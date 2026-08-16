@@ -1,0 +1,38 @@
+// Functional-only fixes. No colors, no custom theme — see conversation history.
+
+// "Market Analysis" and "Tutorials" are legacy tabs now duplicated by "Analysis Tool".
+#id-tutorials,
+#id-market-analysis {
+    display: none !important;
+}
+
+// No scrollbar — the nav wraps to a second line instead, so every tab is always
+// visible without needing to scroll or hide behind the Run panel.
+.dc-tabs__list--main__tabs {
+    overflow-x: visible;
+    white-space: normal;
+    flex-wrap: wrap !important;
+    height: auto !important;
+    row-gap: 4px;
+}
+
+.dc-tabs__item--main__tabs,
+.dc-tabs__item--top.dc-tabs__item--main__tabs {
+    width: auto !important;
+    flex: 0 0 auto !important;
+}
+
+// Content containment: the same "min-width:auto is the flexbox/grid default"
+// issue that affected the nav also affects each tab's own content (Free Bots'
+// card grid, Risk Calculator's layout, etc.) — without this, those pages can
+// render wider than the viewport instead of wrapping/fitting inside it.
+.main,
+.main__container,
+.dc-tabs,
+.dc-tabs__list,
+.dc-tabs__content {
+    min-width: 0;
+}
+.dc-tabs__content--main__tabs {
+    overflow-x: hidden !important;
+}

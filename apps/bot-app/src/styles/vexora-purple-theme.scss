@@ -1,0 +1,329 @@
+// Vexora purple theme — matches VexoraAnalysisPage.jsx tokens exactly.
+// Flat panels, no glass/blur. Blockly canvas itself stays light so block colors
+// remain legible; everything around it (toolbox, chrome, nav, cards) goes dark purple.
+
+:root {
+    --vx-bg: #0a0a12;
+    --vx-panel-bg: #12121c;
+    --vx-panel-bg-2: #171724;
+    --vx-pill-bg: #1c1c2a;
+    --vx-pill-bg-active: #232336;
+    --vx-border: #232333;
+    --vx-text: #f5f5f8;
+    --vx-text-muted: #8b8b9e;
+    --vx-text-faint: #5a5a6c;
+    --vx-purple: #6c5ce7;
+    --vx-purple-to: #3e4fd8;
+    --vx-green: #1fd97a;
+    --vx-red: #f45b69;
+    --vx-orange: #f5a623;
+    --vx-blue: #4fa3f7;
+}
+
+.theme--dark {
+    background: var(--vx-bg) !important;
+    color: var(--vx-text);
+
+    .app-header {
+        background: var(--vx-panel-bg-2) !important;
+        border-bottom: 1px solid var(--vx-border) !important;
+        color: var(--vx-text);
+    }
+
+    .deriv-account-switcher__container {
+        background: var(--vx-pill-bg) !important;
+        color: var(--vx-text) !important;
+        border: 1px solid var(--vx-border) !important;
+        border-radius: 10px !important;
+    }
+
+    // --- Unified nav strip: every tab (Dashboard ... Auto Trader) in one scrollable row ---
+    .main {
+        min-width: 0 !important;
+    }
+    .main__container {
+        min-width: 0 !important;
+    }
+    .dc-tabs {
+        min-width: 0;
+    }
+    .dc-tabs__list {
+        // The Tabs component's own grid row defaults to min-width: auto, meaning a
+        // child with overflow-x:auto never actually shrinks to scroll — it just
+        // forces the ancestor grid track wider instead, which is why the nav (and
+        // anything sized relative to it) was pushing off the right edge of the screen.
+        min-width: 0;
+    }
+    .dc-tabs__content--main__tabs {
+        min-width: 0 !important;
+        overflow-x: hidden !important;
+    }
+
+    .dc-tabs__list--main__tabs {
+        background: var(--vx-panel-bg-2) !important;
+        border-bottom: 1px solid var(--vx-border) !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        flex-wrap: nowrap !important;
+        padding-inline-end: 9rem;
+        scrollbar-width: thin;
+        scrollbar-color: var(--vx-purple) transparent;
+
+        &::-webkit-scrollbar {
+            height: 6px;
+        }
+        &::-webkit-scrollbar-thumb {
+            background: var(--vx-purple);
+            border-radius: 999px;
+        }
+    }
+
+    .dc-tabs__item--main__tabs,
+    .dc-tabs__item--top.dc-tabs__item--main__tabs {
+        width: auto !important;
+        flex: 0 0 auto !important;
+        color: var(--vx-text-muted) !important;
+        background: transparent !important;
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        border-radius: 8px;
+        margin: 6px 3px;
+        padding: 8px 12px;
+        border: 1px solid transparent;
+        white-space: nowrap;
+        transition:
+            background 0.15s ease,
+            color 0.15s ease,
+            border-color 0.15s ease;
+
+        &:hover {
+            color: var(--vx-text) !important;
+            background: rgba(255, 255, 255, 0.04) !important;
+        }
+    }
+
+    .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
+    .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
+    .dc-tabs__item--main__tabs.dc-tabs__active {
+        color: var(--vx-text) !important;
+        background: var(--vx-pill-bg-active) !important;
+        border-color: var(--vx-purple) !important;
+    }
+
+    .dc-tabs__active-line,
+    .dc-tabs__active-line--top {
+        display: none !important;
+    }
+    .dc-tabs__item--is-scrollable-and-active::after {
+        display: none !important;
+    }
+
+    #id-tutorials,
+    #id-market-analysis {
+        display: none !important;
+    }
+
+    // --- Dashboard quick-action cards ---
+    .tab__dashboard__table__tiles {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        width: 100% !important;
+        gap: 14px !important;
+    }
+    .tab__dashboard__table__block {
+        background: var(--vx-panel-bg) !important;
+        border: 1px solid var(--vx-border) !important;
+        border-radius: 12px !important;
+        overflow: hidden;
+        width: 200px !important;
+        min-height: unset !important;
+        max-width: 200px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 14px !important;
+        gap: 2px;
+        cursor: pointer;
+        transition:
+            transform 0.15s ease,
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
+        &:hover {
+            transform: translateY(-3px);
+            border-color: var(--vx-purple) !important;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+        }
+    }
+    .tab__dashboard__table__block.vx-card--purple {
+        border-top: 3px solid var(--vx-purple) !important;
+    }
+    .tab__dashboard__table__block.vx-card--green {
+        border-top: 3px solid var(--vx-green) !important;
+    }
+    .tab__dashboard__table__block.vx-card--blue {
+        border-top: 3px solid var(--vx-blue) !important;
+    }
+    .tab__dashboard__table__block.vx-card--red {
+        border-top: 3px solid var(--vx-red) !important;
+    }
+    .tab__dashboard__table__block.vx-card--orange {
+        border-top: 3px solid var(--vx-orange) !important;
+    }
+
+    .tab__dashboard__table__images {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        min-height: 38px !important;
+        border-radius: 9px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        margin-bottom: 10px !important;
+    }
+    .tab__dashboard__table__images svg,
+    .tab__dashboard__table__images img {
+        background: transparent !important;
+        width: 20px !important;
+        height: 20px !important;
+    }
+    .vx-card--purple .tab__dashboard__table__images {
+        background: rgba(108, 92, 231, 0.18) !important;
+    }
+    .vx-card--green .tab__dashboard__table__images {
+        background: rgba(31, 217, 122, 0.15) !important;
+    }
+    .vx-card--blue .tab__dashboard__table__images {
+        background: rgba(79, 163, 247, 0.15) !important;
+    }
+    .vx-card--red .tab__dashboard__table__images {
+        background: rgba(244, 91, 105, 0.15) !important;
+    }
+    .vx-card--orange .tab__dashboard__table__images {
+        background: rgba(245, 166, 35, 0.15) !important;
+    }
+
+    .vx-card__title {
+        margin: 0 !important;
+        font-size: 15px !important;
+    }
+    .vx-card__desc {
+        margin: 4px 0 12px !important;
+        line-height: 1.5 !important;
+        display: block !important;
+    }
+    .vx-card__open {
+        margin-top: auto !important;
+        letter-spacing: 0.02em;
+    }
+    .vx-card--purple .vx-card__open {
+        color: var(--vx-purple) !important;
+    }
+    .vx-card--green .vx-card__open {
+        color: var(--vx-green) !important;
+    }
+    .vx-card--blue .vx-card__open {
+        color: var(--vx-blue) !important;
+    }
+    .vx-card--red .vx-card__open {
+        color: var(--vx-red) !important;
+    }
+    .vx-card--orange .vx-card__open {
+        color: var(--vx-orange) !important;
+    }
+
+    .dc-btn--primary,
+    button[class*='btn--primary'] {
+        background: linear-gradient(135deg, var(--vx-purple), var(--vx-purple-to)) !important;
+        border-color: var(--vx-purple) !important;
+    }
+    button:not(.dc-btn--primary) {
+        border-radius: 8px;
+    }
+
+    // --- Vexora-built pages: Free Bots, Risk Calculator, embedded-frame loaders ---
+    .vx-freebots__card,
+    .vx-riskcalc__panel,
+    .vx-external-frame,
+    .vx-external-frame__loader,
+    .vx-coming-soon {
+        background: var(--vx-panel-bg) !important;
+        color: var(--vx-text) !important;
+    }
+    .vx-freebots__card,
+    .vx-riskcalc__panel {
+        border: 1px solid var(--vx-border) !important;
+        border-radius: 12px !important;
+    }
+    .vx-freebots__load,
+    .vx-riskcalc button {
+        background: linear-gradient(135deg, var(--vx-purple), var(--vx-purple-to)) !important;
+        color: #fff !important;
+        font-weight: 700;
+        border-radius: 8px !important;
+        border: none !important;
+        &:hover {
+            filter: brightness(1.1);
+        }
+    }
+
+    .main__run-strategy-wrapper {
+        transition: transform 0.25s ease;
+
+        &__toggle {
+            position: absolute;
+            left: -22px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 22px;
+            height: 44px;
+            border-radius: 8px 0 0 8px;
+            background: var(--vx-panel-bg);
+            border: 1px solid var(--vx-border);
+            border-right: none;
+            color: var(--vx-text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            &:hover {
+                color: var(--vx-purple);
+            }
+        }
+
+        &--collapsed {
+            transform: translateX(calc(100% - 22px));
+        }
+    }
+
+    // --- Bot Builder / Blockly chrome ---
+    // Canvas itself stays light so existing block colours remain legible.
+    .bot-builder,
+    #bot-builder {
+        background: var(--vx-bg) !important;
+    }
+    .blocklyMainBackground {
+        background: #f4f4f4 !important;
+    }
+    .blocklyToolboxDiv {
+        background: var(--vx-panel-bg) !important;
+        border-right: 1px solid var(--vx-border) !important;
+    }
+    .blocklyTreeRow,
+    .blocklyTreeLabel {
+        color: var(--vx-text) !important;
+    }
+    .blocklyFlyoutBackground {
+        fill: var(--vx-panel-bg-2) !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme--dark * {
+        transition: none !important;
+    }
+}

@@ -1,0 +1,114 @@
+.vx-freebots {
+    padding: 20px;
+    max-width: 1300px;
+    margin: 0 auto;
+
+    &__header {
+        margin-bottom: 18px;
+
+        h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        p {
+            color: var(--text-less-prominent, #6b6a70);
+            font-size: 0.78rem;
+            max-width: 700px;
+            line-height: 1.5;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        justify-content: center;
+    }
+
+    @media (max-width: 1300px) {
+        &__grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+    @media (max-width: 1100px) {
+        &__grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+    @media (max-width: 700px) {
+        &__grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    &__card {
+        display: flex;
+        flex-direction: column;
+        background: #ffffff;
+        border: 1px solid #e5e5ea;
+        border-radius: 10px;
+        padding: 9px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+        h3 {
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: #16171a;
+            line-height: 1.2;
+        }
+
+        p {
+            color: #6b6a70;
+            font-size: 0.62rem;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            flex: 1;
+        }
+    }
+
+    &__tag {
+        display: inline-block;
+        font-size: 0.54rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: #b0740a;
+        background: #fbeecb;
+        padding: 2px 6px;
+        border-radius: 100px;
+        margin-bottom: 6px;
+        width: fit-content;
+    }
+
+    &__load {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 5px 8px;
+        border-radius: 7px;
+        background: #ff6b00;
+        border: none;
+        font-size: 0.66rem;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        transition: background 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background: #ff7f1f;
+        }
+        &:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    }
+
+    &__error {
+        margin-top: 6px;
+        font-size: 0.66rem;
+        color: #d0342c;
+    }
+}
