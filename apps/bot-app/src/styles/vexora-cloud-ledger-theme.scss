@@ -47,6 +47,9 @@
         overflow-x: auto;
     }
 
+    // Flat underline tabs — no pill/background fill, just a 2px bottom rule
+    // on the active item. Matches the Cloud Ledger pitch exactly (the old
+    // green/white theme's rounded highlight-box treatment is dropped).
     .dc-tabs__item--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs {
         color: var(--vx-text-muted) !important;
@@ -54,25 +57,31 @@
         display: flex !important;
         align-items: center;
         gap: 6px;
-        border-radius: 6px;
-        margin: 6px 4px;
-        padding: 8px 14px;
+        border-radius: 0;
+        margin: 0;
+        padding: 12px 14px;
         border-bottom: 2px solid transparent;
-        transition: background 0.15s ease, color 0.15s ease;
+        transition: color 0.15s ease, border-color 0.15s ease;
         white-space: nowrap;
 
-        &:hover { color: var(--vx-text) !important; background: rgba(255, 255, 255, 0.04) !important; }
+        &:hover { color: var(--vx-text) !important; }
     }
 
     .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
     .dc-tabs__item--main__tabs.dc-tabs__active {
         color: var(--vx-orange) !important;
-        background: rgba(255, 153, 0, 0.14) !important;
+        background: transparent !important;
         border-bottom-color: var(--vx-orange) !important;
     }
 
-    .dc-tabs__active-line--main__tabs { display: none; }
+    // The library's own animated underline bar is a *separate* element that
+    // does NOT inherit the --main__tabs modifier (only --top/--bottom/
+    // --fit-content/--is-hidden do), so it was slipping through unstyled at
+    // its default var(--brand-red-coral) — the stray red line seen in review.
+    // The static border-bottom above already renders the active state, so
+    // just hide the bar outright rather than trying to recolor it.
+    .dc-tabs__active-line { display: none !important; }
 
     #id-tutorials {
         display: none !important;
@@ -84,9 +93,14 @@
         flex-wrap: wrap !important;
         gap: 16px !important;
     }
+    // One accent doing all the signaling — every card gets the same treatment
+    // regardless of category (the old theme's white/green/blue/red per-card
+    // stripe is dropped; that variety is exactly what "Cloud Ledger" argued
+    // against). Border brightens to orange on hover, nothing else changes.
     .tab__dashboard__table__block {
         background: var(--vx-panel-bg) !important;
         border: 1px solid var(--vx-border) !important;
+        border-top: 1px solid var(--vx-border) !important;
         border-radius: 8px !important;
         overflow: hidden;
         width: 260px !important;
@@ -104,10 +118,6 @@
             border-color: var(--vx-orange) !important;
         }
     }
-    .tab__dashboard__table__block.vx-card--white { border-top: 3px solid var(--vx-white) !important; }
-    .tab__dashboard__table__block.vx-card--green { border-top: 3px solid var(--vx-orange) !important; }
-    .tab__dashboard__table__block.vx-card--blue { border-top: 3px solid var(--vx-blue) !important; }
-    .tab__dashboard__table__block.vx-card--red { border-top: 3px solid var(--vx-red) !important; }
 
     .tab__dashboard__table__images {
         width: 44px !important;
@@ -119,6 +129,7 @@
         align-items: center !important;
         justify-content: center !important;
         margin-bottom: 12px !important;
+        background: var(--vx-panel-bg-2) !important;
     }
     .tab__dashboard__table__images svg,
     .tab__dashboard__table__images img {
@@ -126,10 +137,6 @@
         width: 22px !important;
         height: 22px !important;
     }
-    .vx-card--white .tab__dashboard__table__images { background: rgba(255, 255, 255, 0.12) !important; }
-    .vx-card--green .tab__dashboard__table__images { background: rgba(255, 153, 0, 0.15) !important; }
-    .vx-card--blue .tab__dashboard__table__images { background: rgba(69, 153, 219, 0.15) !important; }
-    .vx-card--red .tab__dashboard__table__images { background: rgba(229, 72, 77, 0.15) !important; }
 
     .vx-card__title {
         margin: 0 !important;
@@ -145,11 +152,8 @@
         margin-top: auto !important;
         letter-spacing: 0.02em;
         font-weight: 700;
+        color: var(--vx-orange) !important;
     }
-    .vx-card--white .vx-card__open { color: var(--vx-white) !important; }
-    .vx-card--green .vx-card__open { color: var(--vx-orange) !important; }
-    .vx-card--blue .vx-card__open { color: var(--vx-blue) !important; }
-    .vx-card--red .vx-card__open { color: var(--vx-red) !important; }
 
     button:not(.dc-btn--primary) { border-radius: 6px; }
 
