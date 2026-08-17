@@ -11,12 +11,11 @@ import Text from '@/components/shared_ui/text';
 import { DBOT_TABS } from '@/constants/bot-contents';
 import { useStore } from '@/hooks/useStore';
 import {
-    DerivLightBotBuilderIcon,
     DerivLightGoogleDriveIcon,
     DerivLightLocalDeviceIcon,
     DerivLightMyComputerIcon,
-    DerivLightQuickStrategyIcon,
 } from '@deriv/quill-icons/Illustration';
+import { LabelPairedPlayLgFillIcon, LabelPairedPuzzlePieceTwoCaptionBoldIcon } from '@deriv/quill-icons/LabelPaired';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -32,6 +31,8 @@ type TCardArray = {
     id: string;
     icon: React.ReactElement;
     content: React.ReactElement;
+    description: React.ReactElement;
+    accent: string;
     callback: () => void;
 };
 
@@ -65,6 +66,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                 <DerivLightMyComputerIcon height='48px' width='48px' />
             ),
             content: is_mobile ? <Localize i18n_default_text='Local' /> : <Localize i18n_default_text='My computer' />,
+            description: <Localize i18n_default_text='Import an XML bot from your computer' />,
+            accent: 'orange',
             callback: () => {
                 openFileLoader();
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -75,6 +78,8 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
             id: 'google-drive',
             icon: <DerivLightGoogleDriveIcon height='48px' width='48px' />,
             content: <Localize i18n_default_text='Google Drive' />,
+            description: <Localize i18n_default_text='Import a bot saved in Google Drive' />,
+            accent: 'green',
             callback: () => {
                 openGoogleDriveDialog();
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -83,8 +88,12 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'bot-builder',
-            icon: <DerivLightBotBuilderIcon height='48px' width='48px' />,
+            icon: (
+                <LabelPairedPuzzlePieceTwoCaptionBoldIcon height='40px' width='40px' fill='var(--vx-blue)' />
+            ),
             content: <Localize i18n_default_text='Bot Builder' />,
+            description: <Localize i18n_default_text='Build a custom bot with the visual editor' />,
+            accent: 'blue',
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
@@ -93,8 +102,10 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
         },
         {
             id: 'quick-strategy',
-            icon: <DerivLightQuickStrategyIcon height='48px' width='48px' />,
+            icon: <LabelPairedPlayLgFillIcon height='40px' width='40px' fill='var(--vx-red)' />,
             content: <Localize i18n_default_text='Quick strategy' />,
+            description: <Localize i18n_default_text='Start fast with a pre-built strategy template' />,
+            accent: 'red',
             callback: () => {
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
                 setFormVisibility(true);
@@ -120,13 +131,14 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                     id='tab__dashboard__table__tiles'
                 >
                     {actions.map(icons => {
-                        const { icon, content, callback, id } = icons;
+                        const { icon, content, description, accent, callback, id } = icons;
                         return (
                             <div
                                 key={id}
-                                className={classNames('tab__dashboard__table__block', {
+                                className={classNames('tab__dashboard__table__block', `vx-card--${accent}`, {
                                     'tab__dashboard__table__block--minimized': has_dashboard_strategies && is_mobile,
                                 })}
+                                onClick={() => callback()}
                             >
                                 <div
                                     className={classNames('tab__dashboard__table__images', {
@@ -136,14 +148,17 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
                                     height='8rem'
                                     icon={icon}
                                     id={id}
-                                    onClick={() => {
-                                        callback();
-                                    }}
                                 >
                                     {icon}
                                 </div>
-                                <Text color='prominent' size={is_mobile ? 'xxs' : 'xs'}>
+                                <Text color='prominent' weight='bold' size={is_mobile ? 'xxs' : 'xs'} className='vx-card__title'>
                                     {content}
+                                </Text>
+                                <Text color='less-prominent' size='xxxs' className='vx-card__desc'>
+                                    {description}
+                                </Text>
+                                <Text size='xxxs' weight='bold' className='vx-card__open'>
+                                    <Localize i18n_default_text='Open' /> &rarr;
                                 </Text>
                             </div>
                         );

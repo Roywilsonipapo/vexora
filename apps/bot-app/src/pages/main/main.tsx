@@ -12,17 +12,17 @@ import Tabs from '@/components/shared_ui/tabs/tabs';
 import TradeTypeConfirmationModal from '@/components/trade-type-confirmation-modal';
 import TradingViewModal from '@/components/trading-view-chart/trading-view-modal';
 import { DBOT_TABS, TAB_IDS } from '@/constants/bot-contents';
-import { api_base, save_types, updateWorkspaceName } from '@/external/bot-skeleton';
+import { api_base, updateWorkspaceName } from '@/external/bot-skeleton';
 import { CONNECTION_STATUS } from '@/external/bot-skeleton/services/api/observables/connection-status-stream';
 import { isDbotRTL } from '@/external/bot-skeleton/utils/workspace';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useStore } from '@/hooks/useStore';
-import { waitForDerivWorkspace } from '@/utils/dom-observer';
 import {
     disableUrlParameterApplication,
     enableUrlParameterApplication,
     setupTradeTypeChangeListener,
 } from '@/utils/blockly-url-param-handler';
+import { save_types } from '@/external/bot-skeleton/constants/save-type';
 import {
     checkAndShowTradeTypeModal,
     getModalState,
@@ -37,23 +37,9 @@ import {
     LabelPairedPuzzlePieceTwoCaptionBoldIcon,
 } from '@deriv/quill-icons/LabelPaired';
 import { LegacyGuide1pxIcon } from '@deriv/quill-icons/Legacy';
-import {
-    Briefcase as BriefcaseIcon,
-    Clock as ClockIcon,
-    Cpu as CpuIcon,
-    FlaskConical as FlaskConicalIcon,
-    Home as HomeIcon,
-    Search as SearchIcon,
-    TrendingUp as TrendingUpIcon,
-    UserSquare2 as UserSquare2Icon,
-    Zap as ZapIcon,
-} from 'lucide-react';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
-import ComingSoon from '@/components/coming-soon';
-import ExternalAppFrame from '@/components/external-app-frame';
-import { EXTERNAL_APPS } from '@/constants/external-apps';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import RunStrategy from '../dashboard/run-strategy';
@@ -97,22 +83,22 @@ const AppWrapper = observer(() => {
                 const xml = await response.text();
 
                 setActiveTab(DBOT_TABS.BOT_BUILDER);
-                // Wait for window.Blockly.derivWorkspace to actually mount instead of
-                // guessing with a fixed delay — Bot Builder injects Blockly async after
-                // the tab switch, and loading before that resolves silently no-ops.
-                const is_ready = await waitForDerivWorkspace();
-                if (!is_ready) {
-                    // eslint-disable-next-line no-console
-                    console.error('Vexora: Bot Builder workspace did not become ready in time — bot not loaded.');
-                    return;
-                }
 
-                // loadStrategyToBuilder writes straight into window.Blockly.derivWorkspace —
-                // unlike handleFileChange, it does not depend on the Load modal's preview
-                // pane, which isn't mounted for this cross-app deep link.
+                // Wait for the real Blockly workspace to actually mount before loading into it —
+                // a blind setTimeout here is what caused the old "loads into a hidden preview" bug.
+                await new Promise<void>((resolve, reject) => {
+                    const start = Date.now();
+                    const check = () => {
+                        if (window.Blockly?.derivWorkspace) resolve();
+                        else if (Date.now() - start > 8000) reject(new Error('workspace did not mount'));
+                        else setTimeout(check, 100);
+                    };
+                    check();
+                });
+
                 await load_modal.loadStrategyToBuilder(
-                    { id: file, name: file, save_type: save_types.LOCAL, timestamp: Date.now(), xml },
-                    true
+                    { id: file, name: file, save_type: save_types.UNSAVED, timestamp: Date.now(), xml },
+                    false
                 );
 
                 // Clean the URL so a refresh doesn't reload the same file again.
@@ -140,24 +126,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = [
-        'dashboard',
-        'bot_builder',
-        'chart',
-        'tutorial',
-        'market_analysis',
-        'free_bots',
-        'risk_calculator',
-        'analysis_tool',
-        'manual_trader',
-        'digits',
-        'tradingview',
-        'strategy_pro',
-        'speedbot',
-        'ai_software',
-        'auto_trader',
-        'home',
-    ];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'market_analysis', 'free_bots', 'risk_calculator'];
     const { isDesktop } = useDevice();
     const location = useLocation();
     const navigate = useNavigate();
@@ -422,21 +391,6 @@ const AppWrapper = observer(() => {
 
     const handleTabChange = React.useCallback(
         (tab_index: number) => {
-            // Digits, Home, and TradingView live in the same nav strip visually, but they're
-            // links to sibling Vexora apps / external sites, not real content tabs — redirect
-            // instead of switching to (and rendering) an empty panel.
-            if (tab_index === DBOT_TABS.DIGITS) {
-                window.location.href = EXTERNAL_APPS.DIGITS_URL;
-                return;
-            }
-            if (tab_index === DBOT_TABS.HOME) {
-                window.location.href = EXTERNAL_APPS.HOME_URL;
-                return;
-            }
-            if (tab_index === DBOT_TABS.TRADINGVIEW) {
-                window.open(EXTERNAL_APPS.TRADINGVIEW_URL, '_blank', 'noopener,noreferrer');
-                return;
-            }
             setActiveTab(tab_index);
             const el_id = TAB_IDS[tab_index];
             if (el_id) {
@@ -475,6 +429,7 @@ const AppWrapper = observer(() => {
                             className='main__tabs'
                             onTabItemClick={handleTabChange}
                             top
+                            is_scrollable
                         >
                             <div
                                 label={
@@ -601,109 +556,6 @@ const AppWrapper = observer(() => {
                                 <VxTabBoundary label='Risk Calculator'>
                                     <RiskCalculator />
                                 </VxTabBoundary>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <SearchIcon size={18} />
-                                        <Localize i18n_default_text='Analysis Tool' />
-                                    </>
-                                }
-                                id='id-analysis-tool'
-                            >
-                                <VxTabBoundary label='Analysis Tool'>
-                                    <MarketAnalysis />
-                                </VxTabBoundary>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <UserSquare2Icon size={18} />
-                                        <Localize i18n_default_text='Manual Trader' />
-                                    </>
-                                }
-                                id='id-manual-trader'
-                            >
-                                <VxTabBoundary label='Manual Trader'>
-                                    <ExternalAppFrame src={EXTERNAL_APPS.MANUAL_TRADER_URL} title='Manual Trader' />
-                                </VxTabBoundary>
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <ClockIcon size={18} />
-                                        <Localize i18n_default_text='Digits' />
-                                    </>
-                                }
-                                id='id-digits'
-                            >
-                                <div />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <TrendingUpIcon size={18} />
-                                        <Localize i18n_default_text='TradingView' />
-                                    </>
-                                }
-                                id='id-tradingview'
-                            >
-                                <div />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <FlaskConicalIcon size={18} />
-                                        <Localize i18n_default_text='Strategy Pro' />
-                                    </>
-                                }
-                                id='id-strategy-pro'
-                            >
-                                <ComingSoon title='Strategy Pro' />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <ZapIcon size={18} />
-                                        <Localize i18n_default_text='Speedbot' />
-                                    </>
-                                }
-                                id='id-speedbot'
-                            >
-                                <ComingSoon title='Speedbot' />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <CpuIcon size={18} />
-                                        <Localize i18n_default_text='AI Software' />
-                                    </>
-                                }
-                                id='id-ai-software'
-                            >
-                                <ComingSoon title='AI Software' />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <BriefcaseIcon size={18} />
-                                        <Localize i18n_default_text='Auto Trader' />
-                                    </>
-                                }
-                                id='id-auto-trader'
-                            >
-                                <ComingSoon title='Auto Trader' />
-                            </div>
-                            <div
-                                label={
-                                    <>
-                                        <HomeIcon size={18} />
-                                        <Localize i18n_default_text='Home' />
-                                    </>
-                                }
-                                id='id-home'
-                            >
-                                <div />
                             </div>
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}

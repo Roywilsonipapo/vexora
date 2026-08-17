@@ -23,15 +23,9 @@
     &__grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 8px;
-        justify-content: center;
+        gap: 10px;
     }
 
-    @media (max-width: 1300px) {
-        &__grid {
-            grid-template-columns: repeat(4, 1fr);
-        }
-    }
     @media (max-width: 1100px) {
         &__grid {
             grid-template-columns: repeat(3, 1fr);
@@ -48,38 +42,38 @@
         flex-direction: column;
         background: #ffffff;
         border: 1px solid #e5e5ea;
-        border-radius: 10px;
-        padding: 9px;
+        border-radius: 12px;
+        padding: 12px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 
         h3 {
-            font-size: 0.72rem;
+            font-size: 0.78rem;
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 5px;
             color: #16171a;
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
         p {
             color: #6b6a70;
-            font-size: 0.62rem;
-            line-height: 1.35;
-            margin-bottom: 8px;
+            font-size: 0.66rem;
+            line-height: 1.4;
+            margin-bottom: 10px;
             flex: 1;
         }
     }
 
     &__tag {
         display: inline-block;
-        font-size: 0.54rem;
+        font-size: 0.58rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: #b0740a;
         background: #fbeecb;
-        padding: 2px 6px;
+        padding: 2px 7px;
         border-radius: 100px;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
         width: fit-content;
     }
 
@@ -87,11 +81,11 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        padding: 5px 8px;
-        border-radius: 7px;
+        padding: 6px 10px;
+        border-radius: 8px;
         background: #ff6b00;
         border: none;
-        font-size: 0.66rem;
+        font-size: 0.72rem;
         font-weight: 700;
         color: #fff;
         cursor: pointer;

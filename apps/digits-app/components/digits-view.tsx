@@ -56,6 +56,7 @@ export interface DigitsViewProps {
   currentTick: Tick | null;
   lastDigit: number | null;
   digitStats: DigitStats;
+  prices: number[];
   pipSize: number;
 
   // Trade controls
@@ -116,6 +117,7 @@ export function DigitsView({
   currentTick,
   lastDigit,
   digitStats,
+  prices,
   pipSize,
   tradeType,
   setTradeType,
@@ -278,6 +280,8 @@ export function DigitsView({
           currentTick={currentTick}
           lastDigit={lastDigit}
           digitStats={digitStats}
+          prices={prices}
+          pipSize={pipSize}
           setTradeType={setTradeType}
           setContractMode={setContractMode}
           setSelectedDigit={setSelectedDigit}

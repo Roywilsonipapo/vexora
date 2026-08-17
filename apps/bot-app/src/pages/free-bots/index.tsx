@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { DBOT_TABS } from '@/constants/bot-contents';
-import { save_types } from '@/external/bot-skeleton';
+import { save_types } from '@/external/bot-skeleton/constants/save-type';
 import { useStore } from '@/hooks/useStore';
-import { waitForDerivWorkspace } from '@/utils/dom-observer';
 import './free-bots.scss';
 
 type TBot = {
@@ -74,6 +73,13 @@ const BOTS: TBot[] = [
         description: 'Over 1 / Under 5 round-robin — 2 of the spec\u2019s 4 contract types (can\u2019t mix categories in one bot).',
         tag: 'Over/Under',
     },
+    {
+        file: '11_over1_martingale_recovery.xml',
+        name: 'Over 1 Martingale Recovery',
+        description:
+            'Over 1, $1 stake. On a loss, stake \u00d75 to recover; resets to $1 on a win. Stops at $3 profit with a success alert + sound, or \u2212$13 loss. All values editable in Bot Builder.',
+        tag: 'Over/Under',
+    },
 ];
 
 const FreeBots = observer(() => {
@@ -92,14 +98,21 @@ const FreeBots = observer(() => {
             if (!load_modal || !dashboard) throw new Error('store not ready');
 
             dashboard.setActiveTab(DBOT_TABS.BOT_BUILDER);
-            const is_ready = await waitForDerivWorkspace();
-            if (!is_ready) throw new Error('workspace did not become ready in time');
 
-            // loadStrategyToBuilder writes straight into window.Blockly.derivWorkspace —
-            // unlike handleFileChange, it does not depend on the Load modal's preview
-            // pane (#load-strategy__blockly-container), which isn't mounted here.
+            // Wait for the real Blockly workspace to actually mount before loading into it —
+            // a blind setTimeout here is what caused the old "loads into a hidden preview" bug.
+            await new Promise<void>((resolve, reject) => {
+                const start = Date.now();
+                const check = () => {
+                    if (window.Blockly?.derivWorkspace) resolve();
+                    else if (Date.now() - start > 8000) reject(new Error('workspace did not mount'));
+                    else setTimeout(check, 100);
+                };
+                check();
+            });
+
             await load_modal.loadStrategyToBuilder(
-                { id: bot.file, name: bot.name, save_type: save_types.LOCAL, timestamp: Date.now(), xml },
+                { id: bot.file, name: bot.name, save_type: save_types.UNSAVED, timestamp: Date.now(), xml },
                 true
             );
         } catch {

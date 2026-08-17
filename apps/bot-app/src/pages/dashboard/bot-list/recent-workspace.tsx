@@ -9,7 +9,6 @@ import { DBOT_TABS } from '@/constants/bot-contents';
 import { timeSince } from '@/external/bot-skeleton';
 import { useComponentVisibility } from '@/hooks/useComponentVisibility';
 import { useStore } from '@/hooks/useStore';
-import { waitForDerivWorkspace } from '@/utils/dom-observer';
 import {
     LabelPairedPageCircleArrowRightSmRegularIcon,
     LabelPairedTrashSmRegularIcon,
@@ -99,14 +98,8 @@ const RecentWorkspace = observer(({ workspace, index }: TRecentWorkspace) => {
     };
 
     const handleOpen = async () => {
-        setActiveTab(DBOT_TABS.BOT_BUILDER);
-        const is_ready = await waitForDerivWorkspace();
-        if (!is_ready) {
-            // eslint-disable-next-line no-console
-            console.error('Vexora: Bot Builder workspace did not become ready in time — bot not loaded.');
-            return;
-        }
         await loadFileFromRecent();
+        setActiveTab(DBOT_TABS.BOT_BUILDER);
         /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */
         /* [/AI] */
     };
@@ -157,7 +150,7 @@ const RecentWorkspace = observer(({ workspace, index }: TRecentWorkspace) => {
                 e.stopPropagation(); //stop event bubbling for child element
                 if (is_dropdown_visible) setDropdownVisibility(false);
                 getSelectedStrategyID(workspace.id);
-                viewRecentStrategy(STRATEGY.OPEN);
+                viewRecentStrategy(STRATEGY.INIT);
             }}
         >
             <div className='bot-list__item__label'>

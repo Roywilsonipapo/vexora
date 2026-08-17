@@ -48,7 +48,27 @@ export function QuickBot(props: QuickBotProps) {
   const [isRunning, setIsRunning] = useState(false);
   const [totalProfit, setTotalProfit] = useState(0);
   const [tradeCount, setTradeCount] = useState(0);
+  const [totalStake, setTotalStake] = useState(0);
+  const [totalPayout, setTotalPayout] = useState(0);
+  const [wins, setWins] = useState(0);
+  const [losses, setLosses] = useState(0);
   const [lastMessage, setLastMessage] = useState('');
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const PRESETS: Record<string, { stake: string; multiplier: string; barrier: string; sl: string; tp: string }> = {
+    conservative: { stake: '0.5', multiplier: '2', barrier: '2', sl: '5', tp: '3' },
+    balanced: { stake: '0.5', multiplier: '4', barrier: '1', sl: '6', tp: '4' },
+    aggressive: { stake: '1', multiplier: '6', barrier: '0', sl: '10', tp: '8' },
+  };
+  const applyPreset = (key: string) => {
+    const p = PRESETS[key];
+    if (!p) return;
+    setInitialStake(p.stake);
+    setMultiplier(p.multiplier);
+    setBarrier(p.barrier);
+    setStopLoss(p.sl);
+    setTakeProfit(p.tp);
+  };
 
   const currentStakeRef = useRef(0);
   const pendingContractId = useRef<number | null>(null);
@@ -57,9 +77,11 @@ export function QuickBot(props: QuickBotProps) {
   // proposal before we're allowed to buy — this is what "Purchase Failed:
   // Unknown contract proposal" meant: buying against a stale/empty proposal.
   const awaitingFreshProposal = useRef(false);
+  const lastBoughtProposalId = useRef<string | null>(null);
 
   const armNextBuy = (nextStake: number, barrierVal: number) => {
     currentStakeRef.current = nextStake;
+    setTotalStake(s => s + nextStake);
     setTradeType('over-under');
     setContractMode('DIGITOVER');
     setSelectedDigit(barrierVal);
@@ -77,6 +99,10 @@ export function QuickBot(props: QuickBotProps) {
     setIsRunning(true);
     setTotalProfit(0);
     setTradeCount(0);
+    setTotalStake(0);
+    setTotalPayout(0);
+    setWins(0);
+    setLosses(0);
     setLastMessage('Starting…');
     armNextBuy(stake, Number(barrier));
   };
@@ -88,12 +114,27 @@ export function QuickBot(props: QuickBotProps) {
     setLastMessage('Stopped.');
   };
 
+  const resetStats = () => {
+    setTotalProfit(0);
+    setTradeCount(0);
+    setTotalStake(0);
+    setTotalPayout(0);
+    setWins(0);
+    setLosses(0);
+    setLastMessage('');
+  };
+
   // Fire the buy only once a real, fresh, non-loading proposal is available —
-  // never on a timer guess.
+  // "fresh" means its id actually differs from the one we last bought, since
+  // resetting stake back to its original value after a win can leave the
+  // proposal unchanged (same params = same quote), which used to make the
+  // bot wait forever for a "change" that would never come.
   useEffect(() => {
     if (!isRunningRef.current || !awaitingFreshProposal.current) return;
     if (isProposalLoading || !proposal) return;
+    if (proposal.id === lastBoughtProposalId.current) return;
     awaitingFreshProposal.current = false;
+    lastBoughtProposalId.current = proposal.id;
     void buyContract();
   }, [proposal, isProposalLoading, buyContract]);
 
@@ -110,6 +151,10 @@ export function QuickBot(props: QuickBotProps) {
     if (!position || !position.is_sold) return;
 
     const profit = Number(position.profit) || 0;
+    const payout = profit > 0 ? profit + currentStakeRef.current : 0;
+    setTotalPayout(p => p + payout);
+    if (profit > 0) setWins(w => w + 1);
+    else setLosses(l => l + 1);
     pendingContractId.current = null;
 
     setTotalProfit(prev => {
@@ -137,31 +182,103 @@ export function QuickBot(props: QuickBotProps) {
   }, [openPositions, initialStake, multiplier, stopLoss, takeProfit, tradeCount, barrier]);
 
   return (
-    <div className="vx-quickbot-strip">
-      <span className="vx-quickbot-strip__label">Quick Bot</span>
-      <label>
-        Stake<input value={initialStake} onChange={e => setInitialStake(e.target.value)} disabled={isRunning} />
-      </label>
-      <label>
-        ×<input value={multiplier} onChange={e => setMultiplier(e.target.value)} disabled={isRunning} />
-      </label>
-      <label>
-        Over<input value={barrier} onChange={e => setBarrier(e.target.value)} disabled={isRunning} />
-      </label>
-      <label>
-        SL<input value={stopLoss} onChange={e => setStopLoss(e.target.value)} disabled={isRunning} />
-      </label>
-      <label>
-        TP<input value={takeProfit} onChange={e => setTakeProfit(e.target.value)} disabled={isRunning} />
-      </label>
+    <div className={`vx-quickbot-panel${isCollapsed ? ' is-collapsed' : ''}`}>
+      <div className="vx-quickbot-panel__head">
+        <h3 className="vx-quickbot-panel__title">Quick Bot</h3>
+        <button
+          type="button"
+          className="vx-quickbot-panel__collapse"
+          onClick={() => setIsCollapsed(c => !c)}
+          aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+        >
+          {isCollapsed ? '‹' : '›'}
+        </button>
+      </div>
+
+      {!isCollapsed && (
+        <>
+      <div className="vx-quickbot-panel__presets">
+        <label>Simple strategy</label>
+        <select onChange={e => applyPreset(e.target.value)} disabled={isRunning} defaultValue="">
+          <option value="" disabled>Choose a preset…</option>
+          <option value="conservative">Conservative (2× recovery)</option>
+          <option value="balanced">Balanced (4× recovery)</option>
+          <option value="aggressive">Aggressive (6× recovery)</option>
+        </select>
+      </div>
+
+      <div className="vx-quickbot-panel__inputs">
+        <label>
+          Stake
+          <input value={initialStake} onChange={e => setInitialStake(e.target.value)} disabled={isRunning} />
+        </label>
+        <label>
+          Recovery ×
+          <input value={multiplier} onChange={e => setMultiplier(e.target.value)} disabled={isRunning} />
+        </label>
+        <label>
+          Over digit
+          <input value={barrier} onChange={e => setBarrier(e.target.value)} disabled={isRunning} />
+        </label>
+        <label>
+          Stop loss
+          <input value={stopLoss} onChange={e => setStopLoss(e.target.value)} disabled={isRunning} />
+        </label>
+        <label>
+          Take profit
+          <input value={takeProfit} onChange={e => setTakeProfit(e.target.value)} disabled={isRunning} />
+        </label>
+      </div>
+
       {!isRunning ? (
-        <button className="vx-quickbot-strip__start" onClick={startBot} disabled={isBuying}>Start</button>
+        <button className="vx-quickbot-panel__run" onClick={startBot} disabled={isBuying}>
+          ▶ Run
+        </button>
       ) : (
-        <button className="vx-quickbot-strip__stop" onClick={stopBot}>Stop</button>
+        <button className="vx-quickbot-panel__stop" onClick={stopBot}>
+          ■ Stop
+        </button>
       )}
-      <span>Trades: {tradeCount}</span>
-      <span className={totalProfit >= 0 ? 'is-positive' : 'is-negative'}>P/L: {totalProfit.toFixed(2)}</span>
-      {lastMessage && <span className="vx-quickbot-strip__msg">{lastMessage}</span>}
+      <div className="vx-quickbot-panel__status">{isRunning ? 'Bot is running' : lastMessage || 'Bot is not running'}</div>
+
+      <div className="vx-quickbot-panel__stats">
+        <div>
+          <span className="vx-quickbot-panel__stat-label">Total stake</span>
+          <span className="vx-quickbot-panel__stat-value">{totalStake.toFixed(2)}</span>
+        </div>
+        <div>
+          <span className="vx-quickbot-panel__stat-label">Total payout</span>
+          <span className="vx-quickbot-panel__stat-value">{totalPayout.toFixed(2)}</span>
+        </div>
+        <div>
+          <span className="vx-quickbot-panel__stat-label">No. of runs</span>
+          <span className="vx-quickbot-panel__stat-value">{tradeCount}</span>
+        </div>
+        <div>
+          <span className="vx-quickbot-panel__stat-label">Contracts won</span>
+          <span className="vx-quickbot-panel__stat-value is-positive">{wins}</span>
+        </div>
+        <div>
+          <span className="vx-quickbot-panel__stat-label">Contracts lost</span>
+          <span className="vx-quickbot-panel__stat-value is-negative">{losses}</span>
+        </div>
+        <div>
+          <span className="vx-quickbot-panel__stat-label">Total profit/loss</span>
+          <span className={`vx-quickbot-panel__stat-value ${totalProfit >= 0 ? 'is-positive' : 'is-negative'}`}>
+            {totalProfit.toFixed(2)}
+          </span>
+        </div>
+      </div>
+
+      <button className="vx-quickbot-panel__reset" onClick={resetStats} disabled={isRunning}>
+        Reset
+      </button>
+
+      <p className="vx-quickbot-panel__disclaimer">
+        This runs real trades on your account. Test on demo first.
+      </p>
+        </>
+      )}
     </div>
   );
 }

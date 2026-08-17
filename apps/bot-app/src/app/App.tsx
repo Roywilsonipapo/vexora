@@ -14,8 +14,7 @@ import { localize, TranslationProvider } from '@deriv-com/translations';
 import CoreStoreProvider from './CoreStoreProvider';
 import i18nInstance from './i18n';
 import './app-root.scss';
-import '../styles/vexora-layout-fixes.scss';
-
+import '../styles/vexora-amazon-theme.scss';
 
 const Layout = lazy(() => import('../components/layout'));
 const AppRoot = lazy(() => import('./app-root'));
@@ -57,7 +56,9 @@ const router = createBrowserRouter(
                 </Suspense>
             }
         >
+            {/* All child routes will be passed as children to Layout */}
             <Route index element={<AppRoot />} />
+            {/* App Builder embeds the template at /preview — render the same app shell */}
             <Route path='preview' element={<AppRoot />} />
         </Route>
     ),

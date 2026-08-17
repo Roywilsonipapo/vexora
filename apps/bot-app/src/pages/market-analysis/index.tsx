@@ -64,6 +64,7 @@ const MarketAnalysis = observer(() => {
     const [symbol, setSymbol] = useState('R_100');
     const [prices, setPrices] = useState<string[]>([]);
     const [barrier, setBarrier] = useState(5);
+    const [matchDigit, setMatchDigit] = useState(2);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [scanRows, setScanRows] = useState<{ code: string; label: string; volatility: number; trend: 'up' | 'down' | 'flat' }[]>([]);
@@ -189,10 +190,24 @@ const MarketAnalysis = observer(() => {
     const underPct = digitCounts.slice(0, barrier).reduce((a, b) => a + b, 0) / total * 100;
     const evenPct = (digitCounts[0] + digitCounts[2] + digitCounts[4] + digitCounts[6] + digitCounts[8]) / total * 100;
     const oddPct = 100 - evenPct;
+    const matchPct = digitPct[matchDigit] ?? 0;
+    const differPct = 100 - matchPct;
+    const lastTickDigit = prices.length ? lastDigit(prices[prices.length - 1]) : null;
 
     const nums = prices.map(Number);
     const returns = nums.slice(1).map((p, i) => (p - nums[i]) / nums[i]);
     const volatility = computeStdDev(returns) * 10000;
+
+    // Tick-to-tick rise/fall split — flat (equal) ticks aren't counted in either bucket.
+    let riseCount = 0;
+    let fallCount = 0;
+    for (let i = 1; i < nums.length; i++) {
+        if (nums[i] > nums[i - 1]) riseCount++;
+        else if (nums[i] < nums[i - 1]) fallCount++;
+    }
+    const riseTotal = riseCount + fallCount || 1;
+    const risePct = (riseCount / riseTotal) * 100;
+    const fallPct = 100 - risePct;
 
     // A plain-language summary of the numbers already computed above — not a
     // separate prediction model. It just states the same facts in words, and
@@ -253,59 +268,152 @@ const MarketAnalysis = observer(() => {
 
             {!isLoading && !error && (
                 <>
-                    <div className='vx-analysis__grid'>
-                        <div className='vx-card'>
-                            <h3>Last-digit frequency</h3>
-                            <div className='vx-digit-bars'>
-                                {digitPct.map((pct, i) => (
-                                    <div className='vx-digit-bar' key={i}>
-                                        <div
-                                            className={`vx-digit-bar__fill${i === maxDigit ? ' is-max' : ''}${
-                                                i === minDigit ? ' is-min' : ''
-                                            }`}
-                                            style={{ height: `${Math.max(pct * 4, 3)}px` }}
-                                        />
-                                        <span className='vx-digit-bar__label'>{i}</span>
-                                        <span className='vx-digit-bar__pct'>{pct.toFixed(1)}%</span>
+                    <div className='vx-card vx-ring-panel'>
+                        <div className='vx-ring-row'>
+                            {digitPct.map((pct, i) => {
+                                const isMost = i === maxDigit;
+                                const isLeast = i === minDigit;
+                                const isBarrier = i === barrier;
+                                const isMatch = i === matchDigit;
+                                const isTick = i === lastTickDigit;
+                                let ring = 'default';
+                                if (isMost) ring = 'most';
+                                else if (isLeast) ring = 'least';
+                                else if (isBarrier) ring = 'barrier';
+                                else if (isMatch) ring = 'match';
+                                else if (isTick) ring = 'tick';
+                                return (
+                                    <div className={`vx-ring vx-ring--${ring}`} key={i}>
+                                        <span className='vx-ring__digit'>{i}</span>
+                                        <span className='vx-ring__pct'>{pct.toFixed(1)}%</span>
                                     </div>
+                                );
+                            })}
+                        </div>
+                        <div className='vx-ring-legend'>
+                            <span className='vx-ring-legend__item vx-ring-legend__item--most'>Most frequent</span>
+                            <span className='vx-ring-legend__item vx-ring-legend__item--least'>Least frequent</span>
+                            <span className='vx-ring-legend__item vx-ring-legend__item--barrier'>Over/Under barrier</span>
+                            <span className='vx-ring-legend__item vx-ring-legend__item--match'>Match digit</span>
+                            <span className='vx-ring-legend__item vx-ring-legend__item--tick'>Current tick</span>
+                        </div>
+                    </div>
+
+                    <div className='vx-panel-grid'>
+                        <div className='vx-mini-panel'>
+                            <h3>Over / Under</h3>
+                            <div className='vx-digit-select'>
+                                {Array.from({ length: 10 }, (_, n) => (
+                                    <button
+                                        key={n}
+                                        type='button'
+                                        className={n === barrier ? 'is-active' : ''}
+                                        onClick={() => setBarrier(n)}
+                                    >
+                                        {n}
+                                    </button>
                                 ))}
                             </div>
-                            <p className='vx-card__note'>
-                                Most frequent: <b>{maxDigit}</b> · Least frequent: <b>{minDigit}</b>
-                            </p>
-                        </div>
-
-                        <div className='vx-card'>
-                            <h3>Over / Under, Even / Odd</h3>
-                            <div className='vx-barrier-row'>
-                                <label>Barrier</label>
-                                <input
-                                    type='range'
-                                    min={0}
-                                    max={9}
-                                    value={barrier}
-                                    onChange={e => setBarrier(Number(e.target.value))}
-                                />
-                                <span>{barrier}</span>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--over'>Over</span>
+                                    <span>{overPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--over' style={{ width: `${overPct}%` }} />
+                                </div>
                             </div>
-                            <div className='vx-stat-row'>
-                                <span>Over {barrier}</span>
-                                <b>{overPct.toFixed(1)}%</b>
-                            </div>
-                            <div className='vx-stat-row'>
-                                <span>Under {barrier}</span>
-                                <b>{underPct.toFixed(1)}%</b>
-                            </div>
-                            <div className='vx-stat-row'>
-                                <span>Even</span>
-                                <b>{evenPct.toFixed(1)}%</b>
-                            </div>
-                            <div className='vx-stat-row'>
-                                <span>Odd</span>
-                                <b>{oddPct.toFixed(1)}%</b>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--under'>Under</span>
+                                    <span>{underPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--under' style={{ width: `${underPct}%` }} />
+                                </div>
                             </div>
                         </div>
 
+                        <div className='vx-mini-panel'>
+                            <h3>Match / Differ</h3>
+                            <div className='vx-digit-select'>
+                                {Array.from({ length: 10 }, (_, n) => (
+                                    <button
+                                        key={n}
+                                        type='button'
+                                        className={n === matchDigit ? 'is-active' : ''}
+                                        onClick={() => setMatchDigit(n)}
+                                    >
+                                        {n}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--match'>Match</span>
+                                    <span>{matchPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--match' style={{ width: `${matchPct}%` }} />
+                                </div>
+                            </div>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--differ'>Differ</span>
+                                    <span>{differPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--differ' style={{ width: `${differPct}%` }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='vx-mini-panel'>
+                            <h3>Even / Odd</h3>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--over'>Even</span>
+                                    <span>{evenPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--over' style={{ width: `${evenPct}%` }} />
+                                </div>
+                            </div>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--under'>Odd</span>
+                                    <span>{oddPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--under' style={{ width: `${oddPct}%` }} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className='vx-mini-panel'>
+                            <h3>Rise / Fall</h3>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--over'>Rise</span>
+                                    <span>{risePct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--over' style={{ width: `${risePct}%` }} />
+                                </div>
+                            </div>
+                            <div className='vx-bar'>
+                                <div className='vx-bar__head'>
+                                    <span className='vx-bar__label vx-bar__label--least'>Fall</span>
+                                    <span>{fallPct.toFixed(1)}%</span>
+                                </div>
+                                <div className='vx-bar__track'>
+                                    <div className='vx-bar__fill vx-bar__fill--least' style={{ width: `${fallPct}%` }} />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className='vx-analysis__grid vx-analysis__grid--single'>
                         <div className='vx-card'>
                             <h3>Volatility</h3>
                             <div className='vx-volatility-value'>{volatility.toFixed(2)}</div>

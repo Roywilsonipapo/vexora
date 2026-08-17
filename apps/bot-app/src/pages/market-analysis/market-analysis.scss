@@ -49,11 +49,240 @@
         grid-template-columns: 1.3fr 1fr 0.8fr;
         gap: 16px;
         margin-bottom: 16px;
+
+        &--single {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 900px) {
         &__grid {
             grid-template-columns: 1fr;
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
+// Digit-ring row (0–9 with coloured rings for most/least/barrier/match/tick)
+// ---------------------------------------------------------------------
+
+.vx-ring-panel {
+    margin-bottom: 16px;
+}
+
+.vx-ring-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.vx-ring {
+    width: 62px;
+    height: 62px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.18);
+    background: transparent;
+    transition:
+        border-color 0.2s ease,
+        background 0.2s ease;
+
+    &__digit {
+        font-size: 15px;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+
+    &__pct {
+        font-size: 10px;
+        opacity: 0.85;
+        margin-top: 2px;
+    }
+
+    &--most {
+        border-color: var(--brand-success, #10b981);
+        background: var(--brand-success, #10b981);
+        color: #04150b;
+    }
+
+    &--least {
+        border-color: var(--brand-danger, #ef4444);
+    }
+
+    &--barrier {
+        border-color: var(--brand-warning, #f59e0b);
+    }
+
+    &--match {
+        border-color: var(--brand-info, #0ea5e9);
+    }
+
+    &--tick {
+        border-color: var(--brand-white, #fff);
+    }
+}
+
+.vx-ring-legend {
+    display: flex;
+    justify-content: center;
+    gap: 22px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-less-prominent, #98979e);
+
+    &__item {
+        position: relative;
+        padding-left: 16px;
+
+        &::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        &--most::before {
+            background: var(--brand-success, #10b981);
+        }
+        &--least::before {
+            background: var(--brand-danger, #ef4444);
+        }
+        &--barrier::before {
+            background: var(--brand-warning, #f59e0b);
+        }
+        &--match::before {
+            background: var(--brand-info, #0ea5e9);
+        }
+        &--tick::before {
+            background: var(--brand-white, #fff);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
+// Over/Under, Match/Differ, Even/Odd, Rise/Fall panel grid
+// ---------------------------------------------------------------------
+
+.vx-panel-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.vx-mini-panel {
+    background: #1c1f27;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 16px;
+    padding: 20px 22px;
+
+    h3 {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 14px;
+    }
+}
+
+.vx-digit-select {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+
+    button {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.05);
+        color: inherit;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+            background 0.15s ease,
+            border-color 0.15s ease;
+
+        &:hover {
+            border-color: var(--brand-primary, #ff6b00);
+        }
+
+        &.is-active {
+            background: var(--brand-primary, #ff6b00);
+            border-color: var(--brand-primary, #ff6b00);
+            color: #2a1900;
+        }
+    }
+}
+
+.vx-bar {
+    margin-bottom: 12px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &__head {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        font-weight: 700;
+        margin-bottom: 6px;
+    }
+
+    &__label {
+        &--over,
+        &--match {
+            color: var(--brand-success, #10b981);
+        }
+        &--under {
+            color: var(--brand-warning, #f59e0b);
+        }
+        &--differ {
+            color: var(--brand-info, #0ea5e9);
+        }
+        &--least {
+            color: var(--brand-danger, #ef4444);
+        }
+    }
+
+    &__track {
+        height: 6px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        overflow: hidden;
+    }
+
+    &__fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.3s ease;
+
+        &--over,
+        &--match {
+            background: var(--brand-success, #10b981);
+        }
+        &--under {
+            background: var(--brand-warning, #f59e0b);
+        }
+        &--differ {
+            background: var(--brand-info, #0ea5e9);
+        }
+        &--least {
+            background: var(--brand-danger, #ef4444);
         }
     }
 }
