@@ -44,4 +44,6 @@ export {
   setAccountType,
   getAccountType,
   clearAllAuthData,
+  storePreAuthHash,
+  getAndClearPreAuthHash,
 } from './storage';

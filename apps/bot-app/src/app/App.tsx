@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import React from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider } from 'react-router-dom';
-import { cleanupUrl, handleOAuthCallback } from '@/external/deriv-core';
+import { cleanupUrl, getAndClearPreAuthHash, handleOAuthCallback } from '@/external/deriv-core';
 import ChunkLoader from '@/components/loader/chunk-loader';
 import SplashScreen from '@/components/splash-screen';
 import LocalStorageSyncWrapper from '@/components/localStorage-sync-wrapper';
@@ -109,6 +109,14 @@ function App() {
                 console.error('OAuth callback error:', error);
             } finally {
                 cleanupUrl(window.location.origin);
+
+                // Restore the tab the user was on before being sent to Deriv
+                // (redirect_uri is origin-only, so the hash doesn't survive
+                // the round trip on its own).
+                const preAuthHash = getAndClearPreAuthHash();
+                if (preAuthHash) {
+                    window.location.hash = preAuthHash;
+                }
             }
         };
 

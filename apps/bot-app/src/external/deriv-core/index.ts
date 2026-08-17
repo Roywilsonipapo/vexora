@@ -44,6 +44,8 @@ export {
   setAccountType,
   getAccountType,
   clearAllAuthData,
+  storePreAuthHash,
+  getAndClearPreAuthHash,
   parseReferralLink,
   parseLandingParams,
   resolveReferralViaProxy,

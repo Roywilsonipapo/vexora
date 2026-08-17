@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import { observer } from 'mobx-react-lite';
 import { generateOAuthURL } from '@/components/shared';
 import Button from '@/components/shared_ui/button';
+import { storePreAuthHash } from '@/external/deriv-core';
 import useActiveAccount from '@/hooks/api/account/useActiveAccount';
 import { useApiBase } from '@/hooks/useApiBase';
 import { useLogout } from '@/hooks/useLogout';
@@ -86,6 +87,9 @@ const AppHeader = observer(() => {
     const handleSignup = useCallback(async () => {
         try {
             setIsAuthorizing(true);
+            // Stash the current tab (e.g. "#bot_builder") — the OAuth redirect_uri
+            // is origin-only, so this is otherwise lost across the round trip.
+            storePreAuthHash(window.location.hash);
             const oauthUrl = await generateOAuthURL('registration');
             if (oauthUrl) {
                 window.location.replace(oauthUrl);
@@ -103,6 +107,10 @@ const AppHeader = observer(() => {
         try {
             // Set authorizing state immediately when login is clicked
             setIsAuthorizing(true);
+
+            // Stash the current tab (e.g. "#bot_builder") — the OAuth redirect_uri
+            // is origin-only, so this is otherwise lost across the round trip.
+            storePreAuthHash(window.location.hash);
 
             // Generate OAuth URL with CSRF token and PKCE parameters
             const oauthUrl = await generateOAuthURL();

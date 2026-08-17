@@ -6,6 +6,7 @@ const AUTH_INFO_KEY = 'auth_info';
 const DERIV_ACCOUNTS_KEY = 'deriv_accounts';
 const ACTIVE_LOGINID_KEY = 'active_loginid';
 const ACCOUNT_TYPE_KEY = 'account_type';
+const PRE_AUTH_HASH_KEY = 'oauth_pre_auth_hash';
 
 const TOKEN_MAX_AGE_MS = 10 * 60 * 1000; // 10 minutes
 
@@ -110,6 +111,23 @@ export function setAccountType(type: 'demo' | 'real'): void {
 
 export function getAccountType(): string | null {
   return localStorage.getItem(ACCOUNT_TYPE_KEY);
+}
+
+// --- Pre-auth URL hash (e.g. "#bot_builder") ---
+// The OAuth redirect_uri is window.location.origin, which drops any hash the
+// user was on when they clicked Login/Sign up. Stash it here beforehand so it
+// can be restored once the OAuth callback finishes, instead of always landing
+// back on the default tab.
+
+export function storePreAuthHash(hash: string): void {
+  if (!hash) return;
+  sessionStorage.setItem(PRE_AUTH_HASH_KEY, hash);
+}
+
+export function getAndClearPreAuthHash(): string | null {
+  const hash = sessionStorage.getItem(PRE_AUTH_HASH_KEY);
+  sessionStorage.removeItem(PRE_AUTH_HASH_KEY);
+  return hash;
 }
 
 // --- Clear All Auth Data ---
