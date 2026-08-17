@@ -69,7 +69,7 @@
 
   .dark {
     /* Liquid Glass — dark, desaturated */
-    --primary: 240 240 242;
+    --primary: 16 185 129;
     --accent-foreground: 246 247 248;
     --background: 8 9 11;
     --border: 255 255 255 / 0.11;
@@ -83,13 +83,13 @@
     --muted: 255 255 255 / 0.06;
     --popover: 20 21 26 / 0.85;
     --popover-foreground: 240 240 242;
-    --primary-foreground: 20 21 26;
-    --ring: 255 255 255 / 0.3;
+    --primary-foreground: 8 9 11;
+    --ring: 16 185 129 / 0.4;
     --secondary: 255 255 255 / 0.09;
     --secondary-foreground: 240 240 242;
     --muted-foreground: 152 151 158;
     --chart-1: 29 78 216;
-    --chart-2: 0 195 144;
+    --chart-2: 16 185 129;
     --chart-3: 245 158 11;
     --chart-4: 168 85 247;
     --chart-5: 222 0 64;
@@ -114,15 +114,17 @@
     --destructive-40: 248 113 113 / 0.6000000238418579;
     --outline-10: 115 115 115 / 0.20000000298023224;
     --blue-500: 37 99 235;
-    --buy-20: 0 195 144 / 0.4000000059604645;
+    --buy-20: 16 185 129 / 0.4000000059604645;
     --sell-20: 222 0 64 / 0.4000000059604645;
     --section-message: 30 64 175 / 0.8399999737739563;
-    --border-focus: 255 255 255;
+    --border-focus: 16 185 129;
     --border-focus-destructive: 255 77 77;
     --button-blackwhite: 255 255 255;
     --button-blackwhite-foreground: 0 0 0;
     --checkmark-foreground: 24 28 37;
     --checkmark: 255 255 255;
+    --buy-background: 16 185 129;
+    --buy-foreground: 255 255 255;
   }
 }
 

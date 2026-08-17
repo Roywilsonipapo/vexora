@@ -158,26 +158,26 @@ export function DigitsAnalysis(props: DigitsAnalysisProps) {
         <Panel title="Over / Under">
           <DigitPicker value={barrier} onChange={setBarrier} activeClass="is-barrier" />
           <StatBar label="Over" count={stats.overCount} total={stats.total} color="var(--vx-green)" />
-          <StatBar label="Under" count={stats.underCount} total={stats.total} color="var(--vx-orange)" />
+          <StatBar label="Under" count={stats.underCount} total={stats.total} color="var(--vx-white)" />
           <ChipRow seq={ouSeq} visible={ouVisible} onMore={() => setOuVisible((v) => Math.min(v + CHIP_PAGE, ouSeq.length))} colorFor={chipColorOU} />
         </Panel>
 
         <Panel title="Match / Differ">
           <DigitPicker value={matchDigit} onChange={setMatchDigit} activeClass="is-match" />
           <StatBar label="Match" count={stats.matchCount} total={stats.total} color="var(--vx-green)" />
-          <StatBar label="Differ" count={stats.differCount} total={stats.total} color="var(--vx-orange)" />
+          <StatBar label="Differ" count={stats.differCount} total={stats.total} color="var(--vx-white)" />
           <ChipRow seq={mdSeq} visible={mdVisible} onMore={() => setMdVisible((v) => Math.min(v + CHIP_PAGE, mdSeq.length))} colorFor={chipColorMD} />
         </Panel>
 
         <Panel title="Even / Odd">
           <StatBar label="Even" count={stats.evenCount} total={stats.total} color="var(--vx-green)" />
-          <StatBar label="Odd" count={stats.oddCount} total={stats.total} color="var(--vx-orange)" />
+          <StatBar label="Odd" count={stats.oddCount} total={stats.total} color="var(--vx-white)" />
           <ChipRow seq={eoSeq} visible={eoVisible} onMore={() => setEoVisible((v) => Math.min(v + CHIP_PAGE, eoSeq.length))} colorFor={chipColorEO} />
         </Panel>
 
         <Panel title="Rise / Fall">
           <StatBar label="Rise" count={stats.riseCount} total={stats.riseFallTotal} color="var(--vx-green)" />
-          <StatBar label="Fall" count={stats.fallCount} total={stats.riseFallTotal} color="var(--vx-orange)" />
+          <StatBar label="Fall" count={stats.fallCount} total={stats.riseFallTotal} color="var(--vx-white)" />
           <ChipRow seq={rfSeq} visible={rfVisible} onMore={() => setRfVisible((v) => Math.min(v + CHIP_PAGE, rfSeq.length))} colorFor={chipColorRF} />
         </Panel>
       </div>
@@ -263,14 +263,14 @@ function ChipRow({
 }
 
 function chipColorOU(v: string) {
-  return v === 'O' ? 'var(--vx-green)' : 'var(--vx-orange)';
+  return v === 'O' ? 'var(--vx-green)' : 'var(--vx-white)';
 }
 function chipColorMD(v: string) {
-  return v === 'M' ? 'var(--vx-green)' : 'var(--vx-orange)';
+  return v === 'M' ? 'var(--vx-green)' : 'var(--vx-white)';
 }
 function chipColorEO(v: string) {
-  return v === 'E' ? 'var(--vx-green)' : 'var(--vx-orange)';
+  return v === 'E' ? 'var(--vx-green)' : 'var(--vx-white)';
 }
 function chipColorRF(v: string) {
-  return v === 'R' ? 'var(--vx-green)' : 'var(--vx-orange)';
+  return v === 'R' ? 'var(--vx-green)' : 'var(--vx-white)';
 }

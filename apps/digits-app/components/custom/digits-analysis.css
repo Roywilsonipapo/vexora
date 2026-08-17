@@ -1,4 +1,4 @@
-/* Digits Analysis — Amazon theme (black/charcoal + Amazon orange), premium glass/glow pass */
+/* Digits Analysis — Green & White theme (dark bg, green + white accents), premium glass/glow pass */
 
 .vx-danalysis {
   --vx-bg: #0A0C0D;
@@ -6,16 +6,16 @@
   --vx-panel-bg-2: rgba(26, 35, 46, 0.85);
   --vx-border: rgba(255, 255, 255, 0.08);
   --vx-border-strong: rgba(255, 255, 255, 0.14);
-  --vx-orange: #FF9900;
-  --vx-orange-light: #FEBD69;
-  --vx-green: #2ECC71;
+  --vx-green: #10B981;
+  --vx-green-light: #6EE7B7;
+  --vx-white: #FFFFFF;
   --vx-red: #FF4D4F;
   --vx-blue: #59B7FF;
   --vx-text: #F5F7F8;
   --vx-text-muted: #8B95A1;
 
   background:
-    radial-gradient(120% 140% at 15% -10%, rgba(255, 153, 0, 0.08), transparent 55%),
+    radial-gradient(120% 140% at 15% -10%, rgba(16, 185, 129, 0.10), transparent 55%),
     radial-gradient(100% 120% at 100% 110%, rgba(89, 183, 255, 0.06), transparent 50%),
     var(--vx-bg);
   color: var(--vx-text);
@@ -55,8 +55,8 @@
 }
 
 .vx-danalysis__market-select:focus {
-  border-color: var(--vx-orange);
-  box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.15);
+  border-color: var(--vx-green);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.18);
 }
 
 .vx-danalysis__ticks {
@@ -97,26 +97,26 @@
 .vx-danalysis__price-num {
   font-size: 21px;
   font-weight: 800;
-  color: var(--vx-orange);
+  color: var(--vx-white);
   line-height: 1.15;
-  text-shadow: 0 0 18px rgba(255, 153, 0, 0.45);
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
   font-variant-numeric: tabular-nums;
 }
 
 /* ---------- digit row ---------- */
 .vx-danalysis__digitrow {
   display: flex;
-  justify-content: space-between;
-  gap: 5px;
+  justify-content: center;
+  gap: 10px;
   margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .vx-danalysis__digit {
   position: relative;
-  flex: 1 1 0;
-  min-width: 34px;
-  aspect-ratio: 1 / 1;
+  flex: 0 0 auto;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   background: var(--vx-panel-bg);
   backdrop-filter: blur(10px);
@@ -125,7 +125,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 11px;
   color: var(--vx-text);
   transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.2s ease, box-shadow 0.2s ease;
@@ -137,20 +137,20 @@
 }
 
 .vx-danalysis__digit-pct {
-  font-size: 7px;
-  font-weight: 600;
+  font-size: 12.5px;
+  font-weight: 700;
   color: var(--vx-text-muted);
   margin-top: 1px;
 }
 
 .vx-danalysis__digit.is-hot {
-  background: linear-gradient(150deg, #3EE58A, var(--vx-green));
+  background: linear-gradient(150deg, #34D399, var(--vx-green));
   border-color: var(--vx-green);
-  color: #06210F;
-  box-shadow: 0 0 20px rgba(46, 204, 113, 0.45), 0 4px 10px rgba(0, 0, 0, 0.3);
+  color: #062017;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.45), 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 .vx-danalysis__digit.is-hot .vx-danalysis__digit-pct {
-  color: #06210F;
+  color: #062017;
   opacity: 0.75;
 }
 
@@ -160,8 +160,8 @@
 }
 
 .vx-danalysis__digit.is-barrier {
-  border-color: var(--vx-orange);
-  box-shadow: 0 0 14px rgba(255, 153, 0, 0.4);
+  border-color: var(--vx-green-light);
+  box-shadow: 0 0 14px rgba(110, 231, 183, 0.45);
 }
 
 .vx-danalysis__digit.is-match {
@@ -220,7 +220,7 @@
 }
 .vx-dot.is-hot { background: var(--vx-green); border-color: var(--vx-green); }
 .vx-dot.is-cold { border-color: var(--vx-red); }
-.vx-dot.is-barrier { border-color: var(--vx-orange); }
+.vx-dot.is-barrier { border-color: var(--vx-green-light); }
 .vx-dot.is-match { border-color: var(--vx-blue); }
 .vx-dot.is-touched { border-color: #ffffff; }
 
@@ -250,7 +250,7 @@
 .vx-panel:hover {
   transform: translateY(-3px);
   border-color: var(--vx-border-strong);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 153, 0, 0.08);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(16, 185, 129, 0.1);
 }
 
 .vx-panel__header {
@@ -265,8 +265,8 @@
   position: absolute;
   left: 0; right: 0; bottom: -1px;
   height: 1px;
-  background: linear-gradient(90deg, var(--vx-orange), transparent 60%);
-  opacity: 0.6;
+  background: linear-gradient(90deg, var(--vx-green), transparent 60%);
+  opacity: 0.7;
 }
 
 .vx-panel__header h3 {
@@ -275,7 +275,7 @@
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: var(--vx-orange-light);
+  color: var(--vx-green-light);
 }
 
 .vx-panel__body {
@@ -308,16 +308,16 @@
 }
 
 .vx-picker__digit:hover {
-  border-color: var(--vx-orange-light);
+  border-color: var(--vx-green-light);
   color: var(--vx-text);
   transform: translateY(-1px);
 }
 
 .vx-picker__digit.is-selected {
   color: #ffffff;
-  border-color: var(--vx-orange);
-  background: linear-gradient(160deg, rgba(255, 153, 0, 0.3), rgba(255, 153, 0, 0.1));
-  box-shadow: 0 0 10px rgba(255, 153, 0, 0.35);
+  border-color: var(--vx-green-light);
+  background: linear-gradient(160deg, rgba(110, 231, 183, 0.32), rgba(110, 231, 183, 0.1));
+  box-shadow: 0 0 10px rgba(110, 231, 183, 0.4);
 }
 .vx-picker__digit.is-selected.is-match {
   border-color: var(--vx-blue);
@@ -392,7 +392,7 @@
 .vx-chips__more {
   background: transparent;
   border: 1px dashed var(--vx-border);
-  color: var(--vx-orange-light);
+  color: var(--vx-green-light);
   border-radius: 6px;
   padding: 0 8px;
   height: 20px;
@@ -403,8 +403,43 @@
 }
 
 .vx-chips__more:hover {
-  border-color: var(--vx-orange);
-  color: var(--vx-orange);
+  border-color: var(--vx-green);
+  color: var(--vx-green);
+}
+
+/* ---------- view nav bar (Manual Trader / Analysis switcher) ---------- */
+.vx-view-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px;
+  background: rgba(19, 26, 34, 0.72);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.vx-view-tabs button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #8B95A1;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.vx-view-tabs button:hover {
+  color: #F5F7F8;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.vx-view-tabs button.is-active {
+  color: #062017;
+  background: linear-gradient(150deg, #34D399, #10B981);
+  border-color: #10B981;
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.4);
 }
 
 /* ---------- disclaimer ---------- */
