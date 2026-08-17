@@ -67,7 +67,7 @@ const Cards = observer(({ is_mobile, has_dashboard_strategies }: TCardProps) => 
             ),
             content: is_mobile ? <Localize i18n_default_text='Local' /> : <Localize i18n_default_text='My computer' />,
             description: <Localize i18n_default_text='Import an XML bot from your computer' />,
-            accent: 'orange',
+            accent: 'white',
             callback: () => {
                 openFileLoader();
                 /* [AI] - Analytics event tracking removed - see migrate-docs/MONITORING_PACKAGES.md for re-implementation guide */

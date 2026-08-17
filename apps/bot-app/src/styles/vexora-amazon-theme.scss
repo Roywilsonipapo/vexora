@@ -1,13 +1,13 @@
-// Amazon theme (black/charcoal + Amazon orange), consistent with the Digits Analysis panel.
+// Green & White theme (dark bg, green + white accents), consistent with the Digits Analysis panel.
 // Flat panels only, no backdrop-filter / glass effect, per request.
 :root {
     --vx-bg: #0a0c0d;
     --vx-panel-bg: #131a22;
     --vx-panel-bg-2: #1a232e;
     --vx-border: rgba(255, 255, 255, 0.08);
-    --vx-orange: #ff9900;
-    --vx-orange-light: #febd69;
-    --vx-green: #2ecc71;
+    --vx-green: #10b981;
+    --vx-green-light: #6ee7b7;
+    --vx-white: #ffffff;
     --vx-blue: #59b7ff;
     --vx-red: #ff4d4f;
     --vx-text: #f5f7f8;
@@ -28,7 +28,7 @@
         color: var(--vx-text);
         border-radius: 8px;
         padding: 8px 12px;
-        &:hover { background: rgba(255, 153, 0, 0.12); }
+        &:hover { background: rgba(16, 185, 129, 0.14); }
     }
 
     .deriv-account-switcher__container {
@@ -65,9 +65,9 @@
     .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
     .dc-tabs__item--main__tabs.dc-tabs__active {
-        color: var(--vx-orange) !important;
-        background: rgba(255, 153, 0, 0.15) !important;
-        border-bottom-color: var(--vx-orange) !important;
+        color: var(--vx-green) !important;
+        background: rgba(16, 185, 129, 0.16) !important;
+        border-bottom-color: var(--vx-green) !important;
     }
 
     .dc-tabs__active-line--main__tabs { display: none; }
@@ -100,11 +100,11 @@
         transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
         &:hover {
             transform: translateY(-3px);
-            border-color: var(--vx-orange) !important;
+            border-color: var(--vx-green) !important;
             box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
         }
     }
-    .tab__dashboard__table__block.vx-card--orange { border-top: 3px solid var(--vx-orange) !important; }
+    .tab__dashboard__table__block.vx-card--white { border-top: 3px solid var(--vx-white) !important; }
     .tab__dashboard__table__block.vx-card--green { border-top: 3px solid var(--vx-green) !important; }
     .tab__dashboard__table__block.vx-card--blue { border-top: 3px solid var(--vx-blue) !important; }
     .tab__dashboard__table__block.vx-card--red { border-top: 3px solid var(--vx-red) !important; }
@@ -126,8 +126,8 @@
         width: 22px !important;
         height: 22px !important;
     }
-    .vx-card--orange .tab__dashboard__table__images { background: rgba(255, 153, 0, 0.15) !important; }
-    .vx-card--green .tab__dashboard__table__images { background: rgba(46, 204, 113, 0.15) !important; }
+    .vx-card--white .tab__dashboard__table__images { background: rgba(255, 255, 255, 0.14) !important; }
+    .vx-card--green .tab__dashboard__table__images { background: rgba(16, 185, 129, 0.15) !important; }
     .vx-card--blue .tab__dashboard__table__images { background: rgba(89, 183, 255, 0.15) !important; }
     .vx-card--red .tab__dashboard__table__images { background: rgba(255, 77, 79, 0.15) !important; }
 
@@ -144,7 +144,7 @@
         margin-top: auto !important;
         letter-spacing: 0.02em;
     }
-    .vx-card--orange .vx-card__open { color: var(--vx-orange) !important; }
+    .vx-card--white .vx-card__open { color: var(--vx-white) !important; }
     .vx-card--green .vx-card__open { color: var(--vx-green) !important; }
     .vx-card--blue .vx-card__open { color: var(--vx-blue) !important; }
     .vx-card--red .vx-card__open { color: var(--vx-red) !important; }
@@ -159,11 +159,11 @@
         border-radius: 12px !important;
     }
     .vx-freebots__load, .vx-quickbot-panel__run, .vx-riskcalc button {
-        background: var(--vx-orange) !important;
-        color: #1a0f00 !important;
+        background: var(--vx-green) !important;
+        color: #062017 !important;
         font-weight: 700;
         border-radius: 8px !important;
-        &:hover { background: var(--vx-orange-light) !important; }
+        &:hover { background: var(--vx-green-light) !important; }
     }
 
     // --- Bot Builder / Blockly chrome ---
