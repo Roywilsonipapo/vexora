@@ -80,6 +80,112 @@ const BOTS: TBot[] = [
             'Over 1, $1 stake. On a loss, stake \u00d75 to recover; resets to $1 on a win. Stops at $3 profit with a success alert + sound, or \u2212$13 loss. All values editable in Bot Builder.',
         tag: 'Over/Under',
     },
+    // --- Standard staking-system templates (the classic Deriv Bot Builder
+    // library, not custom-authored) \u2014 real, complete, well-known systems.
+    // Honest framing: these are staking/money-management patterns, not
+    // predictive signals. All parameters are editable after loading.
+    {
+        file: 'martingale.xml',
+        name: 'Classic Martingale',
+        description: 'Doubles the stake after every loss, resets to base stake on a win. No stake cap \u2014 high risk.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'martingale_max-stake.xml',
+        name: 'Martingale (Stake-Capped)',
+        description: 'Same doubling-on-loss progression as classic Martingale, with a maximum stake ceiling.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'dalembert.xml',
+        name: "D'Alembert Recovery",
+        description: 'Increases stake by one unit after a loss, decreases by one unit after a win \u2014 gentler than Martingale.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'dalembert_max-stake.xml',
+        name: "D'Alembert (Stake-Capped)",
+        description: "Same one-unit up/down progression as D'Alembert Recovery, with a maximum stake ceiling.",
+        tag: 'Staking system',
+    },
+    {
+        file: 'reverse_martingale.xml',
+        name: 'Reverse Martingale',
+        description: 'Doubles the stake after a win instead of a loss (a.k.a. Paroli), resets to base stake on a loss.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'reverse_dalembert.xml',
+        name: "Reverse D'Alembert",
+        description: 'Increases stake by one unit after a win, decreases by one unit after a loss.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'oscars_grind.xml',
+        name: "Oscar's Grind",
+        description: 'Low-risk system that only raises stake after a win, aiming to grind out a 1-unit profit per cycle.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'oscars_grind_max-stake.xml',
+        name: "Oscar's Grind (Stake-Capped)",
+        description: "Same grind-to-1-unit-profit cycle as Oscar's Grind, with a maximum stake ceiling.",
+        tag: 'Staking system',
+    },
+    {
+        file: '1_3_2_6.xml',
+        name: '1-3-2-6 System',
+        description: 'Fixed 1-3-2-6 unit betting sequence \u2014 exposure only increases after consecutive wins.',
+        tag: 'Staking system',
+    },
+    {
+        file: 'accumulators_martingale.xml',
+        name: 'Accumulators Martingale',
+        description: 'Classic Martingale staking applied to Accumulator contracts instead of Over/Under.',
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_martingale_on_stat_reset.xml',
+        name: 'Accumulators Martingale (Stat Reset)',
+        description: 'Accumulators Martingale that resets its progression whenever the stat window resets.',
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_dalembert.xml',
+        name: "Accumulators D'Alembert",
+        description: "D'Alembert's one-unit up/down staking applied to Accumulator contracts.",
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_dalembert_on_stat_reset.xml',
+        name: "Accumulators D'Alembert (Stat Reset)",
+        description: "Accumulators D'Alembert that resets its progression whenever the stat window resets.",
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_reverse_martingale.xml',
+        name: 'Accumulators Reverse Martingale',
+        description: 'Reverse Martingale (double on win) staking applied to Accumulator contracts.',
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_reverse_martingale_on_stat_reset.xml',
+        name: 'Accumulators Reverse Martingale (Stat Reset)',
+        description: 'Accumulators Reverse Martingale that resets its progression whenever the stat window resets.',
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_reverse_dalembert.xml',
+        name: "Accumulators Reverse D'Alembert",
+        description: "Reverse D'Alembert staking applied to Accumulator contracts.",
+        tag: 'Accumulators',
+    },
+    {
+        file: 'accumulators_reverse_dalembert_on_stat_reset.xml',
+        name: "Accumulators Reverse D'Alembert (Stat Reset)",
+        description: "Accumulators Reverse D'Alembert that resets its progression whenever the stat window resets.",
+        tag: 'Accumulators',
+    },
 ];
 
 const FreeBots = observer(() => {

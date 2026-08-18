@@ -1,0 +1,40 @@
+.vx-coming-soon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    max-width: 420px;
+    margin: 0 auto;
+    padding: 96px 24px;
+
+    &__badge {
+        display: inline-flex;
+        align-items: center;
+        font-family: var(--vx-mono-font, monospace);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--vx-orange, #ff9900);
+        background: rgba(255, 153, 0, 0.12);
+        border: 1px solid rgba(255, 153, 0, 0.3);
+        border-radius: 999px;
+        padding: 4px 12px;
+    }
+
+    &__title {
+        margin: 4px 0 0;
+        font-size: 22px;
+        font-weight: 700;
+        color: var(--vx-text, #e8eaed);
+    }
+
+    &__desc {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--vx-text-muted, #8b95a1);
+    }
+}

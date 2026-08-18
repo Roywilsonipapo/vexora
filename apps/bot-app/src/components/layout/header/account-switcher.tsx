@@ -14,6 +14,8 @@ import './account-switcher.scss';
 
 const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [resettingId, setResettingId] = useState<string | null>(null);
+    const [resetError, setResetError] = useState<string | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { accountList, activeLoginid } = useApiBase();
     const { client, run_panel } = useStore() ?? {};
@@ -51,6 +53,20 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
         },
         [client]
     );
+
+    // Demo balances can be topped back up via the classic `topup_virtual` API
+    // call — Deriv rejects it outright for real accounts, so this is safe to
+    // only expose on virtual rows. The balance subscription (allBalanceData)
+    // pushes the new figure automatically; no manual refetch needed.
+    const handleResetBalance = useCallback((e: React.MouseEvent, loginid: string) => {
+        e.stopPropagation();
+        setResetError(null);
+        setResettingId(loginid);
+        api_base.api
+            ?.send({ topup_virtual: 1 })
+            .catch(() => setResetError(loginid))
+            .finally(() => setResettingId(null));
+    }, []);
 
     const formattedAccounts = useMemo(() => {
         if (!accountList) return [];
@@ -178,6 +194,25 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                                     <Localize i18n_default_text='No currency assigned' />
                                 )}
                             </Text>
+                            {account.isVirtual && (
+                                <button
+                                    type='button'
+                                    className='acc-dropdown__reset-balance'
+                                    disabled={resettingId === account.loginid}
+                                    onClick={e => handleResetBalance(e, account.loginid)}
+                                >
+                                    {resettingId === account.loginid ? (
+                                        <Localize i18n_default_text='Resetting…' />
+                                    ) : (
+                                        <Localize i18n_default_text='Reset balance' />
+                                    )}
+                                </button>
+                            )}
+                            {resetError === account.loginid && (
+                                <Text size='xxxs' className='acc-dropdown__reset-error'>
+                                    <Localize i18n_default_text="Couldn't reset — try again." />
+                                </Text>
+                            )}
                         </div>
                     ))}
                 </div>

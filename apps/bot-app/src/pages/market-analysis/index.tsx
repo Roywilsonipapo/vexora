@@ -69,6 +69,7 @@ const MarketAnalysis = observer(() => {
     const [error, setError] = useState<string | null>(null);
     const [scanRows, setScanRows] = useState<{ code: string; label: string; volatility: number; trend: 'up' | 'down' | 'flat' }[]>([]);
     const [isScanning, setIsScanning] = useState(true);
+    const [view, setView] = useState<'circles' | 'scanner'>('circles');
 
     // Load tick history for the selected symbol and keep a live subscription running.
     useEffect(() => {
@@ -268,6 +269,41 @@ const MarketAnalysis = observer(() => {
 
             {!isLoading && !error && (
                 <>
+                    <div className='vx-analysis__toprow'>
+                        <div className='vx-analysis__stat'>
+                            <span className='vx-analysis__stat-label'>{SYMBOLS.find(s => s.code === symbol)?.label}</span>
+                        </div>
+                        <div className='vx-analysis__stat vx-analysis__stat--right'>
+                            <span className='vx-analysis__stat-label'>Ticks</span>
+                            <span className='vx-analysis__stat-value'>{prices.length}</span>
+                        </div>
+                        <div className='vx-analysis__stat vx-analysis__stat--right'>
+                            <span className='vx-analysis__stat-label'>Live price</span>
+                            <span className='vx-analysis__stat-value vx-analysis__stat-value--price'>
+                                {prices.length ? Number(prices[prices.length - 1]).toFixed(2) : '—'}
+                            </span>
+                        </div>
+                    </div>
+
+                    <div className='vx-analysis__viewtabs'>
+                        <button
+                            type='button'
+                            className={view === 'circles' ? 'is-active' : ''}
+                            onClick={() => setView('circles')}
+                        >
+                            Circles
+                        </button>
+                        <button
+                            type='button'
+                            className={view === 'scanner' ? 'is-active' : ''}
+                            onClick={() => setView('scanner')}
+                        >
+                            Scanner
+                        </button>
+                    </div>
+
+                    {view === 'circles' && (
+                    <>
                     <div className='vx-card vx-ring-panel'>
                         <div className='vx-ring-row'>
                             {digitPct.map((pct, i) => {
@@ -442,7 +478,10 @@ const MarketAnalysis = observer(() => {
                             </a>
                         </div>
                     )}
+                    </>
+                    )}
 
+                    {view === 'scanner' && (
                     <div className='vx-card vx-scanner'>
                         <h3>Live volatility scanner</h3>
                         <p className='vx-card__note'>
@@ -475,6 +514,7 @@ const MarketAnalysis = observer(() => {
                             </table>
                         )}
                     </div>
+                    )}
                 </>
             )}
         </div>

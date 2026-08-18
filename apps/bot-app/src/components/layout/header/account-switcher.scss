@@ -770,6 +770,36 @@
         line-height: 1.4;
         font-size: 1.2rem;
     }
+
+    &__reset-balance {
+        align-self: flex-start;
+        margin-top: 0.6rem;
+        padding: 0.35rem 0.9rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.01em;
+        color: var(--vx-orange, #ff9900);
+        background: transparent;
+        border: 1px solid var(--vx-orange, #ff9900);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        &:hover:not(:disabled) {
+            background: var(--vx-orange, #ff9900);
+            color: #1a1100;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    }
+
+    &__reset-error {
+        margin-top: 0.4rem;
+        color: var(--vx-red, #e5484d);
+    }
 }
 
 .header {

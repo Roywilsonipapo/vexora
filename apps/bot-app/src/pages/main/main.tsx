@@ -47,6 +47,17 @@ import FreeBots from '../free-bots';
 import MarketAnalysis from '../market-analysis';
 import RiskCalculator from '../risk-calculator';
 import VxTabBoundary from '@/components/vx-tab-boundary';
+import ComingSoon from '@/components/coming-soon';
+import {
+    StrategyProIcon,
+    SpeedbotIcon,
+    AiSoftwareIcon,
+    AutoTraderIcon,
+    ManualTraderIcon,
+    BulkTraderIcon,
+    CopyTraderIcon,
+    TradeAcademyIcon,
+} from './nav-icons';
 import './main.scss';
 
 const ChartWrapper = lazy(() => import('../chart/chart-wrapper'));
@@ -556,6 +567,94 @@ const AppWrapper = observer(() => {
                                 <VxTabBoundary label='Risk Calculator'>
                                     <RiskCalculator />
                                 </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <StrategyProIcon />
+                                        <Localize i18n_default_text='Strategy Pro' />
+                                    </>
+                                }
+                                id='id-strategy-pro'
+                            >
+                                <ComingSoon title='Strategy Pro' description='Curated, higher-complexity strategies with performance history. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <SpeedbotIcon />
+                                        <Localize i18n_default_text='Speedbot' />
+                                    </>
+                                }
+                                id='id-speedbot'
+                            >
+                                <ComingSoon title='Speedbot' description='A faster, simplified bot flow for quick trades. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <AiSoftwareIcon />
+                                        <Localize i18n_default_text='AI Software' />
+                                    </>
+                                }
+                                id='id-ai-software'
+                            >
+                                <ComingSoon title='AI Software' description='AI-assisted strategy generation and tuning. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <AutoTraderIcon />
+                                        <Localize i18n_default_text='Auto Trader' />
+                                    </>
+                                }
+                                id='id-auto-trader'
+                            >
+                                <ComingSoon title='Auto Trader' description='Fully managed automated trading, no Bot Builder setup required. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <ManualTraderIcon />
+                                        <Localize i18n_default_text='Manual Trader' />
+                                    </>
+                                }
+                                id='id-manual-trader'
+                            >
+                                <ComingSoon title='Manual Trader' description="A live manual trading interface is coming. We're building the real-time price feed and order execution carefully rather than shipping it half-working." />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <BulkTraderIcon />
+                                        <Localize i18n_default_text='Bulk Trader' />
+                                    </>
+                                }
+                                id='id-bulk-trader'
+                            >
+                                <ComingSoon title='Bulk Trader' description='Run the same strategy across multiple accounts at once. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <CopyTraderIcon />
+                                        <Localize i18n_default_text='Copy Trader' />
+                                    </>
+                                }
+                                id='id-copy-trader'
+                            >
+                                <ComingSoon title='Copy Trader' description='Mirror trades from other Vexora traders automatically. In the works.' />
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <TradeAcademyIcon />
+                                        <Localize i18n_default_text='Trade Academy' />
+                                    </>
+                                }
+                                id='id-trade-academy'
+                            >
+                                <ComingSoon title='Trade Academy' description='Guides and lessons on strategy building and risk management. In the works.' />
                             </div>
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}

@@ -1,0 +1,323 @@
+// Derelict theme — ancient alien artifact register.
+// Weathered bronze + verdigris on cold stone, Cinzel for headings,
+// Space Mono for everything else, phosphor-green instrumentation accents.
+// This file overrides the underlying @deriv-com design tokens directly
+// (not just a handful of component classes) so the re-theme reaches every
+// surface the library renders, not just the ones we hand-styled before.
+
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root {
+    --vx-stone: #171410;
+    --vx-stone-2: #1e1a14;
+    --vx-panel: #221d16;
+    --vx-panel-2: #28221a;
+    --vx-line: rgba(140, 168, 120, 0.18);
+    --vx-line-strong: rgba(140, 168, 120, 0.4);
+    --vx-verdigris: #7fb08a;
+    --vx-verdigris-dim: #4c6e54;
+    --vx-bronze: #c98a4b;
+    --vx-bronze-deep: #8a5a2e;
+    --vx-phosphor: #9fe89a;
+    --vx-text: #e9e2d0;
+    --vx-text-dim: #a89d84;
+    --vx-text-faint: #665f4d;
+    --vx-red: #c2685c;
+    --vx-font-display: 'Cinzel', serif;
+    --vx-font-body: 'Space Mono', monospace;
+}
+
+// --- Overriding the actual @deriv-com design-token layer -------------------
+// This is what makes buttons, panels, borders, and text across the WHOLE
+// app (not just the components we've hand-touched) pick up the theme, since
+// every shared component reads these variables rather than hardcoded hex.
+.theme--dark {
+    --general-main-1: var(--vx-stone);
+    --general-main-2: var(--vx-stone-2);
+    --general-main-3: var(--vx-panel);
+    --general-main-4: var(--vx-panel-2);
+    --general-section-1: var(--vx-line);
+    --general-section-2: var(--vx-stone-2);
+    --general-section-3: var(--vx-panel);
+    --general-section-4: var(--vx-panel);
+    --general-section-5: var(--vx-panel-2);
+    --general-hover: var(--vx-panel-2);
+    --general-active: var(--vx-panel-2);
+
+    --text-prominent: var(--vx-text);
+    --text-general: var(--vx-text-dim);
+    --text-less-prominent: var(--vx-text-faint);
+    --text-primary: var(--vx-text);
+    --text-disabled: var(--vx-text-faint);
+    --text-disabled-1: var(--vx-text-faint);
+    --text-profit-success: var(--vx-phosphor);
+    --text-loss-danger: var(--vx-red);
+    --text-hint: var(--vx-text-dim);
+
+    --button-primary-default: var(--vx-verdigris-dim);
+    --button-primary-hover: var(--vx-verdigris);
+    --button-secondary-default: var(--vx-bronze-deep);
+    --button-secondary-hover: var(--vx-bronze);
+    --button-tertiary-default: transparent;
+
+    --border-normal: var(--vx-line);
+    --border-normal-1: var(--vx-line);
+    --border-normal-2: var(--vx-line-strong);
+    --border-normal-3: var(--vx-line);
+    --border-hover: var(--vx-bronze);
+    --border-hover-1: var(--vx-bronze);
+    --border-active: var(--vx-verdigris);
+    --border-divider: var(--vx-line);
+
+    --status-success: var(--vx-phosphor);
+    --status-danger: var(--vx-red);
+    --status-info: var(--vx-verdigris);
+
+    --brand-red-coral: var(--vx-bronze);
+    --brand-primary: var(--vx-bronze);
+    --brand-secondary: var(--vx-verdigris-dim);
+    --brand-font-primary: var(--vx-font-body);
+    --brand-font-secondary: var(--vx-font-display);
+    --brand-font-monospace: var(--vx-font-body);
+
+    background: var(--vx-stone) !important;
+    color: var(--vx-text);
+    font-family: var(--vx-font-body);
+
+    // --- Global type treatment ---
+    h1, h2, h3,
+    .tab__dashboard__header .title,
+    .vx-card__title {
+        font-family: var(--vx-font-display) !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.5px;
+    }
+
+    // --- Top glyph marquee band (the "ARCHIVE UNSEALED" strip) ---
+    #root::before,
+    .app-root::before {
+        content: '◈   A R C H I V E   U N S E A L E D   ◈   V E S S E L   V E X O R A   ◈';
+        display: block;
+        text-align: center;
+        font-family: var(--vx-font-body);
+        font-size: 10px;
+        letter-spacing: 4px;
+        color: var(--vx-verdigris-dim);
+        background: var(--vx-stone-2);
+        border-bottom: 1px solid var(--vx-line);
+        padding: 6px 0;
+    }
+
+    // --- Header ---
+    .app-header {
+        background: var(--vx-stone-2) !important;
+        border-bottom: 2px solid var(--vx-bronze-deep) !important;
+        color: var(--vx-text);
+    }
+    .app-header__menu {
+        color: var(--vx-text-dim);
+        font-family: var(--vx-font-display);
+        letter-spacing: 1px;
+        font-size: 12px;
+        text-transform: uppercase;
+        border-radius: 0;
+        padding: 8px 12px;
+        &:hover { color: var(--vx-verdigris); background: transparent; }
+    }
+    // App logo wordmark reads as bronze engraving, not a flat brand color
+    .app-header .app-logo,
+    .app-header svg[class*='logo'] {
+        filter: sepia(1) saturate(2) hue-rotate(-10deg) brightness(0.95);
+    }
+
+    .deriv-account-switcher__container {
+        background: var(--vx-panel) !important;
+        color: var(--vx-text) !important;
+        border: 1px solid var(--vx-line-strong) !important;
+        border-radius: 0 !important;
+        font-family: var(--vx-font-body);
+    }
+
+    // Balance readout — bronze mono figure in a hairline box, not a pill
+    .account-info,
+    [class*='balance'] {
+        font-family: var(--vx-font-body) !important;
+        color: var(--vx-bronze) !important;
+    }
+
+    // "Transfer" and other primary CTAs — square, bordered, no gradient/pill
+    .dc-btn--primary, button[class*='primary'] {
+        background: var(--vx-verdigris-dim) !important;
+        color: var(--vx-stone) !important;
+        border-radius: 0 !important;
+        font-family: var(--vx-font-body) !important;
+        font-weight: 700 !important;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 11.5px !important;
+        border: 1px solid var(--vx-verdigris-dim) !important;
+        &:hover { background: var(--vx-verdigris) !important; }
+    }
+
+    // --- Main nav tabs: Dashboard / Bot Builder / Charts / Market Analysis / Free Bots / Risk Calculator ---
+    .dc-tabs__list--main__tabs {
+        background: var(--vx-stone-2) !important;
+        border-bottom: 1px solid var(--vx-line) !important;
+        overflow-x: auto;
+    }
+
+    .dc-tabs__item--main__tabs,
+    .dc-tabs__item--top.dc-tabs__item--main__tabs {
+        color: var(--vx-text-faint) !important;
+        background: transparent !important;
+        display: flex !important;
+        align-items: center;
+        gap: 6px;
+        border-radius: 0;
+        margin: 0;
+        padding: 12px 16px;
+        border-bottom: 1px solid transparent;
+        font-family: var(--vx-font-display) !important;
+        font-size: 11.5px !important;
+        letter-spacing: 1.5px !important;
+        text-transform: uppercase;
+        transition: color 0.15s ease, border-color 0.15s ease;
+        white-space: nowrap;
+
+        &:hover { color: var(--vx-text) !important; }
+    }
+
+    .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
+    .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
+    .dc-tabs__item--main__tabs.dc-tabs__active {
+        color: var(--vx-verdigris) !important;
+        background: transparent !important;
+        border-bottom-color: var(--vx-verdigris-dim) !important;
+    }
+
+    .dc-tabs__active-line { display: none !important; }
+
+    #id-tutorials { display: none !important; }
+
+    // --- Run bar: "Run" button + "Bot is not running" progress track ---
+    .animation__run-button,
+    .animation__stop-button {
+        background-color: var(--vx-verdigris-dim) !important;
+        border-radius: 0 !important;
+        font-family: var(--vx-font-body) !important;
+    }
+    .animation__container {
+        background: var(--vx-panel) !important;
+        border: 1px solid var(--vx-line-strong) !important;
+        border-radius: 0 !important;
+    }
+    .animation__text {
+        color: var(--vx-text-dim) !important;
+        font-family: var(--vx-font-body) !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-size: 11px !important;
+    }
+    .animation__progress-line { background-color: var(--vx-line) !important; }
+    .animation__progress-bar { background-color: var(--vx-phosphor) !important; }
+
+    // --- Dashboard quick-action cards (My computer / Bot Builder / etc.) ---
+    .tab__dashboard__table__tiles {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        gap: 2px !important;
+    }
+    .tab__dashboard__table__block {
+        background: var(--vx-panel) !important;
+        border: 1px solid var(--vx-line) !important;
+        border-radius: 0 !important;
+        overflow: hidden;
+        width: 260px !important;
+        min-height: 190px !important;
+        max-width: 260px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: 24px 20px !important;
+        gap: 4px;
+        cursor: pointer;
+        transition: border-color 0.15s ease;
+        &:hover { border-color: var(--vx-bronze) !important; }
+    }
+
+    // Replace the icon tile with a rotated-square "sigil" like the mockup
+    .tab__dashboard__table__images {
+        width: 20px !important;
+        height: 20px !important;
+        min-width: 20px !important;
+        min-height: 20px !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        border: 1px solid var(--vx-bronze) !important;
+        transform: rotate(45deg);
+        margin-bottom: 18px !important;
+        display: flex !important;
+    }
+    .tab__dashboard__table__images svg,
+    .tab__dashboard__table__images img {
+        display: none !important;
+    }
+
+    .vx-card__title {
+        margin: 0 !important;
+        font-size: 13px !important;
+        color: var(--vx-text) !important;
+        letter-spacing: 0.5px;
+    }
+    .vx-card__desc {
+        margin: 8px 0 12px !important;
+        line-height: 1.6 !important;
+        display: block !important;
+        color: var(--vx-text-faint) !important;
+        font-size: 10.5px !important;
+    }
+    .vx-card__open {
+        margin-top: auto !important;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-size: 10.5px;
+        font-weight: 700;
+        color: var(--vx-bronze) !important;
+    }
+
+    button:not(.dc-btn--primary) {
+        border-radius: 0;
+        font-family: var(--vx-font-body);
+    }
+
+    // --- Vexora-built pages: Free Bots, Risk Calculator, Digits Analysis ---
+    .vx-card, .vx-freebots__card, .vx-riskcalc__panel, .vx-danalysis__section {
+        background: var(--vx-panel) !important;
+        color: var(--vx-text) !important;
+        border: 1px solid var(--vx-line) !important;
+        border-radius: 0 !important;
+    }
+    .vx-freebots__load, .vx-quickbot-panel__run, .vx-riskcalc button {
+        background: var(--vx-verdigris-dim) !important;
+        color: var(--vx-stone) !important;
+        font-weight: 700;
+        border-radius: 0 !important;
+        font-family: var(--vx-font-body) !important;
+        &:hover { background: var(--vx-verdigris) !important; }
+    }
+
+    // --- Bot Builder / Blockly chrome ---
+    .bot-builder, #bot-builder { background: var(--vx-stone) !important; }
+    .blocklyMainBackground { background: #f4f4f4 !important; }
+    .blocklyToolboxDiv {
+        background: var(--vx-panel) !important;
+        border-right: 1px solid var(--vx-line) !important;
+    }
+    .blocklyTreeRow, .blocklyTreeLabel { color: var(--vx-text) !important; }
+    .blocklyFlyoutBackground { fill: var(--vx-panel-2) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme--dark * { transition: none !important; }
+}

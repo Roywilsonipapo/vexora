@@ -63,6 +63,80 @@
 }
 
 // ---------------------------------------------------------------------
+// Top stat row (symbol / tick count / live price) + Circles/Scanner tabs
+// ---------------------------------------------------------------------
+
+.vx-analysis__toprow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #1c1f27;
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 16px;
+}
+
+.vx-analysis__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    &--right {
+        align-items: flex-end;
+        text-align: right;
+    }
+}
+
+.vx-analysis__stat-label {
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-less-prominent, #98979e);
+}
+
+.vx-analysis__stat-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+
+    &--price {
+        color: var(--vx-orange, var(--brand-primary, #ff9900));
+    }
+}
+
+.vx-analysis__viewtabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+
+    button {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        background: #1c1f27;
+        color: var(--text-less-prominent, #98979e);
+        font-weight: 700;
+        font-size: 0.88rem;
+        cursor: pointer;
+        transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+
+        &:hover {
+            color: inherit;
+        }
+
+        &.is-active {
+            color: var(--vx-orange, var(--brand-primary, #ff9900));
+            border-color: var(--vx-orange, var(--brand-primary, #ff9900));
+            background: rgba(255, 153, 0, 0.1);
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
 // Digit-ring row (0–9 with coloured rings for most/least/barrier/match/tick)
 // ---------------------------------------------------------------------
 
@@ -79,8 +153,8 @@
 }
 
 .vx-ring {
-    width: 62px;
-    height: 62px;
+    width: 76px;
+    height: 76px;
     border-radius: 50%;
     display: flex;
     flex-direction: column;
@@ -93,13 +167,13 @@
         background 0.2s ease;
 
     &__digit {
-        font-size: 15px;
+        font-size: 18px;
         font-weight: 700;
         line-height: 1.1;
     }
 
     &__pct {
-        font-size: 10px;
+        font-size: 11px;
         opacity: 0.85;
         margin-top: 2px;
     }

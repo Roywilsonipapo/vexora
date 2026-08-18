@@ -9,7 +9,7 @@ import './app-logo.scss';
 
 export const AppLogo = () => {
     return (
-        <a href='https://vexora-hub.vercel.app' className='app-header__logo' aria-label={localize('Home')}>
+        <a href='/' className='app-header__logo' aria-label={localize('Dashboard')}>
             <LogoMark height={32} />
         </a>
     );
