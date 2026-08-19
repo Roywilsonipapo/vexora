@@ -566,6 +566,38 @@
         position: relative;
         overflow-y: auto;
     }
+
+    // Sits to the right of the Circles / Scanner pair, visually separate from
+    // them — it switches presentation, not which view you're looking at.
+    .vx-analysis__expand {
+        margin-left: auto;
+        flex: 0 0 auto;
+        background: transparent !important;
+        border: 1px solid var(--vx-line-strong) !important;
+        color: var(--vx-text-dim) !important;
+        padding: 7px 14px !important;
+        font-size: 12px !important;
+        border-radius: 8px;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--vx-text) !important;
+            border-color: var(--vx-orange) !important;
+        }
+    }
+}
+
+// Escape the tab shell entirely. z-index 30 deliberately sits BELOW the run
+// bar's 40, so Run stays reachable while expanded — the point is to see more
+// of the analysis, not to lose control of the bot while looking at it.
+.theme--dark .vx-analysis--expanded {
+    position: fixed;
+    inset: 0;
+    z-index: 30;
+    height: auto;
+    width: auto;
+    background: var(--vx-navy);
+    padding: 10px 14px 72px !important;
 }
 
 // .dc-tabs__content has no explicit height in the base library. It's bounded
