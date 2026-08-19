@@ -303,11 +303,25 @@ export function DigitsView({
       <div className={authState === 'authenticated' ? 'h-[76px] shrink-0' : 'h-[66px] shrink-0'} />
 
       {!editMode && (
-        <div className="vx-view-tabs">
-          <button className={activeView === 'trade' ? 'is-active' : ''} onClick={() => setActiveView('trade')}>
+        <div className="vx-view-tabs flex items-center gap-2 px-4 py-2">
+          <button
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeView === 'trade'
+                ? 'bg-foreground text-background'
+                : 'bg-transparent text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setActiveView('trade')}
+          >
             Manual Trader
           </button>
-          <button className={activeView === 'analysis' ? 'is-active' : ''} onClick={() => setActiveView('analysis')}>
+          <button
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeView === 'analysis'
+                ? 'bg-foreground text-background'
+                : 'bg-transparent text-muted-foreground hover:text-foreground'
+            }`}
+            onClick={() => setActiveView('analysis')}
+          >
             Analysis
           </button>
         </div>

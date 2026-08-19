@@ -362,6 +362,18 @@
     padding-bottom: 24px;
 }
 
+// --- Fix: Digits tab (iframe embed) was collapsing to a tiny box --------
+// .dc-tabs__content (and everything above it up to .main) has no explicit
+// height in the base library — it's auto, relying on natural content flow.
+// A percentage height on our iframe can't resolve through a chain of auto
+// ancestors, so it collapsed to a near-zero default box. Force the content
+// pane to be a real positioned box so our embed can fill it reliably via
+// absolute positioning instead of percentages.
+.theme--dark .main__tabs.dc-tabs .dc-tabs__content {
+    position: relative;
+    min-height: 500px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .theme--dark * { transition: none !important; }
 }

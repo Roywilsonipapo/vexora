@@ -11,7 +11,7 @@ import './vx-digits-embed.scss';
  * analysis surface that's live on the real Digits app — same data, same
  * numbers, no duplicate/divergent logic to maintain.
  */
-const DIGITS_EMBED_URL = 'https://vexora-three.vercel.app/?embed=1';
+const DIGITS_EMBED_URL = 'https://vexora-digits.vercel.app/?embed=1';
 
 const VxDigitsEmbed = () => {
     const [is_loaded, setIsLoaded] = useState(false);
