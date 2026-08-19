@@ -44,7 +44,7 @@ import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import RunStrategy from '../dashboard/run-strategy';
 import FreeBots from '../free-bots';
-import MarketAnalysis from '../market-analysis';
+import VxDigitsEmbed from '@/components/vx-digits-embed';
 import RiskCalculator from '../risk-calculator';
 import VxTabBoundary from '@/components/vx-tab-boundary';
 import './main.scss';
@@ -514,13 +514,13 @@ const AppWrapper = observer(() => {
                                             width='24px'
                                             fill='var(--text-general)'
                                         />
-                                        <Localize i18n_default_text='Market Analysis' />
+                                        <Localize i18n_default_text='Digits' />
                                     </>
                                 }
-                                id='id-market-analysis'
+                                id='id-digits'
                             >
-                                <VxTabBoundary label='Market Analysis'>
-                                    <MarketAnalysis />
+                                <VxTabBoundary label='Digits'>
+                                    <VxDigitsEmbed />
                                 </VxTabBoundary>
                             </div>
                             <div

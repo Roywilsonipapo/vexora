@@ -318,6 +318,50 @@
     .blocklyFlyoutBackground { fill: var(--vx-panel-2) !important; }
 }
 
+// --- Fix: Free Bots card title/description were unreadable ---------------
+// The base free-bots.scss hardcodes h3/p colors for a WHITE card
+// background (#16171a text). We recolor the card to dark, but never
+// re-colored the plain (unclassed) h3/p inside it — this makes them
+// legible against the new dark panel.
+.theme--dark .vx-freebots__card {
+    h3 {
+        color: var(--vx-text) !important;
+    }
+    p {
+        color: var(--vx-text-faint) !important;
+    }
+}
+
+// --- Fix: stray bronze "strikethrough" through active tab labels ---------
+// The tabs library draws its own active-tab underline via an ::after with
+// no explicit top/bottom, which our flex/line-height changes on
+// .dc-tabs__item pushed up into the middle of the text instead of below
+// it. We already draw our own underline via border-bottom-color on the
+// active tab, so this one is now redundant — just hide it.
+.theme--dark .dc-tabs__item--is-scrollable-and-active::after {
+    display: none !important;
+}
+
+// --- Fix: floating Run bar was overlapping the tab strip ------------------
+// .main__run-strategy-wrapper is absolutely positioned near the top-right
+// at the SAME height as the tab row, so on narrower viewports (or with
+// many tabs) it visually covers the last tab(s). Push it down below the
+// tab row instead of overlapping it.
+.theme--dark .main__run-strategy-wrapper {
+    top: calc(1.6rem + 96px) !important;
+}
+
+// --- Fix: Free Bots grid was clipped, not scrollable -----------------------
+// .main has a fixed height + overflow:hidden so Bot Builder/Blockly can
+// manage their own internal scrolling. Free Bots is a plain grid that
+// grows with content, so it needs its own scroll container instead of
+// inheriting the clip.
+.theme--dark .vx-freebots {
+    height: 100%;
+    overflow-y: auto;
+    padding-bottom: 24px;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .theme--dark * { transition: none !important; }
 }

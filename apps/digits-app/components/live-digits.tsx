@@ -22,6 +22,7 @@ export function LiveDigits({
   onReorder,
   logoSrc: logoSrcOverride,
   appName,
+  embedAnalysisOnly,
 }: {
   appConfig?: DigitsAppConfig;
   editMode?: boolean;
@@ -32,6 +33,8 @@ export function LiveDigits({
   /** Override the provider logo — used by the editor to show the previewed logo. */
   logoSrc?: string;
   appName?: string;
+  /** See DigitsViewProps.embedAnalysisOnly — renders only the analysis panel. */
+  embedAnalysisOnly?: boolean;
 }) {
   const providerLogo = useLogoSrc();
   const logoSrc = logoSrcOverride ?? providerLogo;
@@ -92,6 +95,7 @@ export function LiveDigits({
       selectedKey={selectedKey}
       rearrangeMode={rearrangeMode}
       onReorder={onReorder}
+      embedAnalysisOnly={embedAnalysisOnly}
     />
   );
 }

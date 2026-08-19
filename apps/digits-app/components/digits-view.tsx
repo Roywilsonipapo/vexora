@@ -98,6 +98,13 @@ export interface DigitsViewProps {
   rearrangeMode?: boolean;
   /** Called with the new block order after a drag-drop reorder. */
   onReorder?: (order: DigitsAppConfig['order']) => void;
+  /**
+   * Embed mode for hosting the live Digits Analysis view inside another
+   * app's iframe. Renders ONLY the DigitsAnalysis panel — no header, no
+   * footer, no Manual Trader / Analysis toggle, no login chrome. Intended
+   * strictly as a read-only analysis surface embedded elsewhere.
+   */
+  embedAnalysisOnly?: boolean;
 }
 
 export function DigitsView({
@@ -145,6 +152,7 @@ export function DigitsView({
   selectedKey,
   rearrangeMode,
   onReorder,
+  embedAnalysisOnly,
 }: DigitsViewProps) {
   const isMobile = useIsMobile();
   const [activeView, setActiveView] = useState<'trade' | 'analysis'>('trade');
@@ -192,6 +200,39 @@ export function DigitsView({
             <p className="text-sm text-muted-foreground">{error}</p>
           </CardContent>
         </Card>
+      </main>
+    );
+  }
+
+  // Embed mode: render ONLY the live analysis panel — no header, footer,
+  // Manual Trader / Analysis toggle, or login chrome. Used when this app is
+  // hosted inside another app's iframe purely as an analysis surface.
+  if (embedAnalysisOnly) {
+    return (
+      <main className="flex flex-col bg-background min-h-dvh">
+        <DigitsAnalysis
+          symbols={symbols}
+          activeSymbol={activeSymbol}
+          selectSymbol={selectSymbol}
+          currentTick={currentTick}
+          lastDigit={lastDigit}
+          digitStats={digitStats}
+          prices={prices}
+          pipSize={pipSize}
+          setTradeType={setTradeType}
+          setContractMode={setContractMode}
+          setSelectedDigit={setSelectedDigit}
+          stake={stake}
+          setStake={setStake}
+          buyContract={buyContract}
+          buyResult={buyResult}
+          buyError={buyError}
+          isBuying={isBuying}
+          clearBuyResult={clearBuyResult}
+          proposal={proposal}
+          isProposalLoading={isProposalLoading}
+          isAuthenticated={authState === 'authenticated'}
+        />
       </main>
     );
   }
