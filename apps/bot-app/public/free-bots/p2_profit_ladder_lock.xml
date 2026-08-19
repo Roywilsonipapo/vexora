@@ -1,0 +1,99 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="plStake">Stake</variable>
+<variable id="plInitialStake">InitialStake</variable>
+<variable id="plLocked">Locked</variable>
+<variable id="plLockRate">LockRate</variable>
+<variable id="plLockTarget">LockTarget</variable>
+<variable id="plSessionLoss">SessionLoss</variable>
+<variable id="plMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="plTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="plMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">1HZ100V</field>
+<next><block type="trade_definition_tradetype" id="plTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
+<next><block type="trade_definition_contracttype" id="plContractType" deletable="false" movable="false"><field name="TYPE_LIST">both</field>
+<next><block type="trade_definition_candleinterval" id="plCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="plRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="plRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="plSetInitial"><field name="VAR" id="plInitialStake">InitialStake</field><value name="VALUE"><block type="math_number" id="plNumInitial"><field name="NUM">1</field></block></value>
+<next><block type="variables_set" id="plSetStake"><field name="VAR" id="plStake">Stake</field><value name="VALUE"><block type="variables_get" id="plGetInitial1"><field name="VAR" id="plInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="plSetLocked"><field name="VAR" id="plLocked">Locked</field><value name="VALUE"><block type="math_number" id="plNumLocked"><field name="NUM">0</field></block></value>
+<next><block type="variables_set" id="plSetLockRate"><field name="VAR" id="plLockRate">LockRate</field><value name="VALUE"><block type="math_number" id="plNumLockRate"><field name="NUM">0.5</field></block></value>
+<next><block type="variables_set" id="plSetLockTarget"><field name="VAR" id="plLockTarget">LockTarget</field><value name="VALUE"><block type="math_number" id="plNumLockTarget"><field name="NUM">5</field></block></value>
+<next><block type="variables_set" id="plSetSessionLoss"><field name="VAR" id="plSessionLoss">SessionLoss</field><value name="VALUE"><block type="math_number" id="plNumSessionLoss"><field name="NUM">15</field></block></value></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="plTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="plShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="plShAmount"><field name="NUM">1</field></shadow><block type="variables_get" id="plGetStakeAmt"><field name="VAR" id="plStake">Stake</field></block></value>
+<value name="PREDICTION"><shadow type="math_number_positive" id="plShPrediction"><field name="NUM">1</field></shadow></value>
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="plBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="purchase" id="plPurchase"><field name="PURCHASE_LIST">DIGITOVER</field></block></statement>
+</block>
+<block type="after_purchase" id="plAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="controls_if" id="plIfWin"><mutation else="1"></mutation>
+<value name="IF0"><block type="contract_check_result" id="plCheckWin"><field name="CHECK_RESULT">win</field></block></value>
+<statement name="DO0">
+<block type="variables_set" id="plBank"><field name="VAR" id="plLocked">Locked</field>
+<value name="VALUE"><block type="math_arithmetic" id="plLockedPlus"><field name="OP">ADD</field>
+<value name="A"><shadow type="math_number" id="plShBankA"><field name="NUM">0</field></shadow><block type="variables_get" id="plGetLocked1"><field name="VAR" id="plLocked">Locked</field></block></value>
+<value name="B"><shadow type="math_number" id="plShBankB"><field name="NUM">0</field></shadow>
+<block type="math_arithmetic" id="plStakeTimesRate"><field name="OP">MULTIPLY</field>
+<value name="A"><shadow type="math_number" id="plShRateA"><field name="NUM">1</field></shadow><block type="variables_get" id="plGetStakeBank"><field name="VAR" id="plStake">Stake</field></block></value>
+<value name="B"><shadow type="math_number" id="plShRateB"><field name="NUM">1</field></shadow><block type="variables_get" id="plGetLockRate"><field name="VAR" id="plLockRate">LockRate</field></block></value>
+</block></value>
+</block></value>
+<next><block type="variables_set" id="plWinResetStake"><field name="VAR" id="plStake">Stake</field><value name="VALUE"><block type="variables_get" id="plGetInitial2"><field name="VAR" id="plInitialStake">InitialStake</field></block></value></block></next>
+</block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="plLossFlatStake"><field name="VAR" id="plStake">Stake</field><value name="VALUE"><block type="variables_get" id="plGetInitial3"><field name="VAR" id="plInitialStake">InitialStake</field></block></value></block>
+</statement>
+<next>
+<block type="controls_if" id="plIfTarget"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="plCmpTarget"><field name="OP">GTE</field>
+<value name="A"><block type="variables_get" id="plGetLocked2"><field name="VAR" id="plLocked">Locked</field></block></value>
+<value name="B"><block type="variables_get" id="plGetLockTarget"><field name="VAR" id="plLockTarget">LockTarget</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="plJoinDone"><field name="VARIABLE" id="plMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="plDoneTxt1"><value name="TEXT"><shadow type="text" id="plShDone1"><field name="TEXT">Profit Ladder Lock: banked target reached. Session profit</field></shadow></value>
+<next><block type="text_statement" id="plDoneTxt2"><value name="TEXT"><block type="total_profit" id="plTotalProfit1"></block></value>
+<next><block type="text_statement" id="plDoneTxt3"><value name="TEXT"><shadow type="text" id="plShDone3"><field name="TEXT">- stopping while ahead.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="plNotifyDone"><field name="NOTIFICATION_TYPE">success</field><field name="NOTIFICATION_SOUND">earned-money</field><value name="MESSAGE"><block type="variables_get" id="plGetMsgDone"><field name="VAR" id="plMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="plIfStop"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="plCmpStop"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="plTotalProfit2"></block></value>
+<value name="B"><block type="math_arithmetic" id="plNegLoss"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="plShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="plNumZeroNeg"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="plShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="plGetSessionLoss"><field name="VAR" id="plSessionLoss">SessionLoss</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="notify" id="plNotifyStop"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><shadow type="text" id="plShStopMsg"><field name="TEXT">Profit Ladder Lock: session loss limit hit - stopping.</field></shadow></value></block>
+</statement>
+<statement name="ELSE"><block type="trade_again" id="plTradeAgain"></block></statement>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</statement>
+</block>
+</xml>

@@ -11,7 +11,52 @@ type TBot = {
     tag: string;
 };
 
+// --- Premium: exposure-control bots -------------------------------------
+// These are risk-management systems, not edge. Synthetic indices are random
+// per tick with a fixed house edge, so no strategy changes expected value —
+// what these control is how much is at risk and when to stop. Descriptions
+// say what each one actually does; none of them claim to beat the house.
+// All default to a 1 USD stake. Full spec: docs/premium-bots-spec.md
+const PREMIUM_BOTS: TBot[] = [
+    {
+        file: 'p1_drawdown_governor.xml',
+        name: 'Drawdown Governor',
+        description:
+            'Recovery ladder with a hard 4-step cap that resets to the 1 USD base instead of climbing further — the runaway-martingale failure mode is engineered out. Stops the session at −20 USD.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p2_profit_ladder_lock.xml',
+        name: 'Profit Ladder Lock',
+        description:
+            'Banks half of every win into a locked total and never re-risks it, so a winning session cannot fully round-trip. Flat 1 USD stake, stops once 5 USD is banked or at −15 USD.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p3_cooldown_circuit_breaker.xml',
+        name: 'Cool-Down Circuit Breaker',
+        description:
+            'After 3 losses in a row it drops to a 0.35 USD minimum stake for 5 rounds before normal sizing resumes. Refuses to size up while a streak is live. Stops at −15 USD.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p4_volatility_gated_entry.xml',
+        name: 'Volatility-Gated Entry',
+        description:
+            'Only buys when the last digit is 3 or lower and the tick fell; otherwise it skips and waits. Trades far less often than the others by design. 1 USD flat, +6 target, −12 stop.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p5_equity_curve_stop.xml',
+        name: 'Equity Curve Stop',
+        description:
+            'Tracks session peak profit and stops once 2 USD has been given back from that peak, arming only after +3. A trailing stop on the session rather than any single trade.',
+        tag: 'Premium',
+    },
+];
+
 const BOTS: TBot[] = [
+    ...PREMIUM_BOTS,
     {
         file: '01_overunder_cascade_recovery.xml',
         name: 'Over/Under Cascade Recovery',
@@ -193,6 +238,7 @@ const DIGIT_TAGS = ['Over/Under', 'Even/Odd', 'Matches/Differs'];
 
 const FILTERS: { id: string; label: string; match: (bot: TBot) => boolean }[] = [
     { id: 'all', label: 'All', match: () => true },
+    { id: 'premium', label: 'Premium', match: bot => bot.tag === 'Premium' },
     { id: 'digits', label: 'Digits', match: bot => DIGIT_TAGS.includes(bot.tag) },
     { id: 'staking', label: 'Staking systems', match: bot => bot.tag === 'Staking system' },
     { id: 'accumulators', label: 'Accumulators', match: bot => bot.tag === 'Accumulators' },

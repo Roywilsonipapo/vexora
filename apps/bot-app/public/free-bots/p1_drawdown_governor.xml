@@ -1,0 +1,108 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="pgStake">Stake</variable>
+<variable id="pgInitialStake">InitialStake</variable>
+<variable id="pgStepCount">StepCount</variable>
+<variable id="pgMaxSteps">MaxSteps</variable>
+<variable id="pgMultiplier">Multiplier</variable>
+<variable id="pgSessionLoss">SessionLoss</variable>
+<variable id="pgMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="pgTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="pgMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">1HZ100V</field>
+<next><block type="trade_definition_tradetype" id="pgTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
+<next><block type="trade_definition_contracttype" id="pgContractType" deletable="false" movable="false"><field name="TYPE_LIST">both</field>
+<next><block type="trade_definition_candleinterval" id="pgCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="pgRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="pgRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="pgSetInitial"><field name="VAR" id="pgInitialStake">InitialStake</field><value name="VALUE"><block type="math_number" id="pgNumInitial"><field name="NUM">1</field></block></value>
+<next><block type="variables_set" id="pgSetStake"><field name="VAR" id="pgStake">Stake</field><value name="VALUE"><block type="variables_get" id="pgGetInitial1"><field name="VAR" id="pgInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="pgSetStep"><field name="VAR" id="pgStepCount">StepCount</field><value name="VALUE"><block type="math_number" id="pgNumStep"><field name="NUM">0</field></block></value>
+<next><block type="variables_set" id="pgSetMaxSteps"><field name="VAR" id="pgMaxSteps">MaxSteps</field><value name="VALUE"><block type="math_number" id="pgNumMaxSteps"><field name="NUM">4</field></block></value>
+<next><block type="variables_set" id="pgSetMult"><field name="VAR" id="pgMultiplier">Multiplier</field><value name="VALUE"><block type="math_number" id="pgNumMult"><field name="NUM">2</field></block></value>
+<next><block type="variables_set" id="pgSetSessionLoss"><field name="VAR" id="pgSessionLoss">SessionLoss</field><value name="VALUE"><block type="math_number" id="pgNumSessionLoss"><field name="NUM">20</field></block></value></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="pgTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="pgShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="pgShAmount"><field name="NUM">1</field></shadow><block type="variables_get" id="pgGetStakeAmt"><field name="VAR" id="pgStake">Stake</field></block></value>
+<value name="PREDICTION"><shadow type="math_number_positive" id="pgShPrediction"><field name="NUM">1</field></shadow></value>
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="pgBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="purchase" id="pgPurchase"><field name="PURCHASE_LIST">DIGITOVER</field></block></statement>
+</block>
+<block type="after_purchase" id="pgAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="controls_if" id="pgIfWin"><mutation else="1"></mutation>
+<value name="IF0"><block type="contract_check_result" id="pgCheckWin"><field name="CHECK_RESULT">win</field></block></value>
+<statement name="DO0">
+<block type="variables_set" id="pgWinResetStake"><field name="VAR" id="pgStake">Stake</field><value name="VALUE"><block type="variables_get" id="pgGetInitial2"><field name="VAR" id="pgInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="pgWinResetStep"><field name="VAR" id="pgStepCount">StepCount</field><value name="VALUE"><block type="math_number" id="pgNumZeroWin"><field name="NUM">0</field></block></value></block></next>
+</block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="pgLossIncStep"><field name="VAR" id="pgStepCount">StepCount</field>
+<value name="VALUE"><block type="math_arithmetic" id="pgStepPlusOne"><field name="OP">ADD</field>
+<value name="A"><shadow type="math_number" id="pgShStepA"><field name="NUM">0</field></shadow><block type="variables_get" id="pgGetStep1"><field name="VAR" id="pgStepCount">StepCount</field></block></value>
+<value name="B"><shadow type="math_number" id="pgShStepB"><field name="NUM">1</field></shadow></value>
+</block></value>
+<next>
+<block type="controls_if" id="pgIfCapped"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="pgCmpStep"><field name="OP">GTE</field>
+<value name="A"><block type="variables_get" id="pgGetStep2"><field name="VAR" id="pgStepCount">StepCount</field></block></value>
+<value name="B"><block type="variables_get" id="pgGetMaxSteps"><field name="VAR" id="pgMaxSteps">MaxSteps</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="pgCapResetStake"><field name="VAR" id="pgStake">Stake</field><value name="VALUE"><block type="variables_get" id="pgGetInitial3"><field name="VAR" id="pgInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="pgCapResetStep"><field name="VAR" id="pgStepCount">StepCount</field><value name="VALUE"><block type="math_number" id="pgNumZeroCap"><field name="NUM">0</field></block></value>
+<next><block type="notify" id="pgNotifyCap"><field name="NOTIFICATION_TYPE">warn</field><field name="NOTIFICATION_SOUND">silent</field><value name="MESSAGE"><shadow type="text" id="pgShCapMsg"><field name="TEXT">Step cap reached - ladder reset to base stake.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="pgStepUpStake"><field name="VAR" id="pgStake">Stake</field>
+<value name="VALUE"><block type="math_arithmetic" id="pgStakeTimesMult"><field name="OP">MULTIPLY</field>
+<value name="A"><shadow type="math_number" id="pgShMultA"><field name="NUM">1</field></shadow><block type="variables_get" id="pgGetStake2"><field name="VAR" id="pgStake">Stake</field></block></value>
+<value name="B"><shadow type="math_number" id="pgShMultB"><field name="NUM">1</field></shadow><block type="variables_get" id="pgGetMult"><field name="VAR" id="pgMultiplier">Multiplier</field></block></value>
+</block></value>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</statement>
+<next>
+<block type="controls_if" id="pgIfSessionStop"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="pgCmpSession"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="pgTotalProfit"></block></value>
+<value name="B"><block type="math_arithmetic" id="pgNegSessionLoss"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="pgShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="pgNumZeroNeg"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="pgShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="pgGetSessionLoss"><field name="VAR" id="pgSessionLoss">SessionLoss</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="pgJoinStop"><field name="VARIABLE" id="pgMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="pgStopTxt1"><value name="TEXT"><shadow type="text" id="pgShStop1"><field name="TEXT">Drawdown Governor: session loss limit hit at</field></shadow></value>
+<next><block type="text_statement" id="pgStopTxt2"><value name="TEXT"><block type="total_profit" id="pgTotalProfit2"></block></value>
+<next><block type="text_statement" id="pgStopTxt3"><value name="TEXT"><shadow type="text" id="pgShStop3"><field name="TEXT">- stopping to protect the balance.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="pgNotifyStop"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><block type="variables_get" id="pgGetMsgStop"><field name="VAR" id="pgMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE"><block type="trade_again" id="pgTradeAgain"></block></statement>
+</block>
+</next>
+</block>
+</statement>
+</block>
+</xml>

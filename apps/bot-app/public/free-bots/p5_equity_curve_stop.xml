@@ -1,0 +1,104 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="ecStake">Stake</variable>
+<variable id="ecInitialStake">InitialStake</variable>
+<variable id="ecPeak">PeakProfit</variable>
+<variable id="ecGiveback">MaxGiveback</variable>
+<variable id="ecArmAt">ArmAt</variable>
+<variable id="ecSessionLoss">SessionLoss</variable>
+<variable id="ecMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="ecTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="ecMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">1HZ100V</field>
+<next><block type="trade_definition_tradetype" id="ecTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
+<next><block type="trade_definition_contracttype" id="ecContractType" deletable="false" movable="false"><field name="TYPE_LIST">both</field>
+<next><block type="trade_definition_candleinterval" id="ecCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="ecRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="ecRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="ecSetInitial"><field name="VAR" id="ecInitialStake">InitialStake</field><value name="VALUE"><block type="math_number" id="ecNumInitial"><field name="NUM">1</field></block></value>
+<next><block type="variables_set" id="ecSetStake"><field name="VAR" id="ecStake">Stake</field><value name="VALUE"><block type="variables_get" id="ecGetInitial1"><field name="VAR" id="ecInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="ecSetPeak"><field name="VAR" id="ecPeak">PeakProfit</field><value name="VALUE"><block type="math_number" id="ecNumPeak"><field name="NUM">0</field></block></value>
+<next><block type="variables_set" id="ecSetGiveback"><field name="VAR" id="ecGiveback">MaxGiveback</field><value name="VALUE"><block type="math_number" id="ecNumGiveback"><field name="NUM">2</field></block></value>
+<next><block type="variables_set" id="ecSetArmAt"><field name="VAR" id="ecArmAt">ArmAt</field><value name="VALUE"><block type="math_number" id="ecNumArmAt"><field name="NUM">3</field></block></value>
+<next><block type="variables_set" id="ecSetSessionLoss"><field name="VAR" id="ecSessionLoss">SessionLoss</field><value name="VALUE"><block type="math_number" id="ecNumSessionLoss"><field name="NUM">15</field></block></value></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="ecTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="ecShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="ecShAmount"><field name="NUM">1</field></shadow><block type="variables_get" id="ecGetStakeAmt"><field name="VAR" id="ecStake">Stake</field></block></value>
+<value name="PREDICTION"><shadow type="math_number_positive" id="ecShPrediction"><field name="NUM">1</field></shadow></value>
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="ecBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="purchase" id="ecPurchase"><field name="PURCHASE_LIST">DIGITOVER</field></block></statement>
+</block>
+<block type="after_purchase" id="ecAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="variables_set" id="ecFlatStake"><field name="VAR" id="ecStake">Stake</field><value name="VALUE"><block type="variables_get" id="ecGetInitial2"><field name="VAR" id="ecInitialStake">InitialStake</field></block></value>
+<next>
+<block type="controls_if" id="ecIfNewPeak">
+<value name="IF0"><block type="logic_compare" id="ecCmpPeak"><field name="OP">GT</field>
+<value name="A"><block type="total_profit" id="ecTotalProfit1"></block></value>
+<value name="B"><block type="variables_get" id="ecGetPeak1"><field name="VAR" id="ecPeak">PeakProfit</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="ecUpdatePeak"><field name="VAR" id="ecPeak">PeakProfit</field><value name="VALUE"><block type="total_profit" id="ecTotalProfit2"></block></value></block>
+</statement>
+<next>
+<block type="controls_if" id="ecIfTrail"><mutation else="1"></mutation>
+<value name="IF0">
+<block type="logic_operation" id="ecAndTrail"><field name="OP">AND</field>
+<value name="A"><block type="logic_compare" id="ecCmpArmed"><field name="OP">GTE</field>
+<value name="A"><block type="variables_get" id="ecGetPeak2"><field name="VAR" id="ecPeak">PeakProfit</field></block></value>
+<value name="B"><block type="variables_get" id="ecGetArmAt"><field name="VAR" id="ecArmAt">ArmAt</field></block></value>
+</block></value>
+<value name="B"><block type="logic_compare" id="ecCmpGiveback"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="ecTotalProfit3"></block></value>
+<value name="B"><block type="math_arithmetic" id="ecPeakMinusGive"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="ecShGiveA"><field name="NUM">0</field></shadow><block type="variables_get" id="ecGetPeak3"><field name="VAR" id="ecPeak">PeakProfit</field></block></value>
+<value name="B"><shadow type="math_number" id="ecShGiveB"><field name="NUM">0</field></shadow><block type="variables_get" id="ecGetGiveback"><field name="VAR" id="ecGiveback">MaxGiveback</field></block></value>
+</block></value>
+</block></value>
+</block>
+</value>
+<statement name="DO0">
+<block type="text_join" id="ecJoinTrail"><field name="VARIABLE" id="ecMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="ecTrailTxt1"><value name="TEXT"><shadow type="text" id="ecShTrail1"><field name="TEXT">Equity Curve Stop: gave back the allowed amount from peak. Locking in</field></shadow></value>
+<next><block type="text_statement" id="ecTrailTxt2"><value name="TEXT"><block type="total_profit" id="ecTotalProfit4"></block></value>
+<next><block type="text_statement" id="ecTrailTxt3"><value name="TEXT"><shadow type="text" id="ecShTrail3"><field name="TEXT">and stopping.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="ecNotifyTrail"><field name="NOTIFICATION_TYPE">success</field><field name="NOTIFICATION_SOUND">earned-money</field><value name="MESSAGE"><block type="variables_get" id="ecGetMsgTrail"><field name="VAR" id="ecMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="ecIfStop"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="ecCmpStop"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="ecTotalProfit5"></block></value>
+<value name="B"><block type="math_arithmetic" id="ecNegLoss"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="ecShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="ecNumZeroNeg"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="ecShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="ecGetSessionLoss"><field name="VAR" id="ecSessionLoss">SessionLoss</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="notify" id="ecNotifyStop"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><shadow type="text" id="ecShStopMsg"><field name="TEXT">Equity Curve Stop: session loss limit hit - stopping.</field></shadow></value></block>
+</statement>
+<statement name="ELSE"><block type="trade_again" id="ecTradeAgain"></block></statement>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</next>
+</block>
+</statement>
+</block>
+</xml>
