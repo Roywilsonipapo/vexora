@@ -20,9 +20,9 @@ const VxDigitsEmbed = () => {
         <div className='vx-digits-embed'>
             {!is_loaded && (
                 <div className='vx-digits-embed__loading'>
-                    <div className='vx-digits-embed__sigil' />
-                    <p className='vx-digits-embed__label'>connecting to the archive</p>
-                    <p className='vx-digits-embed__sublabel'>syncing live tick signal…</p>
+                    <div className='vx-digits-embed__spinner' />
+                    <p className='vx-digits-embed__label'>Loading analysis</p>
+                    <p className='vx-digits-embed__sublabel'>Connecting to the live tick feed…</p>
                 </div>
             )}
             <iframe

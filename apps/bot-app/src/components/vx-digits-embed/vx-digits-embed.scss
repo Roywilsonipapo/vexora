@@ -1,7 +1,10 @@
+// Fills its parent, which must be positioned. Absolute inset beats a
+// percentage height here: the tab content chain above this has auto-height
+// ancestors, so `height: 100%` on the iframe collapses to a near-zero box.
 .vx-digits-embed {
     position: absolute;
     inset: 0;
-    background: var(--vx-stone, #171410);
+    background: var(--vx-navy, #0a1523);
 
     &__frame {
         width: 100%;
@@ -9,7 +12,7 @@
         min-height: 100%;
         border: none;
         display: block;
-        transition: opacity 0.4s ease;
+        transition: opacity 0.3s ease;
     }
 
     &__loading {
@@ -20,52 +23,45 @@
         align-items: center;
         justify-content: center;
         gap: 14px;
-        background: var(--vx-stone, #171410);
+        background: var(--vx-navy, #0a1523);
         z-index: 1;
     }
 
-    &__sigil {
-        width: 34px;
-        height: 34px;
-        border: 2px solid var(--vx-bronze, #c98a4b);
-        transform: rotate(45deg);
-        position: relative;
-        animation: vx-digits-embed-pulse 1.6s ease-in-out infinite;
-
-        &::after {
-            content: '';
-            position: absolute;
-            inset: 8px;
-            border: 1px solid var(--vx-verdigris, #7fb08a);
-        }
+    &__spinner {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        border-top-color: var(--vx-orange, #f6512c);
+        animation: vx-digits-embed-spin 0.9s linear infinite;
     }
 
     &__label {
-        font-family: var(--vx-font-display, 'Cinzel', serif);
+        font-family: var(--vx-font-body, sans-serif);
         font-size: 12px;
-        letter-spacing: 2px;
+        font-weight: 700;
+        letter-spacing: 1.6px;
         text-transform: uppercase;
-        color: var(--vx-text, #e9e2d0);
+        color: var(--vx-text, #e8f0fb);
         margin: 0;
     }
 
     &__sublabel {
-        font-family: var(--vx-font-body, 'Space Mono', monospace);
-        font-size: 10.5px;
-        letter-spacing: 1px;
-        color: var(--vx-text-faint, #665f4d);
+        font-family: var(--vx-font-body, sans-serif);
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
         margin: 0;
     }
 }
 
-@keyframes vx-digits-embed-pulse {
-    0%,
-    100% {
-        opacity: 1;
-        transform: rotate(45deg) scale(1);
+@keyframes vx-digits-embed-spin {
+    to {
+        transform: rotate(360deg);
     }
-    50% {
-        opacity: 0.55;
-        transform: rotate(45deg) scale(0.88);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vx-digits-embed__spinner {
+        animation: none;
     }
 }

@@ -38,13 +38,6 @@ export const lastDigit = (price: string | number, pip_size: number) => {
     return Number(s.charAt(s.length - 1));
 };
 
-export const computeStdDev = (values: number[]) => {
-    if (values.length < 2) return 0;
-    const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
-    return Math.sqrt(variance);
-};
-
 export const waitForApi = async (timeoutMs = 6000): Promise<boolean> => {
     const start = Date.now();
     while (!api_base?.api) {

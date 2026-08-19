@@ -470,20 +470,71 @@
     display: none !important;
 }
 
-// Free Bots grid needs its own scroll container: .main has a fixed height +
-// overflow:hidden so Blockly can manage its own scrolling, but Free Bots is a
-// plain grid that grows with content.
+// --- Make long tab content actually scroll -------------------------------
+// `height: 100%` on a tab page can't create a scroll container on its own:
+// every ancestor up to .main__container is auto-height, so the percentage
+// resolves against a box that already grew to fit the content. The tab strip
+// row measured `grid-template-rows: 61px 907px` — the content row sized to
+// its content — and the overflow was then silently clipped by .main
+// (overflow: hidden, needed so Blockly manages its own scrolling).
+//
+// Bound the chain instead: minmax(0, 1fr) is what stops the grid row from
+// using its min-content height as a floor, which is the actual bug.
+.theme--dark .main__container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
+// The tab strip is wrapped in an unclassed <div> that we can't add a class to
+// (it comes from the vendored bot code). As a flex item it defaults to
+// min-height: auto, which means it refuses to shrink below its content height
+// and blows straight through .main__container's clip. min-height: 0 is the
+// whole fix — without it every bound below this point is ignored.
+.theme--dark .main__container > div {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.theme--dark .dc-tabs--main__tabs {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+}
+
+.theme--dark .dc-tabs--main__tabs > .dc-tabs__content {
+    min-height: 0;
+    overflow: hidden;
+}
+
+// With the chain bounded, these can finally own their own scrollbar.
 .theme--dark .vx-freebots {
     height: 100%;
     overflow-y: auto;
     padding-bottom: 96px;
 }
 
-// Analysis Tool needs its own scroll container for the same reason Free Bots
-// does — .main clips overflow so Blockly can scroll itself.
+// Analysis Tool: the toggle row stays put and the active view fills the rest.
+// The Circles view is an iframe, so its container has to be a positioned box
+// with a genuinely resolved height — a percentage height collapses here.
 .theme--dark .vx-analysis {
     height: 100%;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    // .dc-tabs__content is a flex row, so this page is a flex item and would
+    // otherwise shrink to its content width. It used to fill only because the
+    // old circles markup was intrinsically wide; the iframe has no intrinsic
+    // width, so without this the whole tab collapsed to ~189px.
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    // Tighter than the other pages: the embed is the content, so chrome here
+    // is just stolen height. Bottom padding only has to clear the run bar.
+    padding: 12px 16px 72px !important;
 
     // Wide Circles / Scanner toggle, active side filled orange
     .vx-analysis__viewtabs button {
@@ -499,22 +550,19 @@
         }
     }
 
-    .vx-mini-panel,
-    .vx-ring-panel {
-        background: var(--vx-panel) !important;
-        border-color: var(--vx-line) !important;
-    }
-
-    .vx-ring {
-        border-color: var(--vx-line-strong);
+    .vx-analysis__view {
+        flex: 1 1 auto;
+        min-height: 0;
+        position: relative;
+        overflow-y: auto;
     }
 }
 
-// .dc-tabs__content has no explicit height in the base library, so percentage
-// heights inside it can't resolve. Make it a real positioned box.
-.theme--dark .main__tabs.dc-tabs .dc-tabs__content {
+// .dc-tabs__content has no explicit height in the base library. It's bounded
+// above by the grid-row fix; this just makes it a positioning context so the
+// Digits iframe can fill it via inset: 0.
+.theme--dark .dc-tabs--main__tabs .dc-tabs__content {
     position: relative;
-    min-height: 500px;
 }
 
 // --- Clearance for the floating run bar -----------------------------------
