@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { observer } from 'mobx-react-lite';
-import { DBOT_TABS } from '@/constants/bot-contents';
-import { save_types } from '@/external/bot-skeleton/constants/save-type';
 import { useStore } from '@/hooks/useStore';
+import { loadStrategyIntoBuilder } from './load-strategy';
 import './free-bots.scss';
 
 type TBot = {
@@ -209,30 +208,7 @@ const FreeBots = observer(() => {
         setErrorFile(null);
         setLoadingFile(bot.file);
         try {
-            const response = await fetch(`/free-bots/${bot.file}`);
-            if (!response.ok) throw new Error('fetch failed');
-            const xml = await response.text();
-
-            if (!load_modal || !dashboard) throw new Error('store not ready');
-
-            dashboard.setActiveTab(DBOT_TABS.BOT_BUILDER);
-
-            // Wait for the real Blockly workspace to actually mount before loading into it —
-            // a blind setTimeout here is what caused the old "loads into a hidden preview" bug.
-            await new Promise<void>((resolve, reject) => {
-                const start = Date.now();
-                const check = () => {
-                    if (window.Blockly?.derivWorkspace) resolve();
-                    else if (Date.now() - start > 8000) reject(new Error('workspace did not mount'));
-                    else setTimeout(check, 100);
-                };
-                check();
-            });
-
-            await load_modal.loadStrategyToBuilder(
-                { id: bot.file, name: bot.name, save_type: save_types.UNSAVED, timestamp: Date.now(), xml },
-                true
-            );
+            await loadStrategyIntoBuilder(bot.file, bot.name, { load_modal, dashboard });
         } catch {
             setErrorFile(bot.file);
         } finally {

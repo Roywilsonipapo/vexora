@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '@/hooks/useStore';
+import { loadStrategyIntoBuilder } from '../free-bots/load-strategy';
 import { digitCountsFor, fetchTickHistory, SYMBOLS, TICK_COUNT } from './tick-utils';
 
 /**
@@ -24,6 +27,22 @@ const STRATEGIES: { value: TStrategy; label: string }[] = [
     { value: 'over_under', label: 'Over / Under' },
     { value: 'rise_fall', label: 'Rise / Fall' },
 ];
+
+/**
+ * Which existing strategy file each scan type opens in Bot Builder.
+ *
+ * These are the shipped Free Bots templates, loaded unmodified. The scan result
+ * is NOT written into the bot: the barrier, digit and market in the template are
+ * whatever that template already had, and you set them yourself in Bot Builder.
+ * Auto-tuning a live-trading bot from a sample statistic would imply the sample
+ * predicts the next tick, which it does not — see the header comment above.
+ */
+const TEMPLATES: Record<TStrategy, { file: string; name: string }> = {
+    matches_differs: { file: '03_differs_most_frequent_digit.xml', name: 'Differs — Most Frequent Digit' },
+    even_odd: { file: '07_evenodd_streak_breaker.xml', name: 'Even/Odd Streak-Breaker' },
+    over_under: { file: '01_overunder_cascade_recovery.xml', name: 'Over/Under Cascade Recovery' },
+    rise_fall: { file: 'martingale.xml', name: 'Classic Martingale (Rise/Fall)' },
+};
 
 type TFinding = {
     code: string;
@@ -112,13 +131,20 @@ const analyseSymbol = (
     };
 };
 
-const SignalScanner = () => {
+const SignalScanner = observer(() => {
+    const { load_modal, dashboard } = useStore();
     const [strategy, setStrategy] = useState<TStrategy>('matches_differs');
     const [market, setMarket] = useState('all');
     const [latestTick, setLatestTick] = useState<string | null>(null);
     const [isRunning, setIsRunning] = useState(false);
     const [lines, setLines] = useState<string[]>([]);
     const [showTerminal, setShowTerminal] = useState(false);
+    // Results of the last completed scan, ranked most-skewed first. Kept
+    // separate from `lines` so the table survives closing the terminal.
+    const [results, setResults] = useState<TFinding[]>([]);
+    const [scannedStrategy, setScannedStrategy] = useState<TStrategy | null>(null);
+    const [loadingCode, setLoadingCode] = useState<string | null>(null);
+    const [errorCode, setErrorCode] = useState<string | null>(null);
     const bodyRef = useRef<HTMLDivElement>(null);
 
     // Latest tick readout on the entry card — polls real history, no socket
@@ -145,10 +171,25 @@ const SignalScanner = () => {
 
     const push = (line: string) => setLines(prev => [...prev, line]);
 
+    const handleLoad = async (finding: TFinding) => {
+        const template = TEMPLATES[scannedStrategy ?? strategy];
+        setErrorCode(null);
+        setLoadingCode(finding.code);
+        try {
+            await loadStrategyIntoBuilder(template.file, template.name, { load_modal, dashboard });
+        } catch {
+            setErrorCode(finding.code);
+        } finally {
+            setLoadingCode(null);
+        }
+    };
+
     const runScan = async () => {
         setIsRunning(true);
         setShowTerminal(true);
         setLines([]);
+        setResults([]);
+        setErrorCode(null);
 
         const targets = market === 'all' ? SYMBOLS : SYMBOLS.filter(s => s.code === market);
         const label = STRATEGIES.find(s => s.value === strategy)?.label ?? strategy;
@@ -181,6 +222,8 @@ const SignalScanner = () => {
 
         findings.sort((a, b) => b.skew - a.skew);
         const top = findings[0];
+        setResults(findings);
+        setScannedStrategy(strategy);
 
         push('');
         push('--- Scan complete ---');
@@ -262,8 +305,68 @@ const SignalScanner = () => {
                     </div>
                 </div>
             )}
+
+            {results.length > 0 && (
+                <div className='vx-card vx-results'>
+                    <h3 className='vx-results__title'>
+                        Scan results
+                        <span className='vx-results__subtitle'>
+                            {STRATEGIES.find(s => s.value === scannedStrategy)?.label} · ranked by deviation from
+                            baseline
+                        </span>
+                    </h3>
+
+                    <div className='vx-results__scroll'>
+                        <table className='vx-results__table'>
+                            <thead>
+                                <tr>
+                                    <th>Market</th>
+                                    <th>Observed</th>
+                                    <th className='vx-results__num'>Deviation</th>
+                                    <th />
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {results.map(f => (
+                                    <tr key={f.code}>
+                                        <td className='vx-results__market'>{f.label}</td>
+                                        <td>
+                                            <span className='vx-results__headline'>{f.headline}</span>
+                                            <span className='vx-results__detail'>{f.detail}</span>
+                                            {errorCode === f.code && (
+                                                <span className='vx-results__error'>
+                                                    Could not load the template — try again.
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className='vx-results__num'>{f.skew.toFixed(2)} pp</td>
+                                        <td>
+                                            <button
+                                                type='button'
+                                                className='vx-results__load'
+                                                onClick={() => handleLoad(f)}
+                                                disabled={loadingCode === f.code}
+                                            >
+                                                {loadingCode === f.code ? 'Loading…' : 'Load'}
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <p className='vx-results__note'>
+                        Deviation is how far the sample sat from the random baseline, in percentage points — not a
+                        win rate and not a forecast. <strong>Load</strong> opens the{' '}
+                        {TEMPLATES[scannedStrategy ?? strategy].name} template in Bot Builder unchanged; it does not
+                        copy the row&rsquo;s market, digit or barrier into the bot. Set those yourself, and test on
+                        demo first.
+                    </p>
+                </div>
+            )}
         </div>
     );
-};
+});
 
 export default SignalScanner;

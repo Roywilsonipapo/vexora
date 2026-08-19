@@ -812,3 +812,121 @@
         background: #3f86ff;
     }
 }
+
+// --- Scan results table --------------------------------------------------
+.vx-results {
+    margin-top: 18px;
+    text-align: left;
+
+    &__title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 10px;
+        margin: 0 0 14px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--vx-text, #e8f0fb);
+    }
+
+    &__subtitle {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    // The table has a hard minimum width, so on narrow viewports it scrolls
+    // inside this box rather than forcing the whole panel sideways.
+    &__scroll {
+        overflow-x: auto;
+    }
+
+    &__table {
+        width: 100%;
+        min-width: 560px;
+        border-collapse: collapse;
+        font-size: 0.82rem;
+
+        th {
+            padding: 8px 12px;
+            text-align: left;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--vx-text-dim, #9db2cd);
+            border-bottom: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+        }
+
+        td {
+            padding: 12px;
+            vertical-align: top;
+            border-bottom: 1px solid var(--vx-line, rgba(96, 140, 196, 0.12));
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+    }
+
+    &__num {
+        text-align: right;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__market {
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    &__headline {
+        display: block;
+        font-weight: 700;
+        color: var(--vx-amber, #f5a623);
+    }
+
+    &__detail {
+        display: block;
+        margin-top: 3px;
+        font-size: 0.74rem;
+        line-height: 1.5;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    &__error {
+        display: block;
+        margin-top: 5px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--vx-red, #ef4444);
+    }
+
+    &__load {
+        padding: 7px 18px;
+        border-radius: 7px;
+        border: none;
+        font-size: 0.75rem;
+        font-weight: 700;
+        cursor: pointer;
+        color: #fff;
+        background: var(--vx-blue, #2f76ed);
+
+        &:hover:not(:disabled) {
+            background: #3f86ff;
+        }
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    }
+
+    &__note {
+        margin: 14px 0 0;
+        font-size: 0.73rem;
+        line-height: 1.6;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+}
