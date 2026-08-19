@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { loadStrategyIntoBuilder } from '../free-bots/load-strategy';
+import { applySignalToXml } from './apply-signal';
 import { digitCountsFor, fetchTickHistory, SYMBOLS, TICK_COUNT } from './tick-utils';
 
 /**
@@ -31,11 +32,14 @@ const STRATEGIES: { value: TStrategy; label: string }[] = [
 /**
  * Which existing strategy file each scan type opens in Bot Builder.
  *
- * These are the shipped Free Bots templates, loaded unmodified. The scan result
- * is NOT written into the bot: the barrier, digit and market in the template are
- * whatever that template already had, and you set them yourself in Bot Builder.
- * Auto-tuning a live-trading bot from a sample statistic would imply the sample
- * predicts the next tick, which it does not — see the header comment above.
+ * These are the shipped Free Bots templates. Load stamps the scanned market,
+ * contract direction and barrier into a copy (see apply-signal.ts) so the bot
+ * you get is the row you clicked, not an unrelated default you have to retype.
+ *
+ * Everything that governs risk — stake, recovery, stop loss — is left at the
+ * template's own values. And nothing is auto-started: Load opens the bot in Bot
+ * Builder and stops there. The sample does not predict the next tick, so the
+ * decision to actually run it stays a deliberate press of Run.
  */
 const TEMPLATES: Record<TStrategy, { file: string; name: string }> = {
     matches_differs: { file: '03_differs_most_frequent_digit.xml', name: 'Differs — Most Frequent Digit' },
@@ -52,6 +56,10 @@ type TFinding = {
     // Percentage-point distance from the random baseline. Higher = more skewed
     // in the sample; explicitly NOT a confidence or win-rate figure.
     skew: number;
+    // The contract the headline describes, in the form Bot Builder needs, so
+    // Load can write the actual scanned market and barrier into the strategy
+    // rather than dropping you into an unrelated template.
+    signal: { purchase: string; prediction?: number };
 };
 
 const analyseSymbol = (
@@ -73,6 +81,7 @@ const analyseSymbol = (
             headline: `MATCHES digit ${top} — ${pct[top].toFixed(2)}% of ${n} ticks`,
             detail: `Least frequent was ${low} at ${pct[low].toFixed(2)}%. Baseline is 10.00% per digit.`,
             skew: Math.abs(pct[top] - 10),
+            signal: { purchase: 'DIGITMATCH', prediction: top },
         };
     }
 
@@ -86,6 +95,7 @@ const analyseSymbol = (
             headline: `${isEven ? 'EVEN' : 'ODD'} — ${(isEven ? evenPct : oddPct).toFixed(2)}% of ${n} ticks`,
             detail: `Split was ${evenPct.toFixed(2)}% even / ${oddPct.toFixed(2)}% odd. Baseline is 50.00%.`,
             skew: Math.abs(evenPct - 50),
+            signal: { purchase: isEven ? 'DIGITEVEN' : 'DIGITODD' },
         };
     }
 
@@ -108,6 +118,7 @@ const analyseSymbol = (
             headline: `${isOver ? 'OVER' : 'UNDER'} ${best.barrier} — ${(isOver ? best.overPct : best.underPct).toFixed(2)}%`,
             detail: `Widest split of any barrier on this market, over ${n} ticks (ties excluded).`,
             skew: best.skew,
+            signal: { purchase: isOver ? 'DIGITOVER' : 'DIGITUNDER', prediction: best.barrier },
         };
     }
 
@@ -128,6 +139,7 @@ const analyseSymbol = (
         headline: `${isRise ? 'RISE' : 'FALL'} — ${(isRise ? risePct : 100 - risePct).toFixed(2)}%`,
         detail: `${rise} rises / ${fall} falls over ${n} ticks (flat ticks excluded). Baseline is 50.00%.`,
         skew: Math.abs(risePct - 50),
+        signal: { purchase: isRise ? 'CALL' : 'PUT' },
     };
 };
 
@@ -176,7 +188,12 @@ const SignalScanner = observer(() => {
         setErrorCode(null);
         setLoadingCode(finding.code);
         try {
-            await loadStrategyIntoBuilder(template.file, template.name, { load_modal, dashboard });
+            await loadStrategyIntoBuilder(
+                template.file,
+                `${finding.label} — ${finding.headline}`,
+                { load_modal, dashboard },
+                xml => applySignalToXml(xml, finding.signal, finding.code)
+            );
         } catch {
             setErrorCode(finding.code);
         } finally {
@@ -359,8 +376,9 @@ const SignalScanner = observer(() => {
                     <p className='vx-results__note'>
                         Deviation is how far the sample sat from the random baseline, in percentage points — not a
                         win rate and not a forecast. <strong>Load</strong> opens the{' '}
-                        {TEMPLATES[scannedStrategy ?? strategy].name} template in Bot Builder unchanged; it does not
-                        copy the row&rsquo;s market, digit or barrier into the bot. Set those yourself, and test on
+                        {TEMPLATES[scannedStrategy ?? strategy].name} template in Bot Builder with that row&rsquo;s
+                        market, direction and barrier already filled in — stake and stop loss stay at the
+                        template&rsquo;s values, so check them. Nothing starts trading until you press Run. Test on
                         demo first.
                     </p>
                 </div>

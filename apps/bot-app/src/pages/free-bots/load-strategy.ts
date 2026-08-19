@@ -15,13 +15,18 @@ import { save_types } from '@/external/bot-skeleton/constants/save-type';
 export const loadStrategyIntoBuilder = async (
     file: string,
     name: string,
-    stores: { load_modal?: any; dashboard?: any }
+    stores: { load_modal?: any; dashboard?: any },
+    // Optional rewrite of the XML before it reaches the workspace. The Signal
+    // Scanner uses this to stamp the scanned market and barrier into the
+    // template; Free Bots passes nothing and loads templates unmodified.
+    transform?: (xml: string) => string
 ): Promise<void> => {
     const { load_modal, dashboard } = stores;
 
     const response = await fetch(`/free-bots/${file}`);
     if (!response.ok) throw new Error('fetch failed');
-    const xml = await response.text();
+    const raw = await response.text();
+    const xml = transform ? transform(raw) : raw;
 
     if (!load_modal || !dashboard) throw new Error('store not ready');
 
