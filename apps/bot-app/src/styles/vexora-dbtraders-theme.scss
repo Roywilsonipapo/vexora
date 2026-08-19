@@ -587,6 +587,68 @@
     }
 }
 
+// --- Display-currency converter ------------------------------------------
+// The converted figure is deliberately secondary to the real balance: smaller,
+// dimmer, and prefixed with a tilde. The account is not held in this currency
+// and the hierarchy has to say so without needing the tooltip.
+.theme--dark .acc-info__balance-converted {
+    margin: 1px 0 0;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--vx-text-faint);
+    font-variant-numeric: tabular-nums;
+}
+
+.theme--dark .acc-dropdown__currency {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px 14px;
+    border-top: 1px solid var(--vx-line);
+}
+
+.theme--dark .acc-dropdown__currency-label {
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--vx-text-faint);
+}
+
+.theme--dark .acc-dropdown__currency-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.theme--dark .acc-dropdown__currency-chip {
+    background: var(--vx-panel-2);
+    border: 1px solid var(--vx-line);
+    color: var(--vx-text-dim);
+    border-radius: 7px;
+    padding: 5px 11px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+
+    &:hover {
+        color: var(--vx-text);
+        border-color: var(--vx-line-strong);
+    }
+
+    &--active {
+        background: var(--vx-orange);
+        border-color: var(--vx-orange);
+        color: #fff;
+    }
+}
+
+.theme--dark .acc-dropdown__currency-note {
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--vx-text-faint);
+}
+
 // Escape the tab shell entirely. z-index 30 deliberately sits BELOW the run
 // bar's 40, so Run stays reachable while expanded — the point is to see more
 // of the analysis, not to lose control of the bot while looking at it.

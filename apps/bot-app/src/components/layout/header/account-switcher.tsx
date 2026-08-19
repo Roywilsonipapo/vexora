@@ -5,6 +5,7 @@ import { addComma, getCurrencyDisplayCode, getDecimalPlaces } from '@/components
 import Text from '@/components/shared_ui/text';
 import { api_base } from '@/external/bot-skeleton/services/api/api-base';
 import { useApiBase } from '@/hooks/useApiBase';
+import { DISPLAY_CURRENCIES, useDisplayCurrency } from '@/hooks/useDisplayCurrency';
 import { useStore } from '@/hooks/useStore';
 import { isDemoAccount } from '@/utils/account-helpers';
 import { Localize } from '@deriv-com/translations';
@@ -19,6 +20,7 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { accountList, activeLoginid } = useApiBase();
     const { client, run_panel } = useStore() ?? {};
+    const { display_currency, setDisplayCurrency, convert, format, has_rates } = useDisplayCurrency();
 
     const is_bot_running = run_panel?.is_running || api_base.is_running;
     const isSingleAccount = !accountList || accountList.length <= 1;
@@ -116,6 +118,10 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     if (!activeAccount) return null;
 
     const { currency, isVirtual, balance } = activeAccount;
+    // Balance is a display string with thousands separators; parse it back
+    // before converting or the separators break Number().
+    const active_balance_num = Number(String(balance ?? '0').replace(/,/g, ''));
+    const converted_active = currency ? convert(active_balance_num, currency) : null;
     const showChevron = !isSingleAccount && !is_bot_running;
 
     return (
@@ -182,6 +188,11 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                                         `${balance} ${getCurrencyDisplayCode(currency)}`
                                     )}
                                 </p>
+                                {converted_active !== null && (
+                                    <p className='acc-info__balance-converted' title='Display only — your account is not held in this currency'>
+                                        {`≈ ${format(converted_active, display_currency)}`}
+                                    </p>
+                                )}
                             </div>
                         )}
                     </div>
@@ -247,6 +258,36 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                             )}
                         </div>
                     ))}
+                    <div className='acc-dropdown__currency'>
+                        <span className='acc-dropdown__currency-label'>
+                            <Localize i18n_default_text='Show balance in' />
+                        </span>
+                        <div className='acc-dropdown__currency-options'>
+                            {DISPLAY_CURRENCIES.map(code => (
+                                <button
+                                    key={code}
+                                    type='button'
+                                    className={classNames('acc-dropdown__currency-chip', {
+                                        'acc-dropdown__currency-chip--active': display_currency === code,
+                                    })}
+                                    aria-pressed={display_currency === code}
+                                    onClick={e => {
+                                        e.stopPropagation();
+                                        setDisplayCurrency(code);
+                                    }}
+                                >
+                                    {code}
+                                </button>
+                            ))}
+                        </div>
+                        <span className='acc-dropdown__currency-note'>
+                            {has_rates ? (
+                                <Localize i18n_default_text='Display only. Your account currency and all trades are unchanged.' />
+                            ) : (
+                                <Localize i18n_default_text='Live rates unavailable — showing your account currency.' />
+                            )}
+                        </span>
+                    </div>
                 </div>
             )}
         </div>
