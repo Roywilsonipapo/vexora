@@ -20,21 +20,12 @@
         }
     }
 
+    // auto-fill keeps the row dense at every width, so no fixed-column
+    // breakpoints are needed — cards just reflow.
     &__grid {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 10px;
-    }
-
-    @media (max-width: 1100px) {
-        &__grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-    }
-    @media (max-width: 700px) {
-        &__grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
+        grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+        gap: 12px;
     }
 
     &__card {
@@ -104,5 +95,108 @@
         margin-top: 6px;
         font-size: 0.66rem;
         color: #d0342c;
+    }
+}
+
+// ---------------------------------------------------------------------
+// Category filter row + denser grid (DBTraders layout)
+// ---------------------------------------------------------------------
+
+.vx-freebots {
+    // The tab content pane sizes children to content, so without an explicit
+    // width the grid collapsed to ~740px inside a 1019px pane and only ever
+    // fitted three columns.
+    max-width: none;
+    width: 100%;
+    box-sizing: border-box;
+
+    &__filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+
+        button {
+            flex: 1 1 160px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: var(--vx-panel, #10233c);
+            border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+            color: var(--vx-text-dim, #9db2cd);
+            transition:
+                background 0.15s ease,
+                color 0.15s ease,
+                border-color 0.15s ease;
+
+            &:hover {
+                color: var(--vx-text, #e8f0fb);
+            }
+
+            &.is-active {
+                background: var(--vx-orange, #f6512c);
+                border-color: var(--vx-orange, #f6512c);
+                color: #fff;
+            }
+        }
+    }
+
+    &__filter-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        font-size: 0.65rem;
+        font-weight: 800;
+        background: rgba(255, 255, 255, 0.14);
+    }
+
+    // Denser than the old fixed 5-column grid — fills the row at any width.
+    &__grid {
+        grid-template-columns: repeat(auto-fill, minmax(178px, 1fr));
+        gap: 12px;
+    }
+
+    &__card {
+        background: var(--vx-panel, #10233c);
+        border-color: var(--vx-line, rgba(96, 140, 196, 0.18));
+        box-shadow: none;
+        padding: 14px;
+
+        h3 {
+            color: var(--vx-text, #e8f0fb);
+            font-size: 0.8rem;
+        }
+
+        p {
+            color: var(--vx-text-faint, #647c99);
+            font-size: 0.68rem;
+        }
+    }
+
+    &__tag {
+        color: var(--vx-amber, #f5a623);
+        background: rgba(245, 166, 35, 0.14);
+    }
+
+    &__load {
+        gap: 6px;
+        background: transparent;
+        border: 1px solid var(--vx-orange, #f6512c);
+        color: var(--vx-orange, #f6512c);
+
+        &:hover:not(:disabled) {
+            background: var(--vx-orange, #f6512c);
+            color: #fff;
+        }
     }
 }

@@ -40,11 +40,11 @@ import { LegacyGuide1pxIcon } from '@deriv/quill-icons/Legacy';
 import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
+import VxRunBar from '@/components/vx-run-bar';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
-import RunStrategy from '../dashboard/run-strategy';
 import FreeBots from '../free-bots';
-import VxDigitsEmbed from '@/components/vx-digits-embed';
+import MarketAnalysis from '../market-analysis';
 import RiskCalculator from '../risk-calculator';
 import VxTabBoundary from '@/components/vx-tab-boundary';
 import './main.scss';
@@ -514,13 +514,13 @@ const AppWrapper = observer(() => {
                                             width='24px'
                                             fill='var(--text-general)'
                                         />
-                                        <Localize i18n_default_text='Digits' />
+                                        <Localize i18n_default_text='Analysis Tool' />
                                     </>
                                 }
-                                id='id-digits'
+                                id='id-analysis-tool'
                             >
-                                <VxTabBoundary label='Digits'>
-                                    <VxDigitsEmbed />
+                                <VxTabBoundary label='Analysis Tool'>
+                                    <MarketAnalysis />
                                 </VxTabBoundary>
                             </div>
                             <div
@@ -563,10 +563,12 @@ const AppWrapper = observer(() => {
                 </div>
             </div>
             <DesktopWrapper>
+                {/* Run control is now the floating bottom bar (VxRunBar); the old
+                    top-right wrapper only carries the slide-out Run panel. */}
                 <div className='main__run-strategy-wrapper'>
-                    <RunStrategy />
                     <RunPanel />
                 </div>
+                <VxRunBar />
                 <ChartModal />
                 <TradingViewModal />
             </DesktopWrapper>

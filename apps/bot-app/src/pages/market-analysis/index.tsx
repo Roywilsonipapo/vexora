@@ -2,90 +2,58 @@ import { useEffect, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { api_base } from '@/external/bot-skeleton';
 import { useStore } from '@/hooks/useStore';
+import SignalScanner from './signal-scanner';
+import { computeStdDev, fetchTickHistory, lastDigit, SYMBOLS, TICK_COUNT, waitForApi } from './tick-utils';
 import './market-analysis.scss';
-
-type TTickHistoryResponse = {
-    history?: { prices: string[]; times: number[] };
-    error?: { message: string };
-};
-
-const SYMBOLS = [
-    { code: 'R_10', label: 'Volatility 10 Index' },
-    { code: 'R_25', label: 'Volatility 25 Index' },
-    { code: 'R_50', label: 'Volatility 50 Index' },
-    { code: 'R_75', label: 'Volatility 75 Index' },
-    { code: 'R_100', label: 'Volatility 100 Index' },
-];
-
-const TICK_COUNT = 200;
-
-const lastDigit = (price: string) => {
-    if (typeof price !== 'string' || price.length === 0) return 0;
-    const n = Number(price.charAt(price.length - 1));
-    return Number.isNaN(n) ? 0 : n;
-};
-
-const computeStdDev = (values: number[]) => {
-    if (values.length < 2) return 0;
-    const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((a, b) => a + (b - mean) ** 2, 0) / values.length;
-    return Math.sqrt(variance);
-};
-
-const waitForApi = async (timeoutMs = 6000): Promise<boolean> => {
-    const start = Date.now();
-    while (!api_base?.api) {
-        if (Date.now() - start > timeoutMs) return false;
-        await new Promise(r => setTimeout(r, 200));
-    }
-    return true;
-};
-
-const fetchTickHistory = async (symbol: string): Promise<string[] | null> => {
-    const ready = await waitForApi();
-    if (!ready || !api_base?.api) return null;
-    try {
-        const response: TTickHistoryResponse = await api_base.api.send({
-            ticks_history: symbol,
-            count: TICK_COUNT,
-            end: 'latest',
-            style: 'ticks',
-        });
-        if (response?.error) return null;
-        return response?.history?.prices ?? null;
-    } catch {
-        return null;
-    }
-};
 
 const MarketAnalysis = observer(() => {
     const { run_panel } = useStore();
     const is_bot_running = Boolean(run_panel?.is_running);
     const [symbol, setSymbol] = useState('R_100');
     const [prices, setPrices] = useState<string[]>([]);
+    const [pipSize, setPipSize] = useState(2);
     const [barrier, setBarrier] = useState(5);
     const [matchDigit, setMatchDigit] = useState(2);
     const [isLoading, setIsLoading] = useState(true);
+    // `error` is fatal (no tick history at all → nothing to analyse).
+    // `liveError` is not: history loaded fine, only the live feed is down, so
+    // the analysis below stays on screen with a staleness warning instead of
+    // the whole tab blanking out.
     const [error, setError] = useState<string | null>(null);
+    const [liveError, setLiveError] = useState<string | null>(null);
     const [scanRows, setScanRows] = useState<{ code: string; label: string; volatility: number; trend: 'up' | 'down' | 'flat' }[]>([]);
     const [isScanning, setIsScanning] = useState(true);
     const [view, setView] = useState<'circles' | 'scanner'>('circles');
+    // Which panels have their history chip row expanded past the first 10.
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    // Bumped by the Retry button to re-run the data-loading effect.
+    const [reloadKey, setReloadKey] = useState(0);
 
     // Load tick history for the selected symbol and keep a live subscription running.
     useEffect(() => {
         let is_mounted = true;
         setIsLoading(true);
         setError(null);
+        setLiveError(null);
 
         (async () => {
-            const history = await fetchTickHistory(symbol);
+            // On a cold page load the socket often isn't open yet — waitForApi
+            // only proves `api_base.api` exists, not that it's connected. A
+            // single attempt therefore loses the race and left the tab stuck on
+            // a permanent error. Retry with backoff before giving up.
+            let history = null;
+            for (let attempt = 0; attempt < 4 && is_mounted && !history; attempt++) {
+                if (attempt > 0) await new Promise(r => setTimeout(r, 700 * attempt));
+                history = await fetchTickHistory(symbol);
+            }
             if (!is_mounted) return;
             if (!history) {
                 setError('Could not load live data from Deriv right now. Please try again shortly.');
                 setIsLoading(false);
                 return;
             }
-            setPrices(history);
+            setPrices(history.prices);
+            setPipSize(history.pip_size);
             setIsLoading(false);
         })();
 
@@ -103,17 +71,20 @@ const MarketAnalysis = observer(() => {
                         if (res?.subscription?.id) tick_subscription_id = res.subscription.id;
                     })
                     .catch(() => {
-                        if (is_mounted) setError('Could not subscribe to live prices right now.');
+                        if (is_mounted) setLiveError('Live price updates are unavailable — showing the latest history.');
                     });
 
                 if (typeof api_base.api.onMessage === 'function') {
                     message_subscription = api_base.api.onMessage().subscribe(
-                        (payload: { data?: { msg_type: string; tick?: { symbol: string; quote: number } } }) => {
+                        (payload: {
+                            data?: { msg_type: string; tick?: { symbol: string; quote: number; pip_size?: number } };
+                        }) => {
                             try {
                                 const data = payload?.data;
                                 if (!is_mounted || !data) return;
                                 if (data.msg_type === 'tick' && data.tick && data.tick.symbol === symbol) {
                                     const quote = data.tick.quote;
+                                    if (typeof data.tick.pip_size === 'number') setPipSize(data.tick.pip_size);
                                     setPrices(prev => [...prev.slice(-(TICK_COUNT - 1)), String(quote)]);
                                 }
                             } catch {
@@ -123,7 +94,7 @@ const MarketAnalysis = observer(() => {
                     );
                 }
             } catch {
-                if (is_mounted) setError('Could not subscribe to live prices right now.');
+                if (is_mounted) setLiveError('Live price updates are unavailable — showing the latest history.');
             }
         })();
 
@@ -138,7 +109,7 @@ const MarketAnalysis = observer(() => {
                 api_base.api.forget(tick_subscription_id).catch(() => {});
             }
         };
-    }, [symbol, is_bot_running]);
+    }, [symbol, is_bot_running, reloadKey]);
 
     // Live multi-symbol scan for the volatility ranking table.
     // Skipped entirely while a bot is running — this does 5 extra history
@@ -156,8 +127,9 @@ const MarketAnalysis = observer(() => {
             const results = await Promise.all(
                 SYMBOLS.map(async s => {
                     const history = await fetchTickHistory(s.code);
-                    if (!history || history.length < 10) return { ...s, volatility: 0, trend: 'flat' as const };
-                    const nums = history.map(Number);
+                    if (!history || history.prices.length < 10)
+                        return { ...s, volatility: 0, trend: 'flat' as const };
+                    const nums = history.prices.map(Number);
                     const returns = nums.slice(1).map((p, i) => (p - nums[i]) / nums[i]);
                     const volatility = computeStdDev(returns) * 10000; // scaled for readability
                     const shortMa = nums.slice(-10).reduce((a, b) => a + b, 0) / 10;
@@ -181,7 +153,7 @@ const MarketAnalysis = observer(() => {
     }, [is_bot_running]);
 
     const digitCounts = Array(10).fill(0);
-    prices.forEach(p => digitCounts[lastDigit(p)]++);
+    prices.forEach(p => digitCounts[lastDigit(p, pipSize)]++);
     const total = prices.length || 1;
     const digitPct = digitCounts.map(c => (c / total) * 100);
     const maxDigit = digitPct.indexOf(Math.max(...digitPct));
@@ -193,7 +165,7 @@ const MarketAnalysis = observer(() => {
     const oddPct = 100 - evenPct;
     const matchPct = digitPct[matchDigit] ?? 0;
     const differPct = 100 - matchPct;
-    const lastTickDigit = prices.length ? lastDigit(prices[prices.length - 1]) : null;
+    const lastTickDigit = prices.length ? lastDigit(prices[prices.length - 1], pipSize) : null;
 
     const nums = prices.map(Number);
     const returns = nums.slice(1).map((p, i) => (p - nums[i]) / nums[i]);
@@ -209,6 +181,43 @@ const MarketAnalysis = observer(() => {
     const riseTotal = riseCount + fallCount || 1;
     const risePct = (riseCount / riseTotal) * 100;
     const fallPct = 100 - risePct;
+
+    // --- Outcome sequences, streaks and history chips ---------------------
+    // Each sequence is the real per-tick outcome for that contract type, in
+    // chronological order. `null` means the tick counts for neither side
+    // (a digit equal to the Over/Under barrier, or a flat tick on Rise/Fall).
+    const digitSeq = prices.map(p => lastDigit(p, pipSize));
+    const overUnderSeq = digitSeq.map(d => (d > barrier ? 'O' : d < barrier ? 'U' : null));
+    const matchDifferSeq = digitSeq.map(d => (d === matchDigit ? 'M' : 'D'));
+    const evenOddSeq = digitSeq.map(d => (d % 2 === 0 ? 'E' : 'O'));
+    const riseFallSeq = nums.map((p, i) => (i === 0 ? null : p > nums[i - 1] ? 'R' : p < nums[i - 1] ? 'F' : null));
+
+    // Length of the current run of identical outcomes at the end of a sequence.
+    const trailingStreak = (seq: (string | null)[]) => {
+        const clean = seq.filter((v): v is string => v !== null);
+        if (!clean.length) return null;
+        const value = clean[clean.length - 1];
+        let count = 0;
+        for (let i = clean.length - 1; i >= 0 && clean[i] === value; i--) count++;
+        return { value, count };
+    };
+
+    const STREAK_LABELS: Record<string, string> = {
+        O: 'Over',
+        U: 'Under',
+        M: 'Match',
+        D: 'Differ',
+        E: 'Even',
+        R: 'Rise',
+        F: 'Fall',
+    };
+    // Even/Odd reuses 'O' for Odd, so it needs its own lookup.
+    const evenOddLabel = (v: string) => (v === 'E' ? 'Even' : 'Odd');
+
+    const formatStreak = (seq: (string | null)[], labeller: (v: string) => string) => {
+        const s = trailingStreak(seq);
+        return s ? `${s.count}x ${labeller(s.value)}` : null;
+    };
 
     // A plain-language summary of the numbers already computed above — not a
     // separate prediction model. It just states the same facts in words, and
@@ -237,6 +246,32 @@ const MarketAnalysis = observer(() => {
     };
     const conclusion = buildConclusion();
 
+    // Most-recent-first row of outcome chips, capped at 10 until expanded.
+    const renderChips = (key: string, seq: (string | null)[]) => {
+        const clean = seq.filter((v): v is string => v !== null).reverse();
+        const is_expanded = !!expanded[key];
+        const shown = is_expanded ? clean.slice(0, 60) : clean.slice(0, 10);
+        if (!shown.length) return null;
+        return (
+            <div className='vx-chips'>
+                {shown.map((v, i) => (
+                    <span className={`vx-chip vx-chip--${v}`} key={`${key}-${i}`}>
+                        {v}
+                    </span>
+                ))}
+                {clean.length > 10 && (
+                    <button
+                        type='button'
+                        className='vx-chips__more'
+                        onClick={() => setExpanded(prev => ({ ...prev, [key]: !prev[key] }))}
+                    >
+                        {is_expanded ? '– Less' : '+ More'}
+                    </button>
+                )}
+            </div>
+        );
+    };
+
 
     return (
         <div className='vx-analysis'>
@@ -259,7 +294,15 @@ const MarketAnalysis = observer(() => {
             </div>
 
             {isLoading && <div className='vx-analysis__status'>Loading live tick data…</div>}
-            {error && <div className='vx-analysis__status vx-analysis__status--error'>{error}</div>}
+            {error && (
+                <div className='vx-analysis__status vx-analysis__status--error'>
+                    {error}{' '}
+                    <button type='button' className='vx-analysis__retry' onClick={() => setReloadKey(k => k + 1)}>
+                        Retry
+                    </button>
+                </div>
+            )}
+            {liveError && !error && <div className='vx-analysis__status'>{liveError}</div>}
             {is_bot_running && (
                 <div className='vx-analysis__status'>
                     A bot is currently running — live updates here are paused so it gets full priority on the
@@ -337,7 +380,12 @@ const MarketAnalysis = observer(() => {
 
                     <div className='vx-panel-grid'>
                         <div className='vx-mini-panel'>
-                            <h3>Over / Under</h3>
+                            <div className='vx-mini-panel__head'>
+                                <h3>Over / Under</h3>
+                                <span className='vx-streak vx-streak--over'>
+                                    {formatStreak(overUnderSeq, v => STREAK_LABELS[v])}
+                                </span>
+                            </div>
                             <div className='vx-digit-select'>
                                 {Array.from({ length: 10 }, (_, n) => (
                                     <button
@@ -368,10 +416,16 @@ const MarketAnalysis = observer(() => {
                                     <div className='vx-bar__fill vx-bar__fill--under' style={{ width: `${underPct}%` }} />
                                 </div>
                             </div>
+                            {renderChips('ou', overUnderSeq)}
                         </div>
 
                         <div className='vx-mini-panel'>
-                            <h3>Match / Differ</h3>
+                            <div className='vx-mini-panel__head'>
+                                <h3>Match / Differ</h3>
+                                <span className='vx-streak vx-streak--match'>
+                                    {formatStreak(matchDifferSeq, v => STREAK_LABELS[v])}
+                                </span>
+                            </div>
                             <div className='vx-digit-select'>
                                 {Array.from({ length: 10 }, (_, n) => (
                                     <button
@@ -402,10 +456,16 @@ const MarketAnalysis = observer(() => {
                                     <div className='vx-bar__fill vx-bar__fill--differ' style={{ width: `${differPct}%` }} />
                                 </div>
                             </div>
+                            {renderChips('md', matchDifferSeq)}
                         </div>
 
                         <div className='vx-mini-panel'>
-                            <h3>Even / Odd</h3>
+                            <div className='vx-mini-panel__head'>
+                                <h3>Even / Odd</h3>
+                                <span className='vx-streak vx-streak--odd'>
+                                    {formatStreak(evenOddSeq, evenOddLabel)}
+                                </span>
+                            </div>
                             <div className='vx-bar'>
                                 <div className='vx-bar__head'>
                                     <span className='vx-bar__label vx-bar__label--over'>Even</span>
@@ -424,10 +484,16 @@ const MarketAnalysis = observer(() => {
                                     <div className='vx-bar__fill vx-bar__fill--under' style={{ width: `${oddPct}%` }} />
                                 </div>
                             </div>
+                            {renderChips('eo', evenOddSeq)}
                         </div>
 
                         <div className='vx-mini-panel'>
-                            <h3>Rise / Fall</h3>
+                            <div className='vx-mini-panel__head'>
+                                <h3>Rise / Fall</h3>
+                                <span className='vx-streak vx-streak--fall'>
+                                    {formatStreak(riseFallSeq, v => STREAK_LABELS[v])}
+                                </span>
+                            </div>
                             <div className='vx-bar'>
                                 <div className='vx-bar__head'>
                                     <span className='vx-bar__label vx-bar__label--over'>Rise</span>
@@ -446,6 +512,7 @@ const MarketAnalysis = observer(() => {
                                     <div className='vx-bar__fill vx-bar__fill--least' style={{ width: `${fallPct}%` }} />
                                 </div>
                             </div>
+                            {renderChips('rf', riseFallSeq)}
                         </div>
                     </div>
 
@@ -482,6 +549,8 @@ const MarketAnalysis = observer(() => {
                     )}
 
                     {view === 'scanner' && (
+                    <>
+                    <SignalScanner />
                     <div className='vx-card vx-scanner'>
                         <h3>Live volatility scanner</h3>
                         <p className='vx-card__note'>
@@ -514,6 +583,7 @@ const MarketAnalysis = observer(() => {
                             </table>
                         )}
                     </div>
+                    </>
                     )}
                 </>
             )}

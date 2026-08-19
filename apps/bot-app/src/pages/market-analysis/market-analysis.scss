@@ -516,3 +516,299 @@
         color: var(--text-less-prominent, #98979e);
     }
 }
+
+// ---------------------------------------------------------------------
+// Panel header with streak badge, and the outcome-history chip rows
+// ---------------------------------------------------------------------
+
+.vx-mini-panel__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+
+    h3 {
+        margin-bottom: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        font-size: 0.78rem;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+}
+
+// Current run of identical outcomes, e.g. "4x Under".
+.vx-streak {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+
+    &--over {
+        color: var(--vx-amber, #f5a623);
+    }
+    &--match {
+        color: var(--vx-orange, #f6512c);
+    }
+    &--odd {
+        color: var(--vx-amber, #f5a623);
+    }
+    &--fall {
+        color: var(--vx-red, #ef4444);
+    }
+}
+
+.vx-chips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 5px;
+    margin-top: 14px;
+}
+
+.vx-chip {
+    width: 21px;
+    height: 21px;
+    border-radius: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 800;
+    border: 1px solid transparent;
+
+    // Over / Rise / Even read as "up"; Under / Fall / Odd as "down".
+    &--O,
+    &--R,
+    &--E {
+        color: #4ade80;
+        border-color: rgba(74, 222, 128, 0.45);
+        background: rgba(74, 222, 128, 0.1);
+    }
+    &--U,
+    &--F {
+        color: #f87171;
+        border-color: rgba(248, 113, 113, 0.45);
+        background: rgba(248, 113, 113, 0.1);
+    }
+    &--M {
+        color: #c084fc;
+        border-color: rgba(192, 132, 252, 0.45);
+        background: rgba(192, 132, 252, 0.1);
+    }
+    &--D {
+        color: #60a5fa;
+        border-color: rgba(96, 165, 250, 0.45);
+        background: rgba(96, 165, 250, 0.1);
+    }
+}
+
+.vx-chips__more {
+    height: 21px;
+    padding: 0 8px;
+    border-radius: 5px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    color: var(--vx-text-dim, #9db2cd);
+    background: rgba(96, 140, 196, 0.12);
+    border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+
+    &:hover {
+        color: var(--vx-text, #e8f0fb);
+    }
+}
+
+// ---------------------------------------------------------------------
+// Signal Scanner — entry card + terminal output window
+// ---------------------------------------------------------------------
+
+.vx-signal-card {
+    padding: 22px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+.vx-signal-card__title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    margin-bottom: 18px;
+    color: var(--vx-orange, #f6512c);
+}
+
+.vx-signal-card__controls {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+}
+
+.vx-signal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 210px;
+    text-align: left;
+
+    > span {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    select {
+        padding: 9px 12px;
+        border-radius: 8px;
+        background: var(--vx-navy-2, #0c1c30);
+        border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+        color: var(--vx-amber, #f5a623);
+        font-weight: 700;
+        font-size: 0.85rem;
+        cursor: pointer;
+    }
+}
+
+.vx-signal-tick {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    margin-bottom: 18px;
+    border-radius: 10px;
+    background: var(--vx-navy, #0a1523);
+    border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+    font-size: 1rem;
+    font-weight: 700;
+
+    &__digit {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(74, 222, 128, 0.15);
+        border: 1px solid #4ade80;
+        color: #4ade80;
+        font-size: 0.85rem;
+    }
+}
+
+.vx-signal-analyse {
+    display: block;
+    margin: 0 auto;
+    padding: 11px 46px;
+    border-radius: 8px;
+    border: none;
+    background: #16a34a;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.92rem;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: #15803d;
+    }
+
+    &:disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+}
+
+// Terminal output window
+.vx-terminal {
+    border: 1px solid #1e7f74;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    background: #04070b;
+    box-shadow: 0 0 22px rgba(20, 184, 166, 0.14);
+
+    &__bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 8px 12px;
+        background: #070c13;
+        border-bottom: 1px solid rgba(30, 127, 116, 0.5);
+    }
+
+    &__dots {
+        display: inline-flex;
+        gap: 6px;
+    }
+
+    &__dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+
+        &--r { background: #ff5f57; }
+        &--y { background: #febc2e; }
+        &--g { background: #28c840; }
+    }
+
+    &__close {
+        width: 24px;
+        height: 22px;
+        border: none;
+        border-radius: 4px;
+        background: #e01b24;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        cursor: pointer;
+    }
+
+    &__body {
+        max-height: 340px;
+        overflow-y: auto;
+        padding: 14px 16px;
+        font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+        font-size: 12.5px;
+        line-height: 1.65;
+        color: #3ddc84;
+    }
+
+    &__line {
+        white-space: pre-wrap;
+        word-break: break-word;
+    }
+
+    &__line--cursor {
+        animation: vx-blink 1s steps(2, start) infinite;
+    }
+}
+
+@keyframes vx-blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vx-terminal__line--cursor {
+        animation: none;
+    }
+}
+
+.vx-analysis__retry {
+    margin-left: 8px;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    color: #fff;
+    background: var(--vx-blue, #2f76ed);
+    border: none;
+
+    &:hover {
+        background: #3f86ff;
+    }
+}

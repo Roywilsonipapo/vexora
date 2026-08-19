@@ -1,0 +1,139 @@
+// Floating run bar — pinned bottom-centre, above page content but below modals.
+.vx-run-bar {
+    position: fixed;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+
+    display: flex;
+    align-items: center;
+    gap: 0;
+
+    background: var(--vx-panel, #10233c);
+    border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    padding: 8px 10px;
+
+    .animation__wrapper {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+    }
+
+    // Run / Stop button — green pill with the play glyph
+    .animation__run-button,
+    .animation__stop-button {
+        background-color: var(--vx-teal, #14b8a6) !important;
+        color: #fff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        font-size: 14px !important;
+        padding: 9px 20px !important;
+        min-width: 96px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+
+        &:hover {
+            background-color: #10a596 !important;
+        }
+    }
+
+    .animation__stop-button {
+        background-color: var(--vx-red, #ef4444) !important;
+
+        &:hover {
+            background-color: #dc2626 !important;
+        }
+    }
+
+    // Contract-stage readout: hidden in fast mode (see VxRunBar doc comment)
+    .animation__container {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 6px;
+    }
+
+    &--fast .animation__container {
+        display: none !important;
+    }
+
+    &__divider {
+        width: 1px;
+        align-self: stretch;
+        margin: 2px 10px;
+        background: var(--vx-line, rgba(96, 140, 196, 0.18));
+    }
+
+    &__speed {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: transparent !important;
+        border: none !important;
+        cursor: pointer;
+        padding: 2px 6px 2px 0;
+        color: inherit;
+    }
+
+    &__speed-text {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        line-height: 1.25;
+    }
+
+    &__speed-label {
+        font-size: 10px;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__speed-value {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.3px;
+        color: var(--vx-text, #e8f0fb);
+    }
+
+    // Track + knob
+    &__switch {
+        position: relative;
+        width: 40px;
+        height: 22px;
+        border-radius: 11px;
+        background: #33455e;
+        transition: background 0.18s ease;
+        flex: 0 0 40px;
+    }
+
+    &__knob {
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.18s ease;
+    }
+
+    &--fast &__switch {
+        background: var(--vx-teal, #14b8a6);
+    }
+
+    &--fast &__knob {
+        transform: translateX(18px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vx-run-bar__switch,
+    .vx-run-bar__knob {
+        transition: none;
+    }
+}

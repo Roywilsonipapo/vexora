@@ -1,7 +1,6 @@
 import React from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
-import Text from '@/components/shared_ui/text';
 import { useStore } from '@/hooks/useStore';
 import { localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -14,13 +13,21 @@ type TMobileIconGuide = {
     handleTabChange: (active_number: number) => void;
 };
 
+const TAGLINES = [
+    'Your Ultimate Deriv Trading Companion.',
+    'The trend is your friend — until it ends.',
+    'Plan the trade. Trade the plan.',
+    'Risk first. Profit second.',
+];
+
 const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
-    const { load_modal, dashboard, client, google_drive } = useStore();
+    const { load_modal, dashboard, client } = useStore();
     const { dashboard_strategies } = load_modal;
-    const { is_google_drive_configured } = google_drive;
     const { active_tab, active_tour } = dashboard;
     const has_dashboard_strategies = !!dashboard_strategies?.length;
     const { isDesktop, isTablet } = useDevice();
+    // Picked once per mount so the line doesn't churn on every re-render.
+    const tagline = React.useMemo(() => localize(TAGLINES[Math.floor(Math.random() * TAGLINES.length)]), []);
 
     return (
         <React.Fragment>
@@ -34,39 +41,16 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
                         <Announcements is_mobile={!isDesktop} is_tablet={isTablet} handleTabChange={handleTabChange} />
                     )}
                     <div className='quick-panel'>
-                        <div
-                            className={classNames('tab__dashboard__header', {
-                                'tab__dashboard__header--listed': isDesktop && has_dashboard_strategies,
-                            })}
-                        >
-                            {!has_dashboard_strategies && (
-                                <Text
-                                    className='title'
-                                    as='h2'
-                                    color='prominent'
-                                    size={isDesktop ? 'sm' : 's'}
-                                    lineHeight='xxl'
-                                    weight='bold'
-                                >
-                                    {localize('Load or build your bot')}
-                                </Text>
-                            )}
-                            <Text
-                                as='p'
-                                color='prominent'
-                                lineHeight='s'
-                                size={isDesktop ? 's' : 'xxs'}
-                                className={classNames('subtitle', { 'subtitle__has-list': has_dashboard_strategies })}
-                            >
-                                {is_google_drive_configured
-                                    ? localize(
-                                          'Import a bot from your computer or Google Drive, build it from scratch, or start with a quick strategy.'
-                                      )
-                                    : localize(
-                                          'Import a bot from your computer, build it from scratch, or start with a quick strategy.'
-                                      )}
-                            </Text>
+                        <div className='vx-hero'>
+                            <h1 className='vx-hero__greeting'>
+                                {client.loginid
+                                    ? localize('Hello {{loginid}}', { loginid: client.loginid })
+                                    : localize('Welcome to Vexora')}{' '}
+                                <span className='vx-hero__wave'>👋</span>
+                            </h1>
+                            <p className='vx-hero__tagline'>{tagline}</p>
                         </div>
+                        <div className='vx-quick-actions-label'>{localize('Quick actions')}</div>
                         <Cards has_dashboard_strategies={has_dashboard_strategies} is_mobile={!isDesktop} />
                     </div>
                 </div>

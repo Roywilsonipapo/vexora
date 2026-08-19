@@ -188,10 +188,22 @@ const BOTS: TBot[] = [
     },
 ];
 
+// Filters are derived from the real `tag` values on BOTS above — no bot is
+// listed under a category it doesn't actually belong to.
+const DIGIT_TAGS = ['Over/Under', 'Even/Odd', 'Matches/Differs'];
+
+const FILTERS: { id: string; label: string; match: (bot: TBot) => boolean }[] = [
+    { id: 'all', label: 'All', match: () => true },
+    { id: 'digits', label: 'Digits', match: bot => DIGIT_TAGS.includes(bot.tag) },
+    { id: 'staking', label: 'Staking systems', match: bot => bot.tag === 'Staking system' },
+    { id: 'accumulators', label: 'Accumulators', match: bot => bot.tag === 'Accumulators' },
+];
+
 const FreeBots = observer(() => {
     const { load_modal, dashboard } = useStore();
     const [loadingFile, setLoadingFile] = useState<string | null>(null);
     const [errorFile, setErrorFile] = useState<string | null>(null);
+    const [filter, setFilter] = useState('all');
 
     const handleLoadBot = async (bot: TBot) => {
         setErrorFile(null);
@@ -238,8 +250,23 @@ const FreeBots = observer(() => {
                     scanning — read each description, and always test on demo before running with real funds.
                 </p>
             </div>
+            <div className='vx-freebots__filters'>
+                {FILTERS.map(f => {
+                    const count = BOTS.filter(f.match).length;
+                    return (
+                        <button
+                            type='button'
+                            key={f.id}
+                            className={filter === f.id ? 'is-active' : ''}
+                            onClick={() => setFilter(f.id)}
+                        >
+                            {f.label} <span className='vx-freebots__filter-count'>{count}</span>
+                        </button>
+                    );
+                })}
+            </div>
             <div className='vx-freebots__grid'>
-                {BOTS.map(bot => (
+                {BOTS.filter(FILTERS.find(f => f.id === filter)?.match ?? (() => true)).map(bot => (
                     <div className='vx-freebots__card' key={bot.file}>
                         <span className='vx-freebots__tag'>{bot.tag}</span>
                         <h3>{bot.name}</h3>

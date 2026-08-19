@@ -15,7 +15,7 @@ import './account-switcher.scss';
 const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     const [isOpen, setIsOpen] = useState(false);
     const [resettingId, setResettingId] = useState<string | null>(null);
-    const [resetError, setResetError] = useState<string | null>(null);
+    const [resetError, setResetError] = useState<{ loginid: string; message: string } | null>(null);
     const wrapperRef = useRef<HTMLDivElement>(null);
     const { accountList, activeLoginid } = useApiBase();
     const { client, run_panel } = useStore() ?? {};
@@ -58,13 +58,45 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
     // call — Deriv rejects it outright for real accounts, so this is safe to
     // only expose on virtual rows. The balance subscription (allBalanceData)
     // pushes the new figure automatically; no manual refetch needed.
+    //
+    // The API resolves with an `{ error }` payload rather than rejecting, so a
+    // refusal never reaches .catch(). Without checking the body, a declined
+    // top-up looked identical to a successful one — the button appeared to do
+    // nothing. Deriv also only allows a top-up once the virtual balance has
+    // dropped below its threshold, which is the usual reason this declines, so
+    // we surface the API's own message rather than a generic retry prompt.
     const handleResetBalance = useCallback((e: React.MouseEvent, loginid: string) => {
         e.stopPropagation();
         setResetError(null);
         setResettingId(loginid);
-        api_base.api
-            ?.send({ topup_virtual: 1 })
-            .catch(() => setResetError(loginid))
+        // Vendored TApiBaseApi types `send` as void; assert the real shape.
+        // Cast the API object, not the method — a detached `send` reference
+        // loses its `this` binding and fails at runtime.
+        const api = api_base.api as unknown as
+            | { send: (r: Record<string, unknown>) => Promise<{ error?: { message?: string } }> }
+            | undefined;
+
+        if (!api) {
+            setResetError({ loginid, message: 'Not connected to Deriv — try again.' });
+            setResettingId(null);
+            return;
+        }
+
+        api.send({ topup_virtual: 1 })
+            .then(res => {
+                if (res?.error) {
+                    setResetError({
+                        loginid,
+                        message: res.error.message || 'Deriv declined the top-up.',
+                    });
+                }
+            })
+            .catch((err: { error?: { message?: string } }) => {
+                setResetError({
+                    loginid,
+                    message: err?.error?.message || 'Could not reach Deriv — try again.',
+                });
+            })
             .finally(() => setResettingId(null));
     }, []);
 
@@ -208,9 +240,9 @@ const AccountSwitcher = observer(({ activeAccount }: TAccountSwitcher) => {
                                     )}
                                 </button>
                             )}
-                            {resetError === account.loginid && (
+                            {resetError?.loginid === account.loginid && (
                                 <Text size='xxxs' className='acc-dropdown__reset-error'>
-                                    <Localize i18n_default_text="Couldn't reset — try again." />
+                                    {resetError.message}
                                 </Text>
                             )}
                         </div>
