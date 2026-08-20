@@ -28,7 +28,7 @@
             <field name="TRADETYPE_LIST">callput</field>
             <next>
               <block type="trade_definition_contracttype" id="ylkrZy.qZGsh(vr]U4GE" deletable="false" movable="false">
-                <field name="TYPE_LIST">both</field>
+                <field name="TYPE_LIST">CALL</field>
                 <next>
                   <block type="trade_definition_candleinterval" id="MzB+vLQbn(:5m;3(O-hu" deletable="false" movable="false">
                     <field name="CANDLEINTERVAL_LIST">60</field>

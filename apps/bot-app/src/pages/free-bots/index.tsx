@@ -53,6 +53,33 @@ const PREMIUM_BOTS: TBot[] = [
             'Tracks session peak profit and stops once 2 USD has been given back from that peak, arming only after +3. A trailing stop on the session rather than any single trade.',
         tag: 'Premium',
     },
+    // --- Stake-escalation trio -------------------------------------------
+    // These take the risk in the STAKE rather than the barrier: each sits on a
+    // high-hit-rate barrier and steps the stake up after a loss. High hit rate
+    // means small payouts, so a single loss takes several wins to recover —
+    // which is exactly why each one carries a hard step cap, a take profit and
+    // a session stop. Market and barrier are fixed per bot and pre-selected.
+    {
+        file: 'p6_safe_barrier_escalator.xml',
+        name: 'Safe Barrier Escalator — Over 1',
+        description:
+            'Volatility 100 (1s), Over 1 — wins on any last digit 2–9. Stakes 3 USD, doubles after a loss, caps at 4 steps then returns to base. Take profit +15, session stop −60.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p7_deep_under_escalator.xml',
+        name: 'Deep Under Escalator — Under 8',
+        description:
+            'Volatility 50, Under 8 — wins on any last digit 0–7. Stakes 3 USD, doubles after a loss, caps at 4 steps then returns to base. Take profit +15, session stop −60.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p8_wide_barrier_grind.xml',
+        name: 'Wide Barrier Grind — Over 2',
+        description:
+            'Volatility 25, Over 2 — wins on 3–9, so a lower hit rate than the other two but a larger payout. Stakes 3 USD, steps up ×1.8 with a 5-step cap. Take profit +12, session stop −45.',
+        tag: 'Premium',
+    },
 ];
 
 const BOTS: TBot[] = [

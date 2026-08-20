@@ -12,7 +12,7 @@
 <statement name="TRADE_OPTIONS">
 <block type="trade_definition_market" id="ecMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">1HZ100V</field>
 <next><block type="trade_definition_tradetype" id="ecTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
-<next><block type="trade_definition_contracttype" id="ecContractType" deletable="false" movable="false"><field name="TYPE_LIST">both</field>
+<next><block type="trade_definition_contracttype" id="ecContractType" deletable="false" movable="false"><field name="TYPE_LIST">DIGITOVER</field>
 <next><block type="trade_definition_candleinterval" id="ecCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
 <next><block type="trade_definition_restartbuysell" id="ecRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
 <next><block type="trade_definition_restartonerror" id="ecRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>

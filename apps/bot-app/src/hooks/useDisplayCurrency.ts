@@ -51,20 +51,46 @@ export const useDisplayCurrency = () => {
     useEffect(() => {
         let is_mounted = true;
 
+        // `api_base.api` does not exist yet on a cold load — the socket is still
+        // being set up when the header first mounts. Firing immediately loses
+        // that race and leaves rates permanently null, which is what made the
+        // converter look broken: it silently sat on "rates unavailable" forever
+        // because nothing ever retried.
+        const waitForApi = async (timeout_ms = 8000) => {
+            const start = Date.now();
+            while (!api_base?.api) {
+                if (Date.now() - start > timeout_ms) return false;
+                await new Promise(res => setTimeout(res, 200));
+            }
+            return true;
+        };
+
+        const fetchOnce = async () => {
+            // api_base.send is typed as returning void upstream, but it
+            // resolves with the API payload — hence the cast.
+            const res = (await api_base.api?.send({
+                exchange_rates: 1,
+                base_currency: 'USD',
+            })) as unknown as { exchange_rates?: { rates?: Record<string, number> } } | undefined;
+            return res?.exchange_rates?.rates ?? null;
+        };
+
         const load = async () => {
-            try {
-                // api_base.send is typed as returning void upstream, but it
-                // resolves with the API payload — hence the cast.
-                const res = (await api_base.api?.send({
-                    exchange_rates: 1,
-                    base_currency: 'USD',
-                })) as unknown as { exchange_rates?: { rates?: Record<string, number> } } | undefined;
-                if (!is_mounted) return;
-                const next = res?.exchange_rates?.rates;
-                if (next) setRates(next);
-            } catch {
-                // Leave `rates` as-is. A failed refresh keeps the last good set;
-                // a cold failure leaves it null and we show the real currency.
+            if (!(await waitForApi())) return;
+            // Even with the socket up the first call can land mid-reconnect, so
+            // back off and retry rather than giving up on one failure.
+            for (let attempt = 0; attempt < 3 && is_mounted; attempt++) {
+                if (attempt > 0) await new Promise(res => setTimeout(res, 800 * attempt));
+                try {
+                    const next = await fetchOnce();
+                    if (!is_mounted) return;
+                    if (next) {
+                        setRates(next);
+                        return;
+                    }
+                } catch {
+                    // Try again; the loop bounds how long we keep trying.
+                }
             }
         };
 
