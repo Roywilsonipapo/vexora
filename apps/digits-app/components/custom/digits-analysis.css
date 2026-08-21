@@ -1,28 +1,37 @@
-/* Digits Analysis — Green & White theme (dark bg, green + white accents), premium glass/glow pass */
+/* Digits Analysis — matches bot-app's Vexora navy theme.
+ *
+ * This panel is iframed into bot-app's Analysis Tool, so it has to read as the
+ * same product, not an embedded second app. These tokens are copied verbatim
+ * from bot-app/src/styles/vexora-dbtraders-theme.scss — if that palette
+ * changes, change it here too or the seam becomes visible again.
+ *
+ * No border or radius on the root: inside the iframe it is the whole surface,
+ * and a rounded bordered card floating in another card is what made it look
+ * bolted on.
+ */
 
 .vx-danalysis {
-  --vx-bg: #0A0C0D;
-  --vx-panel-bg: rgba(19, 26, 34, 0.72);
-  --vx-panel-bg-2: rgba(26, 35, 46, 0.85);
-  --vx-border: rgba(255, 255, 255, 0.08);
-  --vx-border-strong: rgba(255, 255, 255, 0.14);
-  --vx-green: #10B981;
-  --vx-green-light: #6EE7B7;
-  --vx-white: #FFFFFF;
-  --vx-red: #FF4D4F;
-  --vx-blue: #59B7FF;
-  --vx-text: #F5F7F8;
-  --vx-text-muted: #8B95A1;
+  --vx-bg: #0a1523;
+  --vx-panel-bg: #10233c;
+  --vx-panel-bg-2: #162c48;
+  --vx-border: rgba(96, 140, 196, 0.18);
+  --vx-border-strong: rgba(96, 140, 196, 0.34);
+  --vx-green: #16c784;
+  --vx-green-light: #4ade80;
+  --vx-white: #ffffff;
+  --vx-red: #ef4444;
+  --vx-blue: #2f76ed;
+  --vx-orange: #f6512c;
+  --vx-text: #e8f0fb;
+  --vx-text-muted: #9db2cd;
+  --vx-text-faint: #647c99;
 
-  background:
-    radial-gradient(120% 140% at 15% -10%, rgba(16, 185, 129, 0.10), transparent 55%),
-    radial-gradient(100% 120% at 100% 110%, rgba(89, 183, 255, 0.06), transparent 50%),
-    var(--vx-bg);
+  background: var(--vx-bg);
   color: var(--vx-text);
-  border: 1px solid var(--vx-border);
-  border-radius: 16px;
-  padding: 18px;
-  font-family: inherit;
+  border: none;
+  border-radius: 0;
+  padding: 14px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   font-size: 13px;
 }
 
@@ -232,7 +241,79 @@
   margin-bottom: 18px;
 }
 
+/* Phones.
+ *
+ * This used to collapse the grid to a single column, which made things worse,
+ * not better: four stacked panels pushed the panel to 1148px tall inside an
+ * iframe that only gets ~570px on a phone, so most of the analysis was
+ * unreachable. The panels are simple enough to hold two columns at 375px, so
+ * keep the 2x2 and shrink the chrome instead — that roughly halves the height
+ * and keeps all four visible.
+ */
 @media (max-width: 720px) {
+  .vx-danalysis {
+    padding: 10px;
+    font-size: 12px;
+  }
+
+  .vx-danalysis__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .vx-danalysis__topbar {
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .vx-panel__header {
+    padding: 7px 9px;
+  }
+
+  .vx-panel__body {
+    padding: 9px;
+  }
+
+  /* Hover lift is meaningless on touch and causes jitter on tap. */
+  .vx-panel:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* The digit row and legend are chrome around the panels. Shrink rather than
+     remove — the legend is what explains the ring colours, and dropping it
+     would leave the colour coding unexplained on the device where it is
+     hardest to guess. Both scroll sideways instead of wrapping into extra
+     rows, which is what was stacking up the height. */
+  .vx-danalysis__digitrow {
+    gap: 6px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .vx-danalysis__digitrow::-webkit-scrollbar {
+    display: none;
+  }
+
+  .vx-danalysis__legend {
+    gap: 8px 10px;
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .vx-danalysis__disclaimer {
+    font-size: 10px;
+    line-height: 1.4;
+    margin-top: 8px;
+  }
+}
+
+/* Very narrow phones: two columns start to crush the bars, so go single. */
+@media (max-width: 360px) {
   .vx-danalysis__grid {
     grid-template-columns: 1fr;
   }

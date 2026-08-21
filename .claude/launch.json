@@ -6,6 +6,12 @@
             "runtimeExecutable": "npm",
             "runtimeArgs": ["run", "dev", "--prefix", "apps/bot-app"],
             "port": 4003
+        },
+        {
+            "name": "digits-app",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": ["run", "dev", "--prefix", "apps/digits-app"],
+            "port": 3000
         }
     ]
 }
