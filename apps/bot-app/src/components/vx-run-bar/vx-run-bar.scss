@@ -131,6 +131,39 @@
     }
 }
 
+// Phones: the bar is the primary action, so it spans the width instead of
+// floating as a centred pill that can overflow 375px. Sits above the OS
+// browser chrome via safe-area inset.
+@media (max-width: 600px) {
+    .vx-run-bar {
+        left: 8px;
+        right: 8px;
+        transform: none;
+        bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+        justify-content: center;
+        padding: 7px 8px;
+        border-radius: 10px;
+
+        .animation__wrapper {
+            gap: 8px;
+        }
+
+        // The progress track eats the width the Run button needs on a phone.
+        .animation__progress-line,
+        .animation__text {
+            display: none;
+        }
+    }
+
+    .vx-run-bar__label {
+        font-size: 9px;
+    }
+
+    .vx-run-bar__value {
+        font-size: 10.5px;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .vx-run-bar__switch,
     .vx-run-bar__knob {

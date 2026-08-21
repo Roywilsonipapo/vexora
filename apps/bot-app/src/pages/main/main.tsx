@@ -568,11 +568,15 @@ const AppWrapper = observer(() => {
                 <div className='main__run-strategy-wrapper'>
                     <RunPanel />
                 </div>
-                <VxRunBar />
                 <ChartModal />
                 <TradingViewModal />
             </DesktopWrapper>
             <MobileWrapper>{!is_open && <RunPanel />}</MobileWrapper>
+            {/* Outside both wrappers on purpose. This used to sit inside
+                DesktopWrapper, which meant phones had NO run control at all —
+                the primary action of the app was simply absent below the
+                desktop breakpoint. */}
+            <VxRunBar />
             <Dialog
                 cancel_button_text={cancel_button_text || localize('Cancel')}
                 className='dc-dialog__wrapper--fixed'
