@@ -1,0 +1,136 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="gsStake">Stake</variable>
+<variable id="gsGrindStake">GrindStake</variable>
+<variable id="gsBarrier">Barrier</variable>
+<variable id="gsGrindBarrier">GrindBarrier</variable>
+<variable id="gsRecoverBarrier">RecoverBarrier</variable>
+<variable id="gsRecoverPPU">RecoverPayoutPerUnit</variable>
+<variable id="gsRecoverWins">RecoverOverWins</variable>
+<variable id="gsTargetProfit">TargetProfit</variable>
+<variable id="gsMaxStake">MaxStake</variable>
+<variable id="gsSessionFloor">SessionFloor</variable>
+<variable id="gsMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="gsTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="gsMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">R_50</field>
+<next><block type="trade_definition_tradetype" id="gsTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
+<next><block type="trade_definition_contracttype" id="gsContractType" deletable="false" movable="false"><field name="TYPE_LIST">DIGITUNDER</field>
+<next><block type="trade_definition_candleinterval" id="gsCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="gsRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="gsRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="gsSetGrindStake"><field name="VAR" id="gsGrindStake">GrindStake</field><value name="VALUE"><block type="math_number" id="gsNumGrindStake"><field name="NUM">50</field></block></value>
+<next><block type="variables_set" id="gsSetStake"><field name="VAR" id="gsStake">Stake</field><value name="VALUE"><block type="variables_get" id="gsGetGrindStake1"><field name="VAR" id="gsGrindStake">GrindStake</field></block></value>
+<next><block type="variables_set" id="gsSetGrindBarrier"><field name="VAR" id="gsGrindBarrier">GrindBarrier</field><value name="VALUE"><block type="math_number" id="gsNumGrindBarrier"><field name="NUM">8</field></block></value>
+<next><block type="variables_set" id="gsSetRecoverBarrier"><field name="VAR" id="gsRecoverBarrier">RecoverBarrier</field><value name="VALUE"><block type="math_number" id="gsNumRecoverBarrier"><field name="NUM">5</field></block></value>
+<next><block type="variables_set" id="gsSetBarrier"><field name="VAR" id="gsBarrier">Barrier</field><value name="VALUE"><block type="variables_get" id="gsGetGrindBarrier1"><field name="VAR" id="gsGrindBarrier">GrindBarrier</field></block></value>
+<next><block type="variables_set" id="gsSetPPU"><field name="VAR" id="gsRecoverPPU">RecoverPayoutPerUnit</field><value name="VALUE"><block type="math_number" id="gsNumPPU"><field name="NUM">0.95</field></block></value>
+<next><block type="variables_set" id="gsSetRecoverWins"><field name="VAR" id="gsRecoverWins">RecoverOverWins</field><value name="VALUE"><block type="math_number" id="gsNumRecoverWins"><field name="NUM">2</field></block></value>
+<next><block type="variables_set" id="gsSetTarget"><field name="VAR" id="gsTargetProfit">TargetProfit</field><value name="VALUE"><block type="math_number" id="gsNumTarget"><field name="NUM">10</field></block></value>
+<next><block type="variables_set" id="gsSetMaxStake"><field name="VAR" id="gsMaxStake">MaxStake</field><value name="VALUE"><block type="math_number" id="gsNumMaxStake"><field name="NUM">200</field></block></value>
+<next><block type="variables_set" id="gsSetFloor"><field name="VAR" id="gsSessionFloor">SessionFloor</field><value name="VALUE"><block type="math_number" id="gsNumFloor"><field name="NUM">400</field></block></value></block></next>
+</block></next></block></next></block></next></block></next></block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="gsTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="gsShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="gsShAmount"><field name="NUM">50</field></shadow><block type="variables_get" id="gsGetStakeAmt"><field name="VAR" id="gsStake">Stake</field></block></value>
+<value name="PREDICTION"><shadow type="math_number_positive" id="gsShPrediction"><field name="NUM">1</field></shadow><block type="variables_get" id="gsGetBarrierPred"><field name="VAR" id="gsBarrier">Barrier</field></block></value>
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="gsBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="purchase" id="gsPurchase"><field name="PURCHASE_LIST">DIGITUNDER</field></block></statement>
+</block>
+<block type="after_purchase" id="gsAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="controls_if" id="gsIfTarget"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="gsCmpTarget"><field name="OP">GTE</field>
+<value name="A"><block type="total_profit" id="gsTP1"></block></value>
+<value name="B"><block type="variables_get" id="gsGetTarget1"><field name="VAR" id="gsTargetProfit">TargetProfit</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="notify" id="gsNotifyDone"><field name="NOTIFICATION_TYPE">success</field><field name="NOTIFICATION_SOUND">earned-money</field><value name="MESSAGE"><shadow type="text" id="gsShDone"><field name="TEXT">Target reached - stopping.</field></shadow></value></block>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="gsIfFloor"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="gsCmpFloor"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="gsTP2"></block></value>
+<value name="B"><block type="math_arithmetic" id="gsNegFloor"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="gsShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="gsNumZero1"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="gsShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="gsGetFloor"><field name="VAR" id="gsSessionFloor">SessionFloor</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="gsJoinFloor"><field name="VARIABLE" id="gsMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="gsFloorTxt1"><value name="TEXT"><shadow type="text" id="gsShFloor1"><field name="TEXT">Session floor reached at</field></shadow></value>
+<next><block type="text_statement" id="gsFloorTxt2"><value name="TEXT"><block type="total_profit" id="gsTP3"></block></value>
+<next><block type="text_statement" id="gsFloorTxt3"><value name="TEXT"><shadow type="text" id="gsShFloor3"><field name="TEXT">- stopping instead of chasing.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="gsNotifyFloor"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><block type="variables_get" id="gsGetMsgFloor"><field name="VAR" id="gsMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="gsIfBehind"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="gsCmpBehind"><field name="OP">LT</field>
+<value name="A"><block type="total_profit" id="gsTP4"></block></value>
+<value name="B"><block type="math_number" id="gsNumZero2"><field name="NUM">0</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="gsSwitchBarrier"><field name="VAR" id="gsBarrier">Barrier</field><value name="VALUE"><block type="variables_get" id="gsGetRecoverBarrier"><field name="VAR" id="gsRecoverBarrier">RecoverBarrier</field></block></value>
+<next>
+<block type="variables_set" id="gsSizeToDeficit"><field name="VAR" id="gsStake">Stake</field>
+<value name="VALUE">
+<block type="math_arithmetic" id="gsDivide"><field name="OP">DIVIDE</field>
+<value name="A"><shadow type="math_number" id="gsShDivA"><field name="NUM">0</field></shadow>
+<block type="math_arithmetic" id="gsDeficitPlusTarget"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="gsShDefA"><field name="NUM">0</field></shadow><block type="variables_get" id="gsGetTarget2"><field name="VAR" id="gsTargetProfit">TargetProfit</field></block></value>
+<value name="B"><shadow type="math_number" id="gsShDefB"><field name="NUM">0</field></shadow><block type="total_profit" id="gsTP5"></block></value>
+</block>
+</value>
+<value name="B"><shadow type="math_number" id="gsShDivB"><field name="NUM">1</field></shadow>
+<block type="math_arithmetic" id="gsWinsTimesPPU"><field name="OP">MULTIPLY</field>
+<value name="A"><shadow type="math_number" id="gsShWpA"><field name="NUM">1</field></shadow><block type="variables_get" id="gsGetRecoverWins"><field name="VAR" id="gsRecoverWins">RecoverOverWins</field></block></value>
+<value name="B"><shadow type="math_number" id="gsShWpB"><field name="NUM">1</field></shadow><block type="variables_get" id="gsGetPPU"><field name="VAR" id="gsRecoverPPU">RecoverPayoutPerUnit</field></block></value>
+</block>
+</value>
+</block>
+</value>
+<next>
+<block type="controls_if" id="gsIfCeiling">
+<value name="IF0"><block type="logic_compare" id="gsCmpCeiling"><field name="OP">GT</field>
+<value name="A"><block type="variables_get" id="gsGetStake1"><field name="VAR" id="gsStake">Stake</field></block></value>
+<value name="B"><block type="variables_get" id="gsGetMaxStake"><field name="VAR" id="gsMaxStake">MaxStake</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="gsClampStake"><field name="VAR" id="gsStake">Stake</field><value name="VALUE"><block type="variables_get" id="gsGetMaxStake2"><field name="VAR" id="gsMaxStake">MaxStake</field></block></value>
+<next><block type="notify" id="gsNotifyCeiling"><field name="NOTIFICATION_TYPE">warn</field><field name="NOTIFICATION_SOUND">silent</field><value name="MESSAGE"><shadow type="text" id="gsShCeiling"><field name="TEXT">Recovery stake hit the ceiling - capped rather than chasing the deficit.</field></shadow></value></block></next>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</next>
+</block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="gsBackToGrindBarrier"><field name="VAR" id="gsBarrier">Barrier</field><value name="VALUE"><block type="variables_get" id="gsGetGrindBarrier2"><field name="VAR" id="gsGrindBarrier">GrindBarrier</field></block></value>
+<next><block type="variables_set" id="gsBackToGrindStake"><field name="VAR" id="gsStake">Stake</field><value name="VALUE"><block type="variables_get" id="gsGetGrindStake2"><field name="VAR" id="gsGrindStake">GrindStake</field></block></value></block></next>
+</block>
+</statement>
+<next><block type="trade_again" id="gsTradeAgain"></block></next>
+</block>
+</statement>
+</block>
+</statement>
+</block>
+</statement>
+</block>
+</xml>

@@ -87,6 +87,36 @@ const PREMIUM_BOTS: TBot[] = [
             'Sizes each stake to the deficit you actually have, not a fixed ladder: down 10 USD it stakes 3.95 and clears that plus a 5 USD target in 4 wins, where a flat 1 USD would need 16. Over 4 on Volatility 100 is deliberate — it wins ~50% but pays ~0.95 per unit, and payout is what repays a deficit. Stake ceiling 25 USD, session floor −60.',
         tag: 'Premium',
     },
+    // --- Greedy switch trio ------------------------------------------------
+    // Grind a high-hit-rate barrier at 50 USD, and the moment the session goes
+    // negative, switch the BARRIER to one that pays several times more per unit
+    // and size the stake to clear the shortfall in 2-3 wins.
+    //
+    // Deriv cannot change trade type mid-bot — the purchase block's options are
+    // fixed by the trade definition — so this switches barrier within
+    // Over/Under instead. That is the part that actually matters anyway: it is
+    // payout per unit, not hit rate, that repays a deficit.
+    {
+        file: 'p10_greedy_switch_50.xml',
+        name: 'Greedy Switch — Over 1 → Over 4',
+        description:
+            'Volatility 100. Grinds Over 1 at 50 USD (wins on 2–9, pays little). On going negative it switches to Over 4, which pays roughly 5× more per unit, and sizes to clear the deficit plus 10 USD in 2 wins. Stake ceiling 200, session floor −400.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p11_greedy_switch_v100.xml',
+        name: 'Greedy Switch — Over 2 → Over 5',
+        description:
+            'Volatility 100 (1s). Grinds Over 2 at 50 USD, recovers on Over 5 — a lower hit rate but a much larger payout — spread over 3 wins for a 15 USD target. Fewer, larger recovery trades. Ceiling 200, floor −400.',
+        tag: 'Premium',
+    },
+    {
+        file: 'p12_greedy_under_switch.xml',
+        name: 'Greedy Switch — Under 8 → Under 5',
+        description:
+            'Volatility 50, the Under-side mirror. Grinds Under 8 at 50 USD (wins on 0–7) and recovers on Under 5, clearing the shortfall in 2 wins. Ceiling 200, session floor −400.',
+        tag: 'Premium',
+    },
 ];
 
 const BOTS: TBot[] = [
