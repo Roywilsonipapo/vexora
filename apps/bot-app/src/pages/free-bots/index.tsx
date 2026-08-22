@@ -11,110 +11,44 @@ type TBot = {
     tag: string;
 };
 
-// --- Premium: exposure-control bots -------------------------------------
-// These are risk-management systems, not edge. Synthetic indices are random
-// per tick with a fixed house edge, so no strategy changes expected value —
-// what these control is how much is at risk and when to stop. Descriptions
-// say what each one actually does; none of them claim to beat the house.
-// All default to a 1 USD stake. Full spec: docs/premium-bots-spec.md
+// --- Premium: fixed-ladder bots ------------------------------------------
+// One staking rule across all five, to Roy's spec: 10 USD base, x2.5 after a
+// loss, straight back to 10 after a win, take profit 50, stop loss 200.
+// Everything is editable in Bot Builder after loading.
 const PREMIUM_BOTS: TBot[] = [
     {
-        file: 'p1_drawdown_governor.xml',
-        name: 'Drawdown Governor',
+        file: 'v1_over2_x25.xml',
+        name: 'Over 2 — x2.5 Ladder',
         description:
-            'Recovery ladder with a hard 4-step cap that resets to the 1 USD base instead of climbing further — the runaway-martingale failure mode is engineered out. Stops the session at −20 USD.',
+            'Volatility 100, Over 2 (wins on 3-9). Stakes 10 USD, x2.5 after a loss, back to 10 after a win. Take profit 50, stop loss 200.',
         tag: 'Premium',
     },
     {
-        file: 'p2_profit_ladder_lock.xml',
-        name: 'Profit Ladder Lock',
+        file: 'v2_over1_x25.xml',
+        name: 'Over 1 — x2.5 Ladder',
         description:
-            'Banks half of every win into a locked total and never re-risks it, so a winning session cannot fully round-trip. Flat 1 USD stake, stops once 5 USD is banked or at −15 USD.',
+            'Volatility 100, Over 1 (wins on 2-9) — a higher hit rate than Over 2 but a smaller payout per win. Same ladder: 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
-        file: 'p3_cooldown_circuit_breaker.xml',
-        name: 'Cool-Down Circuit Breaker',
+        file: 'v3_even_x25.xml',
+        name: 'Even — x2.5 Ladder',
         description:
-            'After 3 losses in a row it drops to a 0.35 USD minimum stake for 5 rounds before normal sizing resumes. Refuses to size up while a streak is live. Stops at −15 USD.',
+            'Volatility 100, Digit Even. Roughly a coin flip with a near-double payout, so a win recovers far more of a ladder than Over 1 does. 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
-        file: 'p4_volatility_gated_entry.xml',
-        name: 'Volatility-Gated Entry',
+        file: 'v4_odd_x25.xml',
+        name: 'Odd — x2.5 Ladder',
         description:
-            'Only buys when the last digit is 3 or lower and the tick fell; otherwise it skips and waits. Trades far less often than the others by design. 1 USD flat, +6 target, −12 stop.',
+            'Volatility 100, Digit Odd. The mirror of the Even bot, same staking. 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
-        file: 'p5_equity_curve_stop.xml',
-        name: 'Equity Curve Stop',
+        file: 'v5_rotator_x25.xml',
+        name: 'Rotator — Over/Under x2.5',
         description:
-            'Tracks session peak profit and stops once 2 USD has been given back from that peak, arming only after +3. A trailing stop on the session rather than any single trade.',
-        tag: 'Premium',
-    },
-    // --- Stake-escalation trio -------------------------------------------
-    // These take the risk in the STAKE rather than the barrier: each sits on a
-    // high-hit-rate barrier and steps the stake up after a loss. High hit rate
-    // means small payouts, so a single loss takes several wins to recover —
-    // which is exactly why each one carries a hard step cap, a take profit and
-    // a session stop. Market and barrier are fixed per bot and pre-selected.
-    {
-        file: 'p6_safe_barrier_escalator.xml',
-        name: 'Safe Barrier Escalator — Over 1',
-        description:
-            'Volatility 100 (1s), Over 1 — wins on any last digit 2–9. Stakes 3 USD, doubles after a loss, caps at 4 steps then returns to base. Take profit +15, session stop −60.',
-        tag: 'Premium',
-    },
-    {
-        file: 'p7_deep_under_escalator.xml',
-        name: 'Deep Under Escalator — Under 8',
-        description:
-            'Volatility 50, Under 8 — wins on any last digit 0–7. Stakes 3 USD, doubles after a loss, caps at 4 steps then returns to base. Take profit +15, session stop −60.',
-        tag: 'Premium',
-    },
-    {
-        file: 'p8_wide_barrier_grind.xml',
-        name: 'Wide Barrier Grind — Over 2',
-        description:
-            'Volatility 25, Over 2 — wins on 3–9, so a lower hit rate than the other two but a larger payout. Stakes 3 USD, steps up ×1.8 with a 5-step cap. Take profit +12, session stop −45.',
-        tag: 'Premium',
-    },
-    {
-        file: 'p9_deficit_recovery_engine.xml',
-        name: 'Deficit Recovery Engine — Over 4',
-        description:
-            'Sizes each stake to the deficit you actually have, not a fixed ladder: down 10 USD it stakes 3.95 and clears that plus a 5 USD target in 4 wins, where a flat 1 USD would need 16. Over 4 on Volatility 100 is deliberate — it wins ~50% but pays ~0.95 per unit, and payout is what repays a deficit. Stake ceiling 25 USD, session floor −60.',
-        tag: 'Premium',
-    },
-    // --- Greedy switch trio ------------------------------------------------
-    // Grind a high-hit-rate barrier at 50 USD, and the moment the session goes
-    // negative, switch the BARRIER to one that pays several times more per unit
-    // and size the stake to clear the shortfall in 2-3 wins.
-    //
-    // Deriv cannot change trade type mid-bot — the purchase block's options are
-    // fixed by the trade definition — so this switches barrier within
-    // Over/Under instead. That is the part that actually matters anyway: it is
-    // payout per unit, not hit rate, that repays a deficit.
-    {
-        file: 'p10_greedy_switch_50.xml',
-        name: 'Greedy Switch — Over 1 → Over 4',
-        description:
-            'Volatility 100. Grinds Over 1 at 50 USD (wins on 2–9, pays little). On going negative it switches to Over 4, which pays roughly 5× more per unit, and sizes to clear the deficit plus 10 USD in 2 wins. Stake ceiling 200, session floor −400.',
-        tag: 'Premium',
-    },
-    {
-        file: 'p11_greedy_switch_v100.xml',
-        name: 'Greedy Switch — Over 2 → Over 5',
-        description:
-            'Volatility 100 (1s). Grinds Over 2 at 50 USD, recovers on Over 5 — a lower hit rate but a much larger payout — spread over 3 wins for a 15 USD target. Fewer, larger recovery trades. Ceiling 200, floor −400.',
-        tag: 'Premium',
-    },
-    {
-        file: 'p12_greedy_under_switch.xml',
-        name: 'Greedy Switch — Under 8 → Under 5',
-        description:
-            'Volatility 50, the Under-side mirror. Grinds Under 8 at 50 USD (wins on 0–7) and recovers on Under 5, clearing the shortfall in 2 wins. Ceiling 200, session floor −400.',
+            'Rotates the contract on each loss: Over 2, then Under 7, then Over 1, then Under 8, then back. Any win resets both the rotation and the stake. 10 USD, x2.5, TP 50, SL 200. Deriv fixes trade type per bot, so this rotates within Over/Under rather than across Even/Odd and Differs.',
         tag: 'Premium',
     },
 ];

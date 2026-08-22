@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { api_base } from '@/external/bot-skeleton';
 
 /**
  * Display-only currency conversion for the balance readout.
@@ -50,48 +49,57 @@ export const useDisplayCurrency = () => {
 
     useEffect(() => {
         let is_mounted = true;
+        let socket: WebSocket | null = null;
 
-        // `api_base.api` does not exist yet on a cold load — the socket is still
-        // being set up when the header first mounts. Firing immediately loses
-        // that race and leaves rates permanently null, which is what made the
-        // converter look broken: it silently sat on "rates unavailable" forever
-        // because nothing ever retried.
-        const waitForApi = async (timeout_ms = 8000) => {
-            const start = Date.now();
-            while (!api_base?.api) {
-                if (Date.now() - start > timeout_ms) return false;
-                await new Promise(res => setTimeout(res, 200));
+        // Deliberately its own short-lived socket rather than api_base.
+        //
+        // api_base connects to the brand's proxied endpoint
+        // (derivws.url.* + options/ws/public), which does not answer
+        // `exchange_rates` — the call simply never resolved, so the converter
+        // sat on "Live rates unavailable" forever. Retrying against the wrong
+        // endpoint could never have fixed it.
+        //
+        // This asks Deriv's public WS directly. It sends nothing but a request
+        // for public FX rates: no auth, no account, no user data.
+        const load = () => {
+            if (!is_mounted) return;
+            try {
+                socket = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
+            } catch {
+                return;
             }
-            return true;
-        };
 
-        const fetchOnce = async () => {
-            // api_base.send is typed as returning void upstream, but it
-            // resolves with the API payload — hence the cast.
-            const res = (await api_base.api?.send({
-                exchange_rates: 1,
-                base_currency: 'USD',
-            })) as unknown as { exchange_rates?: { rates?: Record<string, number> } } | undefined;
-            return res?.exchange_rates?.rates ?? null;
-        };
-
-        const load = async () => {
-            if (!(await waitForApi())) return;
-            // Even with the socket up the first call can land mid-reconnect, so
-            // back off and retry rather than giving up on one failure.
-            for (let attempt = 0; attempt < 3 && is_mounted; attempt++) {
-                if (attempt > 0) await new Promise(res => setTimeout(res, 800 * attempt));
+            // Don't leave a socket hanging if Deriv never answers.
+            const timeout = setTimeout(() => {
                 try {
-                    const next = await fetchOnce();
-                    if (!is_mounted) return;
-                    if (next) {
-                        setRates(next);
-                        return;
-                    }
+                    socket?.close();
                 } catch {
-                    // Try again; the loop bounds how long we keep trying.
+                    /* already closed */
                 }
-            }
+            }, 10000);
+
+            socket.onopen = () => socket?.send(JSON.stringify({ exchange_rates: 1, base_currency: 'USD' }));
+
+            socket.onmessage = event => {
+                clearTimeout(timeout);
+                try {
+                    const data = JSON.parse(event.data);
+                    const next = data?.exchange_rates?.rates;
+                    // Only replace a good set with another good set — a failed
+                    // refresh keeps the last known rates rather than blanking
+                    // the converter.
+                    if (is_mounted && next) setRates(next);
+                } catch {
+                    /* malformed payload — keep whatever we already had */
+                }
+                try {
+                    socket?.close();
+                } catch {
+                    /* already closed */
+                }
+            };
+
+            socket.onerror = () => clearTimeout(timeout);
         };
 
         load();
@@ -99,6 +107,11 @@ export const useDisplayCurrency = () => {
         return () => {
             is_mounted = false;
             clearInterval(id);
+            try {
+                socket?.close();
+            } catch {
+                /* already closed */
+            }
         };
     }, []);
 
