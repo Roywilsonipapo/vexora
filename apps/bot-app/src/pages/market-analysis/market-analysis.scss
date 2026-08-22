@@ -930,3 +930,279 @@
         color: var(--vx-text-dim, #9db2cd);
     }
 }
+
+// --- Strategy Backtester -------------------------------------------------
+// Two stacked cards: the form, then results once a run completes. Built
+// mobile-first — the input grid collapses to one column on phones rather than
+// squeezing number inputs until they are unusable.
+.vx-backtest {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 24px;
+
+    &__title {
+        margin: 0 0 4px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--vx-text, #e8f0fb);
+    }
+
+    &__lede {
+        margin: 0 0 14px;
+        font-size: 12px;
+        line-height: 1.55;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    &__form,
+    &__results {
+        padding: 16px;
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 10px 12px;
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 0;
+
+            span {
+                font-size: 10.5px;
+                letter-spacing: 0.06em;
+                text-transform: uppercase;
+                color: var(--vx-text-faint, #647c99);
+            }
+
+            select,
+            input {
+                width: 100%;
+                min-width: 0;
+                background: var(--vx-navy-2, #0c1c30);
+                border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+                border-radius: 8px;
+                color: var(--vx-text, #e8f0fb);
+                padding: 8px 10px;
+                font-size: 12.5px;
+                font-family: inherit;
+
+                &:focus-visible {
+                    outline: none;
+                    border-color: var(--vx-orange, #f6512c);
+                }
+            }
+        }
+    }
+
+    &__run {
+        margin-top: 14px;
+        width: 100%;
+        background: var(--vx-orange, #f6512c);
+        color: #fff;
+        border: none;
+        border-radius: 9px;
+        padding: 11px 18px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.6;
+            cursor: default;
+        }
+    }
+
+    &__payout {
+        margin: 10px 0 0;
+        font-size: 11.5px;
+        color: var(--vx-green, #16c784);
+    }
+
+    &__warn {
+        margin: 8px 0 0;
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: var(--vx-amber, #f5a623);
+    }
+
+    // The refusal-to-guess path is a first-class state, not a footnote: it has
+    // to be readable enough that the manual payout box is the obvious next step.
+    &__error {
+        margin-top: 12px;
+        padding: 12px;
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        border-left: 3px solid var(--vx-amber, #f5a623);
+        border-radius: 8px;
+        background: var(--vx-navy-2, #0c1c30);
+
+        p {
+            margin: 0 0 10px;
+            font-size: 12px;
+            line-height: 1.55;
+            color: var(--vx-text-dim, #9db2cd);
+        }
+    }
+
+    &__manual {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        max-width: 220px;
+
+        span {
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--vx-text-faint, #647c99);
+        }
+
+        input {
+            background: var(--vx-panel, #10233c);
+            border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+            border-radius: 8px;
+            color: var(--vx-text, #e8f0fb);
+            padding: 8px 10px;
+            font-size: 12.5px;
+        }
+    }
+
+    &__resulthead {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+
+        h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+    }
+
+    &__sample {
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 8px;
+    }
+
+    &__stopped {
+        margin: 12px 0 0;
+        font-size: 12px;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    &__curve {
+        margin-top: 14px;
+
+        svg {
+            width: 100%;
+            height: 110px;
+            display: block;
+            background: var(--vx-navy-2, #0c1c30);
+            border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+            border-radius: 8px;
+
+            polyline {
+                fill: none;
+                stroke-width: 1.5;
+            }
+        }
+    }
+
+    &__zero {
+        stroke: var(--vx-text-faint, #647c99);
+        stroke-width: 1;
+        stroke-dasharray: 3 3;
+    }
+
+    &__line--up {
+        stroke: var(--vx-green, #16c784);
+    }
+
+    &__line--down {
+        stroke: var(--vx-red, #ef4444);
+    }
+
+    &__curvelabel {
+        display: block;
+        margin-top: 6px;
+        font-size: 10.5px;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__note {
+        margin: 14px 0 0;
+        font-size: 11.5px;
+        line-height: 1.6;
+        color: var(--vx-text-faint, #647c99);
+    }
+}
+
+// Stat tile — value carries the colour, label stays muted so a wall of tiles
+// still scans.
+.vx-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 9px 10px;
+    background: var(--vx-navy-2, #0c1c30);
+    border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+    border-radius: 8px;
+    min-width: 0;
+
+    &__label {
+        font-size: 10px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__value {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--vx-text, #e8f0fb);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &--up &__value {
+        color: var(--vx-green, #16c784);
+    }
+
+    &--down &__value {
+        color: var(--vx-red, #ef4444);
+    }
+}
+
+@media (max-width: 600px) {
+    .vx-backtest {
+        &__form,
+        &__results {
+            padding: 12px;
+        }
+
+        // Number inputs get unusable when squeezed; one column beats two here.
+        &__grid {
+            grid-template-columns: 1fr;
+        }
+
+        &__stats {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__curve svg {
+            height: 88px;
+        }
+    }
+}

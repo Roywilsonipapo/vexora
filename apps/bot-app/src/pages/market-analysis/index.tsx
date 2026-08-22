@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import classNames from 'classnames';
 import VxDigitsEmbed from '@/components/vx-digits-embed';
+import Backtest from './backtest';
 import SignalScanner from './signal-scanner';
 import './market-analysis.scss';
 
@@ -26,7 +27,7 @@ import './market-analysis.scss';
  * the shell is the only thing that actually makes it fit.
  */
 const MarketAnalysis = () => {
-    const [view, setView] = useState<'circles' | 'scanner'>('circles');
+    const [view, setView] = useState<'circles' | 'scanner' | 'backtest'>('circles');
     const [is_expanded, setIsExpanded] = useState(false);
 
     // Esc collapses. Without this the only way back is the button, which sits
@@ -59,6 +60,13 @@ const MarketAnalysis = () => {
                 </button>
                 <button
                     type='button'
+                    className={view === 'backtest' ? 'is-active' : ''}
+                    onClick={() => setView('backtest')}
+                >
+                    Backtest
+                </button>
+                <button
+                    type='button'
                     className='vx-analysis__expand'
                     onClick={() => setIsExpanded(v => !v)}
                     aria-pressed={is_expanded}
@@ -68,7 +76,9 @@ const MarketAnalysis = () => {
                 </button>
             </div>
             <div className='vx-analysis__view'>
-                {view === 'circles' ? <VxDigitsEmbed /> : <SignalScanner />}
+                {view === 'circles' && <VxDigitsEmbed />}
+                {view === 'scanner' && <SignalScanner />}
+                {view === 'backtest' && <Backtest />}
             </div>
         </div>
     );
