@@ -80,6 +80,13 @@ const PREMIUM_BOTS: TBot[] = [
             'Volatility 25, Over 2 — wins on 3–9, so a lower hit rate than the other two but a larger payout. Stakes 3 USD, steps up ×1.8 with a 5-step cap. Take profit +12, session stop −45.',
         tag: 'Premium',
     },
+    {
+        file: 'p9_deficit_recovery_engine.xml',
+        name: 'Deficit Recovery Engine — Over 4',
+        description:
+            'Sizes each stake to the deficit you actually have, not a fixed ladder: down 10 USD it stakes 3.95 and clears that plus a 5 USD target in 4 wins, where a flat 1 USD would need 16. Over 4 on Volatility 100 is deliberate — it wins ~50% but pays ~0.95 per unit, and payout is what repays a deficit. Stake ceiling 25 USD, session floor −60.',
+        tag: 'Premium',
+    },
 ];
 
 const BOTS: TBot[] = [

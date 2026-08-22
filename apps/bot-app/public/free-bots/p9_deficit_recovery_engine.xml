@@ -1,0 +1,124 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="drStake">Stake</variable>
+<variable id="drInitialStake">InitialStake</variable>
+<variable id="drTargetProfit">TargetProfit</variable>
+<variable id="drRecoverOverWins">RecoverOverWins</variable>
+<variable id="drProfitPerUnit">ProfitPerUnit</variable>
+<variable id="drMaxStake">MaxStake</variable>
+<variable id="drSessionFloor">SessionFloor</variable>
+<variable id="drMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="drTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="drMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">R_100</field>
+<next><block type="trade_definition_tradetype" id="drTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">overunder</field>
+<next><block type="trade_definition_contracttype" id="drContractType" deletable="false" movable="false"><field name="TYPE_LIST">DIGITOVER</field>
+<next><block type="trade_definition_candleinterval" id="drCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="drRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="drRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="drSetInitial"><field name="VAR" id="drInitialStake">InitialStake</field><value name="VALUE"><block type="math_number" id="drNumInitial"><field name="NUM">1</field></block></value>
+<next><block type="variables_set" id="drSetStake"><field name="VAR" id="drStake">Stake</field><value name="VALUE"><block type="variables_get" id="drGetInitial1"><field name="VAR" id="drInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="drSetTarget"><field name="VAR" id="drTargetProfit">TargetProfit</field><value name="VALUE"><block type="math_number" id="drNumTarget"><field name="NUM">5</field></block></value>
+<next><block type="variables_set" id="drSetOverWins"><field name="VAR" id="drRecoverOverWins">RecoverOverWins</field><value name="VALUE"><block type="math_number" id="drNumOverWins"><field name="NUM">4</field></block></value>
+<next><block type="variables_set" id="drSetPPU"><field name="VAR" id="drProfitPerUnit">ProfitPerUnit</field><value name="VALUE"><block type="math_number" id="drNumPPU"><field name="NUM">0.95</field></block></value>
+<next><block type="variables_set" id="drSetMaxStake"><field name="VAR" id="drMaxStake">MaxStake</field><value name="VALUE"><block type="math_number" id="drNumMaxStake"><field name="NUM">25</field></block></value>
+<next><block type="variables_set" id="drSetFloor"><field name="VAR" id="drSessionFloor">SessionFloor</field><value name="VALUE"><block type="math_number" id="drNumFloor"><field name="NUM">60</field></block></value></block></next>
+</block></next></block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="drTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="true"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="drShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="drShAmount"><field name="NUM">1</field></shadow><block type="variables_get" id="drGetStakeAmt"><field name="VAR" id="drStake">Stake</field></block></value>
+<value name="PREDICTION"><shadow type="math_number_positive" id="drShPrediction"><field name="NUM">4</field></shadow></value>
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="drBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="purchase" id="drPurchase"><field name="PURCHASE_LIST">DIGITOVER</field></block></statement>
+</block>
+<block type="after_purchase" id="drAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="controls_if" id="drIfTarget"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="drCmpTarget"><field name="OP">GTE</field>
+<value name="A"><block type="total_profit" id="drTP1"></block></value>
+<value name="B"><block type="variables_get" id="drGetTarget1"><field name="VAR" id="drTargetProfit">TargetProfit</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="notify" id="drNotifyDone"><field name="NOTIFICATION_TYPE">success</field><field name="NOTIFICATION_SOUND">earned-money</field><value name="MESSAGE"><shadow type="text" id="drShDone"><field name="TEXT">Recovered and hit target - stopping.</field></shadow></value></block>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="drIfFloor"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="drCmpFloor"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="drTP2"></block></value>
+<value name="B"><block type="math_arithmetic" id="drNegFloor"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="drShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="drNumZero1"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="drShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="drGetFloor"><field name="VAR" id="drSessionFloor">SessionFloor</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="drJoinFloor"><field name="VARIABLE" id="drMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="drFloorTxt1"><value name="TEXT"><shadow type="text" id="drShFloor1"><field name="TEXT">Recovery abandoned at</field></shadow></value>
+<next><block type="text_statement" id="drFloorTxt2"><value name="TEXT"><block type="total_profit" id="drTP3"></block></value>
+<next><block type="text_statement" id="drFloorTxt3"><value name="TEXT"><shadow type="text" id="drShFloor3"><field name="TEXT">- the floor exists so a bad run ends here instead of chasing.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="drNotifyFloor"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><block type="variables_get" id="drGetMsgFloor"><field name="VAR" id="drMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="drIfBehind"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="drCmpBehind"><field name="OP">LT</field>
+<value name="A"><block type="total_profit" id="drTP4"></block></value>
+<value name="B"><block type="math_number" id="drNumZero2"><field name="NUM">0</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="drSizeToDeficit"><field name="VAR" id="drStake">Stake</field>
+<value name="VALUE">
+<block type="math_arithmetic" id="drDivide"><field name="OP">DIVIDE</field>
+<value name="A"><shadow type="math_number" id="drShDivA"><field name="NUM">0</field></shadow>
+<block type="math_arithmetic" id="drDeficitPlusTarget"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="drShDefA"><field name="NUM">0</field></shadow><block type="variables_get" id="drGetTarget2"><field name="VAR" id="drTargetProfit">TargetProfit</field></block></value>
+<value name="B"><shadow type="math_number" id="drShDefB"><field name="NUM">0</field></shadow><block type="total_profit" id="drTP5"></block></value>
+</block>
+</value>
+<value name="B"><shadow type="math_number" id="drShDivB"><field name="NUM">1</field></shadow>
+<block type="math_arithmetic" id="drWinsTimesPPU"><field name="OP">MULTIPLY</field>
+<value name="A"><shadow type="math_number" id="drShWpA"><field name="NUM">1</field></shadow><block type="variables_get" id="drGetOverWins"><field name="VAR" id="drRecoverOverWins">RecoverOverWins</field></block></value>
+<value name="B"><shadow type="math_number" id="drShWpB"><field name="NUM">1</field></shadow><block type="variables_get" id="drGetPPU"><field name="VAR" id="drProfitPerUnit">ProfitPerUnit</field></block></value>
+</block>
+</value>
+</block>
+</value>
+<next>
+<block type="controls_if" id="drIfCeiling">
+<value name="IF0"><block type="logic_compare" id="drCmpCeiling"><field name="OP">GT</field>
+<value name="A"><block type="variables_get" id="drGetStake1"><field name="VAR" id="drStake">Stake</field></block></value>
+<value name="B"><block type="variables_get" id="drGetMaxStake"><field name="VAR" id="drMaxStake">MaxStake</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="variables_set" id="drClampStake"><field name="VAR" id="drStake">Stake</field><value name="VALUE"><block type="variables_get" id="drGetMaxStake2"><field name="VAR" id="drMaxStake">MaxStake</field></block></value>
+<next><block type="notify" id="drNotifyCeiling"><field name="NOTIFICATION_TYPE">warn</field><field name="NOTIFICATION_SOUND">silent</field><value name="MESSAGE"><shadow type="text" id="drShCeiling"><field name="TEXT">Recovery stake hit the ceiling - capped rather than chasing the full deficit.</field></shadow></value></block></next>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="drBackToBase"><field name="VAR" id="drStake">Stake</field><value name="VALUE"><block type="variables_get" id="drGetInitial2"><field name="VAR" id="drInitialStake">InitialStake</field></block></value></block>
+</statement>
+<next><block type="trade_again" id="drTradeAgain"></block></next>
+</block>
+</statement>
+</block>
+</statement>
+</block>
+</statement>
+</block>
+</xml>
