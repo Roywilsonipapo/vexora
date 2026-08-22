@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { runBacktest, TBacktestResult, TContract } from './backtest-engine';
+import { runBacktest, TBacktestResult, TContract, TStakingMode } from './backtest-engine';
 import { fetchPayoutRatio } from './fetch-payout';
 import { fetchTickHistory, SYMBOLS } from './tick-utils';
 import './market-analysis.scss';
@@ -29,8 +29,11 @@ const Backtest = () => {
     const [contract, setContract] = useState<TContract>('DIGITOVER');
     const [barrier, setBarrier] = useState(1);
     const [baseStake, setBaseStake] = useState(1);
+    const [staking, setStaking] = useState<TStakingMode>('ladder');
     const [multiplier, setMultiplier] = useState(2);
     const [maxSteps, setMaxSteps] = useState(4);
+    const [recoverOverWins, setRecoverOverWins] = useState(4);
+    const [maxStake, setMaxStake] = useState(25);
     const [sessionLoss, setSessionLoss] = useState(50);
     const [takeProfit, setTakeProfit] = useState(15);
     const [tickCount, setTickCount] = useState(1000);
@@ -84,6 +87,9 @@ const Backtest = () => {
             contract,
             barrier,
             base_stake: baseStake,
+            staking,
+            recover_over_wins: recoverOverWins,
+            max_stake: maxStake,
             multiplier,
             max_steps: maxSteps,
             session_loss: sessionLoss,
@@ -174,26 +180,62 @@ const Backtest = () => {
                     </label>
 
                     <label>
-                        <span>Loss multiplier</span>
-                        <input
-                            type='number'
-                            min='1'
-                            step='0.1'
-                            value={multiplier}
-                            onChange={e => setMultiplier(Number(e.target.value))}
-                        />
+                        <span>Staking</span>
+                        <select value={staking} onChange={e => setStaking(e.target.value as TStakingMode)}>
+                            <option value='ladder'>Ladder (multiply on loss)</option>
+                            <option value='deficit'>Deficit recovery (size to shortfall)</option>
+                        </select>
                     </label>
 
-                    <label>
-                        <span>Step cap (0 = uncapped)</span>
-                        <input
-                            type='number'
-                            min='0'
-                            step='1'
-                            value={maxSteps}
-                            onChange={e => setMaxSteps(Number(e.target.value))}
-                        />
-                    </label>
+                    {staking === 'ladder' ? (
+                        <>
+                            <label>
+                                <span>Loss multiplier</span>
+                                <input
+                                    type='number'
+                                    min='1'
+                                    step='0.1'
+                                    value={multiplier}
+                                    onChange={e => setMultiplier(Number(e.target.value))}
+                                />
+                            </label>
+
+                            <label>
+                                <span>Step cap (0 = uncapped)</span>
+                                <input
+                                    type='number'
+                                    min='0'
+                                    step='1'
+                                    value={maxSteps}
+                                    onChange={e => setMaxSteps(Number(e.target.value))}
+                                />
+                            </label>
+                        </>
+                    ) : (
+                        <>
+                            <label>
+                                <span>Recover over N wins</span>
+                                <input
+                                    type='number'
+                                    min='1'
+                                    step='1'
+                                    value={recoverOverWins}
+                                    onChange={e => setRecoverOverWins(Number(e.target.value))}
+                                />
+                            </label>
+
+                            <label>
+                                <span>Stake ceiling</span>
+                                <input
+                                    type='number'
+                                    min='1'
+                                    step='1'
+                                    value={maxStake}
+                                    onChange={e => setMaxStake(Number(e.target.value))}
+                                />
+                            </label>
+                        </>
+                    )}
 
                     <label>
                         <span>Session loss stop</span>
@@ -293,7 +335,9 @@ const Backtest = () => {
                             <span className='vx-stat__value'>{result.total_staked.toFixed(2)}</span>
                         </div>
                         <div className='vx-stat'>
-                            <span className='vx-stat__label'>Cap resets</span>
+                            <span className='vx-stat__label'>
+                                {staking === 'deficit' ? 'Ceiling hits' : 'Cap resets'}
+                            </span>
                             <span className='vx-stat__value'>{result.cap_hits}</span>
                         </div>
                     </div>

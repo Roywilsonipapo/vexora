@@ -15,10 +15,29 @@ import { lastDigit } from './tick-utils';
 
 export type TContract = 'DIGITOVER' | 'DIGITUNDER' | 'DIGITEVEN' | 'DIGITODD' | 'DIGITMATCH' | 'DIGITDIFF';
 
+/**
+ * How the next stake is chosen.
+ *
+ * `ladder` — classic escalation: multiply after a loss, reset on a win or at
+ * the step cap.
+ *
+ * `deficit` — size to the shortfall that actually exists, the way the Deficit
+ * Recovery Engine bot does. A flat base stake cannot repay a deficit, because
+ * what repays it is profit per unit staked, not the number of trades. Stake is
+ * whatever clears the current shortfall plus the target over N wins, clamped
+ * to a ceiling.
+ */
+export type TStakingMode = 'ladder' | 'deficit';
+
 export type TBacktestConfig = {
     contract: TContract;
     barrier: number;
     base_stake: number;
+    staking?: TStakingMode;
+    /** deficit mode: spread recovery across this many wins rather than chasing it in one. */
+    recover_over_wins?: number;
+    /** deficit mode: hard ceiling on a single stake. This is what bounds the tail. */
+    max_stake?: number;
     multiplier: number;
     /**
      * Steps of escalation allowed before the ladder resets to base.
@@ -76,7 +95,24 @@ export const runBacktest = (
     pip_size: number,
     config: TBacktestConfig
 ): TBacktestResult => {
-    const { contract, barrier, base_stake, multiplier, max_steps, session_loss, take_profit, payout_ratio } = config;
+    const {
+        contract,
+        barrier,
+        base_stake,
+        multiplier,
+        max_steps,
+        session_loss,
+        take_profit,
+        payout_ratio,
+        staking = 'ladder',
+        recover_over_wins = 4,
+        max_stake = 25,
+    } = config;
+
+    // Profit per unit staked, derived from the real payout rather than taken
+    // as a separate setting. The bot has to be told this number by hand; here
+    // we already know the true payout, so deriving it keeps the two in step.
+    const profit_per_unit = payout_ratio - 1;
 
     let stake = base_stake;
     let steps = 0;
@@ -105,22 +141,47 @@ export const runBacktest = (
             pl += stake * (payout_ratio - 1);
             wins++;
             streak = 0;
-            stake = base_stake;
-            steps = 0;
+            if (staking === 'ladder') {
+                stake = base_stake;
+                steps = 0;
+            }
         } else {
             pl -= stake;
             losses++;
             streak++;
             longest_loss_streak = Math.max(longest_loss_streak, streak);
-            steps++;
-            if (max_steps > 0 && steps >= max_steps) {
-                // Cap reached: back to base rather than climbing further. This
-                // is the difference between a bounded ladder and a blow-up.
-                stake = base_stake;
-                steps = 0;
-                cap_hits++;
+            if (staking === 'ladder') {
+                steps++;
+                if (max_steps > 0 && steps >= max_steps) {
+                    // Cap reached: back to base rather than climbing further.
+                    // This is the difference between a bounded ladder and a
+                    // blow-up.
+                    stake = base_stake;
+                    steps = 0;
+                    cap_hits++;
+                } else {
+                    stake = stake * multiplier;
+                }
+            }
+        }
+
+        if (staking === 'deficit') {
+            // Size to the shortfall that actually exists. Once back above
+            // water there is nothing to recover, so drop to base.
+            if (pl < 0 && profit_per_unit > 0) {
+                const target = take_profit > 0 ? take_profit : base_stake;
+                const needed = (target - pl) / (recover_over_wins * profit_per_unit);
+                // The ceiling is the whole point: past it the bot stops
+                // chasing the full deficit. Count those as cap hits so the
+                // result shows how often the tail was being clipped.
+                if (needed > max_stake) {
+                    stake = max_stake;
+                    cap_hits++;
+                } else {
+                    stake = needed;
+                }
             } else {
-                stake = stake * multiplier;
+                stake = base_stake;
             }
         }
 

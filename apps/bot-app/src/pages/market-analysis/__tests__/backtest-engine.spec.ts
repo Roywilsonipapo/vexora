@@ -100,3 +100,70 @@ describe('runBacktest', () => {
         expect(r.wins).toBe(1);
     });
 });
+
+describe('runBacktest — deficit staking', () => {
+    const deficit: TBacktestConfig = {
+        ...base,
+        staking: 'deficit',
+        recover_over_wins: 4,
+        max_stake: 25,
+        take_profit: 5,
+        payout_ratio: 1.95, // profit_per_unit = 0.95
+    };
+
+    it('sizes the next stake to the shortfall, not to a fixed base', () => {
+        // One loss of 1.00 leaves pl = -1. Next stake should be
+        // (5 - (-1)) / (4 * 0.95) = 6 / 3.8 = 1.578...
+        const r = runBacktest(px([0, 0]), 2, deficit);
+        // Trade 1 staked 1.00, trade 2 staked ~1.58 -> total ~2.58
+        expect(r.total_staked).toBeCloseTo(2.58, 2);
+        expect(r.final_pl).toBeCloseTo(-2.58, 2);
+    });
+
+    it('scales the stake up as the deficit grows', () => {
+        // Deeper hole -> bigger stake. Three losses in a row must be strictly
+        // increasing under deficit sizing.
+        const r = runBacktest(px([0, 0, 0]), 2, deficit);
+        expect(r.peak_stake).toBeGreaterThan(1);
+        // 1.00, then ~1.58, then ~2.00 — each larger than the last.
+        expect(r.total_staked).toBeGreaterThan(4);
+        expect(r.longest_loss_streak).toBe(3);
+    });
+
+    it('returns to base stake once back above water', () => {
+        // Win first (pl > 0) so there is no deficit; stake stays at base.
+        const r = runBacktest(px([9, 9]), 2, deficit);
+        expect(r.total_staked).toBeCloseTo(2, 2); // 1.00 + 1.00
+    });
+
+    it('clamps at max_stake and counts it, rather than chasing the deficit', () => {
+        // Tiny ceiling forces the clamp immediately after the first loss.
+        const r = runBacktest(px([0, 0, 0]), 2, { ...deficit, max_stake: 1.2 });
+        expect(r.peak_stake).toBe(1.2);
+        expect(r.cap_hits).toBeGreaterThan(0);
+    });
+
+    it('ignores multiplier and step cap in deficit mode', () => {
+        // Same ticks, wildly different ladder settings -> identical result,
+        // proving deficit sizing does not fall through to ladder logic.
+        const a = runBacktest(px([0, 0, 0]), 2, { ...deficit, multiplier: 2, max_steps: 2 });
+        const b = runBacktest(px([0, 0, 0]), 2, { ...deficit, multiplier: 9, max_steps: 0 });
+        expect(a.total_staked).toBeCloseTo(b.total_staked, 6);
+        expect(a.final_pl).toBeCloseTo(b.final_pl, 6);
+    });
+
+    it('does not divide by zero when the payout has no edge to give', () => {
+        // payout_ratio 1 means profit_per_unit 0 — sizing is undefined, so it
+        // must fall back to base rather than producing Infinity.
+        const r = runBacktest(px([0, 0]), 2, { ...deficit, payout_ratio: 1 });
+        expect(Number.isFinite(r.total_staked)).toBe(true);
+        expect(r.total_staked).toBeCloseTo(2, 2);
+    });
+
+    it('leaves ladder mode behaviour unchanged', () => {
+        // The original uncapped-ladder case must still give exactly 1+2+4.
+        const r = runBacktest(px([0, 0, 0]), 2, base);
+        expect(r.final_pl).toBe(-7);
+        expect(r.peak_stake).toBe(4);
+    });
+});
