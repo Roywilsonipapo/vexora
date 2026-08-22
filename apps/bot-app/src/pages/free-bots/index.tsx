@@ -20,35 +20,35 @@ const PREMIUM_BOTS: TBot[] = [
         file: 'v1_over2_x25.xml',
         name: 'Over 2 — x2.5 Ladder',
         description:
-            'Volatility 100, Over 2 (wins on 3-9). Stakes 10 USD, x2.5 after a loss, back to 10 after a win. Take profit 50, stop loss 200.',
+            'Volatility 100 (1s), Over 2 (wins on 3-9). Stakes 10 USD, x2.5 after a loss, back to 10 after a win. Take profit 50, stop loss 200.',
         tag: 'Premium',
     },
     {
         file: 'v2_over1_x25.xml',
         name: 'Over 1 — x2.5 Ladder',
         description:
-            'Volatility 100, Over 1 (wins on 2-9) — a higher hit rate than Over 2 but a smaller payout per win. Same ladder: 10 USD, x2.5, TP 50, SL 200.',
+            'Volatility 100 (1s), Over 1 (wins on 2-9) — a higher hit rate than Over 2 but a smaller payout per win. Same ladder: 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
         file: 'v3_even_x25.xml',
         name: 'Even — x2.5 Ladder',
         description:
-            'Volatility 100, Digit Even. Roughly a coin flip with a near-double payout, so a win recovers far more of a ladder than Over 1 does. 10 USD, x2.5, TP 50, SL 200.',
+            'Volatility 100 (1s), Digit Even. Roughly a coin flip with a near-double payout, so a win recovers far more of a ladder than Over 1 does. 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
         file: 'v4_odd_x25.xml',
         name: 'Odd — x2.5 Ladder',
         description:
-            'Volatility 100, Digit Odd. The mirror of the Even bot, same staking. 10 USD, x2.5, TP 50, SL 200.',
+            'Volatility 100 (1s), Digit Odd. The mirror of the Even bot, same staking. 10 USD, x2.5, TP 50, SL 200.',
         tag: 'Premium',
     },
     {
         file: 'v5_rotator_x25.xml',
         name: 'Rotator — Over/Under x2.5',
         description:
-            'Rotates the contract on each loss: Over 2, then Under 7, then Over 1, then Under 8, then back. Any win resets both the rotation and the stake. 10 USD, x2.5, TP 50, SL 200. Deriv fixes trade type per bot, so this rotates within Over/Under rather than across Even/Odd and Differs.',
+            'Volatility 100 (1s). Rotates the contract on each loss: Over 2, then Under 7, then Over 1, then Under 8, then back. Any win resets both the rotation and the stake. 10 USD, x2.5, TP 50, SL 200. Deriv fixes trade type per bot, so this rotates within Over/Under rather than across Even/Odd and Differs.',
         tag: 'Premium',
     },
 ];
