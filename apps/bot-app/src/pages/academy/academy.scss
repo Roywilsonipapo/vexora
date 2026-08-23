@@ -1,0 +1,319 @@
+// Vexora Academy — reading surface, so it is measured for line length and
+// contrast rather than density. Mobile-first: everything stacks, tables scroll
+// in their own container so the page body never moves sideways.
+.vx-academy {
+    height: 100%;
+    overflow-y: auto;
+    padding: 16px 16px 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+
+    &__head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+
+        h2 {
+            margin: 0 0 4px;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        p {
+            margin: 0;
+            max-width: 62ch;
+            font-size: 12.5px;
+            line-height: 1.6;
+            color: var(--vx-text-dim, #9db2cd);
+        }
+    }
+
+    &__progress {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 180px;
+    }
+
+    &__bar {
+        height: 6px;
+        border-radius: 3px;
+        background: var(--vx-navy-2, #0c1c30);
+        border: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+        overflow: hidden;
+
+        span {
+            display: block;
+            height: 100%;
+            background: var(--vx-green, #16c784);
+            transition: width 0.25s ease;
+        }
+    }
+
+    &__pcount {
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__edge {
+        padding: 16px;
+    }
+
+    &__edgehead {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+
+        h3 {
+            margin: 0;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+            color: var(--vx-text-dim, #9db2cd);
+            border-radius: 8px;
+            padding: 6px 13px;
+            font-size: 11.5px;
+            cursor: pointer;
+
+            &:hover:not(:disabled) {
+                color: var(--vx-text, #e8f0fb);
+                border-color: var(--vx-orange, #f6512c);
+            }
+
+            &:disabled {
+                opacity: 0.6;
+                cursor: default;
+            }
+        }
+    }
+
+    &__edgelede {
+        margin: 0 0 12px;
+        max-width: 70ch;
+        font-size: 12px;
+        line-height: 1.6;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    &__warn {
+        margin: 0 0 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        border-left: 3px solid var(--vx-amber, #f5a623);
+        border-radius: 8px;
+        font-size: 11.5px;
+        line-height: 1.55;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    // Wide content scrolls inside itself so the page never scrolls sideways.
+    &__tablewrap {
+        overflow-x: auto;
+        margin: 12px 0 0;
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            min-width: 420px;
+        }
+
+        th {
+            text-align: left;
+            padding: 8px 10px;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--vx-text-faint, #647c99);
+            border-bottom: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 8px 10px;
+            color: var(--vx-text, #e8f0fb);
+            border-bottom: 1px solid var(--vx-line, rgba(96, 140, 196, 0.12));
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+
+            &.is-neg {
+                color: var(--vx-red, #ef4444);
+            }
+        }
+    }
+
+    &__module {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__modhead {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+
+        h3 {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        span {
+            font-size: 11.5px;
+            color: var(--vx-text-faint, #647c99);
+        }
+    }
+}
+
+.vx-lesson {
+    padding: 0;
+    overflow: hidden;
+
+    &.is-done {
+        border-color: rgba(22, 199, 132, 0.4);
+    }
+
+    &__head {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        background: transparent;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+        color: inherit;
+    }
+
+    &__tick {
+        flex: 0 0 auto;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: var(--vx-green, #16c784);
+    }
+
+    &.is-done &__tick {
+        border-color: var(--vx-green, #16c784);
+        background: rgba(22, 199, 132, 0.12);
+    }
+
+    &__titles {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    &__title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--vx-text, #e8f0fb);
+    }
+
+    &__summary {
+        font-size: 11.5px;
+        line-height: 1.5;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__mins {
+        flex: 0 0 auto;
+        font-size: 10.5px;
+        color: var(--vx-text-faint, #647c99);
+        white-space: nowrap;
+    }
+
+    &__body {
+        padding: 0 14px 14px;
+        border-top: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+
+        p {
+            margin: 12px 0 0;
+            max-width: 68ch;
+            font-size: 12.5px;
+            line-height: 1.7;
+            color: var(--vx-text-dim, #9db2cd);
+        }
+    }
+
+    &__takeaway {
+        margin-top: 14px !important;
+        padding: 10px 12px;
+        border-left: 3px solid var(--vx-orange, #f6512c);
+        background: var(--vx-navy-2, #0c1c30);
+        border-radius: 0 8px 8px 0;
+        color: var(--vx-text, #e8f0fb) !important;
+
+        strong {
+            color: var(--vx-orange, #f6512c);
+        }
+    }
+
+    &__done {
+        margin-top: 14px;
+        background: transparent;
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        color: var(--vx-text-dim, #9db2cd);
+        border-radius: 8px;
+        padding: 8px 15px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--vx-text, #e8f0fb);
+            border-color: var(--vx-green, #16c784);
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .vx-academy {
+        padding: 12px 12px 96px;
+
+        &__head {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        &__progress {
+            min-width: 0;
+        }
+
+        &__edge {
+            padding: 12px;
+        }
+    }
+
+    .vx-lesson__head {
+        padding: 11px 12px;
+    }
+
+    .vx-lesson__body {
+        padding: 0 12px 12px;
+    }
+}

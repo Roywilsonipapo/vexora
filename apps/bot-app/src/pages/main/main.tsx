@@ -41,6 +41,7 @@ import { Localize, localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
 import VxRunBar from '@/components/vx-run-bar';
+import Academy from '../academy';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import FreeBots from '../free-bots';
@@ -126,7 +127,7 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'market_analysis', 'free_bots', 'risk_calculator'];
+    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'market_analysis', 'free_bots', 'risk_calculator', 'academy'];
     const { isDesktop } = useDevice();
     const location = useLocation();
     const navigate = useNavigate();
@@ -555,6 +556,24 @@ const AppWrapper = observer(() => {
                             >
                                 <VxTabBoundary label='Risk Calculator'>
                                     <RiskCalculator />
+                                </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LegacyGuide1pxIcon
+                                            height='16px'
+                                            width='16px'
+                                            fill='var(--text-general)'
+                                            className='icon-general-fill-g-path'
+                                        />
+                                        <Localize i18n_default_text='Academy' />
+                                    </>
+                                }
+                                id='id-academy'
+                            >
+                                <VxTabBoundary label='Academy'>
+                                    <Academy />
                                 </VxTabBoundary>
                             </div>
                         </Tabs>
