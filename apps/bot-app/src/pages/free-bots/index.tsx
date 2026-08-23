@@ -51,6 +51,36 @@ const PREMIUM_BOTS: TBot[] = [
             'Volatility 100 (1s). Rotates the contract on each loss: Over 2, then Under 7, then Over 1, then Under 8, then back. Any win resets both the rotation and the stake. 10 USD, x2.5, TP 50, SL 200. Deriv fixes trade type per bot, so this rotates within Over/Under rather than across Even/Odd and Differs.',
         tag: 'Premium',
     },
+    // --- Gated entry -------------------------------------------------------
+    // Same staking as above, but each only buys when its condition holds, so
+    // they sit out most ticks instead of firing on every one.
+    //
+    // Worth being exact about what a gate does: it changes HOW OFTEN you
+    // trade, not the odds of any single trade. Ticks are independent, so
+    // "after a fall" or "after a low digit" tells you nothing about the next
+    // digit. Fewer, more deliberate trades is a real difference in pace and
+    // variance — it is not an edge, and the descriptions do not pretend it is.
+    {
+        file: 's1_gated_over2_lowdigit.xml',
+        name: 'Gated Over 2 — after a low digit',
+        description:
+            'Only buys Over 2 when the last digit was 2 or lower, so it skips most ticks. Same 10 USD x2.5 ladder, TP 50, SL 200. The gate sets how often it trades, not the odds of each trade.',
+        tag: 'Premium',
+    },
+    {
+        file: 's2_gated_even_afterfall.xml',
+        name: 'Gated Even — after a fall',
+        description:
+            'Only buys Even when the previous tick fell. Even pays near 2x, the best payout of the common contracts, so each win is worth far more than an Over 1 win. 10 USD x2.5, TP 50, SL 200.',
+        tag: 'Premium',
+    },
+    {
+        file: 's3_gated_over1_highrise.xml',
+        name: 'Gated Over 1 — high digit and rising',
+        description:
+            'The most selective of the three: buys Over 1 only when the last digit was 5 or higher AND the tick rose. Both conditions must hold, so it trades rarely. 10 USD x2.5, TP 50, SL 200.',
+        tag: 'Premium',
+    },
 ];
 
 const BOTS: TBot[] = [

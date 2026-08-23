@@ -1,0 +1,101 @@
+<xml xmlns="https://developers.google.com/blockly/xml" is_dbot="true" collection="false">
+<variables>
+<variable id="vStake">Stake</variable>
+<variable id="vInitialStake">InitialStake</variable>
+<variable id="vMultiplier">Multiplier</variable>
+<variable id="vTakeProfit">TakeProfit</variable>
+<variable id="vStopLoss">StopLoss</variable>
+<variable id="vMessage">Message</variable>
+</variables>
+<block type="trade_definition" id="vTradeDef" deletable="false" x="0" y="60">
+<statement name="TRADE_OPTIONS">
+<block type="trade_definition_market" id="vMarket" deletable="false" movable="false"><field name="MARKET_LIST">synthetic_index</field><field name="SUBMARKET_LIST">random_index</field><field name="SYMBOL_LIST">1HZ100V</field>
+<next><block type="trade_definition_tradetype" id="vTradeType" deletable="false" movable="false"><field name="TRADETYPECAT_LIST">digits</field><field name="TRADETYPE_LIST">evenodd</field>
+<next><block type="trade_definition_contracttype" id="vContractType" deletable="false" movable="false"><field name="TYPE_LIST">DIGITEVEN</field>
+<next><block type="trade_definition_candleinterval" id="vCandle" deletable="false" movable="false"><field name="CANDLEINTERVAL_LIST">60</field>
+<next><block type="trade_definition_restartbuysell" id="vRestartBuy" deletable="false" movable="false"><field name="TIME_MACHINE_ENABLED">FALSE</field>
+<next><block type="trade_definition_restartonerror" id="vRestartErr" deletable="false" movable="false"><field name="RESTARTONERROR">TRUE</field></block></next>
+</block></next></block></next></block></next></block></next></block>
+</statement>
+<statement name="INITIALIZATION">
+<block type="variables_set" id="vSetInitial"><field name="VAR" id="vInitialStake">InitialStake</field><value name="VALUE"><block type="math_number" id="vNumInitial"><field name="NUM">10</field></block></value>
+<next><block type="variables_set" id="vSetStake"><field name="VAR" id="vStake">Stake</field><value name="VALUE"><block type="variables_get" id="vGetInitial1"><field name="VAR" id="vInitialStake">InitialStake</field></block></value>
+<next><block type="variables_set" id="vSetMult"><field name="VAR" id="vMultiplier">Multiplier</field><value name="VALUE"><block type="math_number" id="vNumMult"><field name="NUM">2.5</field></block></value>
+<next><block type="variables_set" id="vSetTP"><field name="VAR" id="vTakeProfit">TakeProfit</field><value name="VALUE"><block type="math_number" id="vNumTP"><field name="NUM">50</field></block></value>
+<next><block type="variables_set" id="vSetSL"><field name="VAR" id="vStopLoss">StopLoss</field><value name="VALUE"><block type="math_number" id="vNumSL"><field name="NUM">200</field></block></value></block></next>
+</block></next></block></next></block></next></block>
+</statement>
+<statement name="SUBMARKET">
+<block type="trade_definition_tradeoptions" id="vTradeOpts"><mutation has_first_barrier="false" has_second_barrier="false" has_prediction="false"></mutation><field name="DURATIONTYPE_LIST">t</field>
+<value name="DURATION"><shadow type="math_number_positive" id="vShDuration"><field name="NUM">1</field></shadow></value>
+<value name="AMOUNT"><shadow type="math_number_positive" id="vShAmount"><field name="NUM">10</field></shadow><block type="variables_get" id="vGetStakeAmt"><field name="VAR" id="vStake">Stake</field></block></value>
+
+</block>
+</statement>
+</block>
+<block type="before_purchase" id="vBeforePurchase" deletable="false" x="0" y="900">
+<statement name="BEFOREPURCHASE_STACK"><block type="controls_if" id="sGate"><value name="IF0"><block type="check_direction" id="sDir"><field name="CHECK_DIRECTION">fall</field></block></value><statement name="DO0"><block type="purchase" id="sPur"><field name="PURCHASE_LIST">DIGITEVEN</field></block></statement></block></statement>
+</block>
+<block type="after_purchase" id="vAfterPurchase" x="0" y="1400">
+<statement name="AFTERPURCHASE_STACK">
+<block type="controls_if" id="vIfWin"><mutation else="1"></mutation>
+<value name="IF0"><block type="contract_check_result" id="vCheckWin"><field name="CHECK_RESULT">win</field></block></value>
+<statement name="DO0">
+<block type="variables_set" id="vWinReset"><field name="VAR" id="vStake">Stake</field><value name="VALUE"><block type="variables_get" id="vGetInitial2"><field name="VAR" id="vInitialStake">InitialStake</field></block></value></block>
+</statement>
+<statement name="ELSE">
+<block type="variables_set" id="vLossMultiply"><field name="VAR" id="vStake">Stake</field>
+<value name="VALUE"><block type="math_arithmetic" id="vStakeTimesMult"><field name="OP">MULTIPLY</field>
+<value name="A"><shadow type="math_number" id="vShMultA"><field name="NUM">1</field></shadow><block type="variables_get" id="vGetStake2"><field name="VAR" id="vStake">Stake</field></block></value>
+<value name="B"><shadow type="math_number" id="vShMultB"><field name="NUM">1</field></shadow><block type="variables_get" id="vGetMult"><field name="VAR" id="vMultiplier">Multiplier</field></block></value>
+</block></value>
+</block>
+</statement>
+<next>
+<block type="controls_if" id="vIfTP"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="vCmpTP"><field name="OP">GTE</field>
+<value name="A"><block type="total_profit" id="vTP1"></block></value>
+<value name="B"><block type="variables_get" id="vGetTP"><field name="VAR" id="vTakeProfit">TakeProfit</field></block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="vJoinWin"><field name="VARIABLE" id="vMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="vWinTxt1"><value name="TEXT"><shadow type="text" id="vShWin1"><field name="TEXT">Take profit reached. Session profit</field></shadow></value>
+<next><block type="text_statement" id="vWinTxt2"><value name="TEXT"><block type="total_profit" id="vTP2"></block></value>
+<next><block type="text_statement" id="vWinTxt3"><value name="TEXT"><shadow type="text" id="vShWin3"><field name="TEXT">- stopping.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="vNotifyWin"><field name="NOTIFICATION_TYPE">success</field><field name="NOTIFICATION_SOUND">earned-money</field><value name="MESSAGE"><block type="variables_get" id="vGetMsgWin"><field name="VAR" id="vMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE">
+<block type="controls_if" id="vIfSL"><mutation else="1"></mutation>
+<value name="IF0"><block type="logic_compare" id="vCmpSL"><field name="OP">LTE</field>
+<value name="A"><block type="total_profit" id="vTP3"></block></value>
+<value name="B"><block type="math_arithmetic" id="vNegSL"><field name="OP">MINUS</field>
+<value name="A"><shadow type="math_number" id="vShNegA"><field name="NUM">0</field></shadow><block type="math_number" id="vNumZero"><field name="NUM">0</field></block></value>
+<value name="B"><shadow type="math_number" id="vShNegB"><field name="NUM">0</field></shadow><block type="variables_get" id="vGetSL"><field name="VAR" id="vStopLoss">StopLoss</field></block></value>
+</block></value>
+</block></value>
+<statement name="DO0">
+<block type="text_join" id="vJoinLoss"><field name="VARIABLE" id="vMessage">Message</field>
+<statement name="STACK">
+<block type="text_statement" id="vLossTxt1"><value name="TEXT"><shadow type="text" id="vShLoss1"><field name="TEXT">Stop loss reached at</field></shadow></value>
+<next><block type="text_statement" id="vLossTxt2"><value name="TEXT"><block type="total_profit" id="vTP4"></block></value>
+<next><block type="text_statement" id="vLossTxt3"><value name="TEXT"><shadow type="text" id="vShLoss3"><field name="TEXT">- stopping to protect the balance.</field></shadow></value></block></next>
+</block></next>
+</block>
+</statement>
+</block>
+<next><block type="notify" id="vNotifyLoss"><field name="NOTIFICATION_TYPE">error</field><field name="NOTIFICATION_SOUND">severe-error</field><value name="MESSAGE"><block type="variables_get" id="vGetMsgLoss"><field name="VAR" id="vMessage">Message</field></block></value></block></next>
+</statement>
+<statement name="ELSE"><block type="trade_again" id="vTradeAgain"></block></statement>
+</block>
+</statement>
+</block>
+</next>
+</block>
+</statement>
+</block>
+</xml>
