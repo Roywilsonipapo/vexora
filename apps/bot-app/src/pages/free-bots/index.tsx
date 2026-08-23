@@ -61,6 +61,20 @@ const PREMIUM_BOTS: TBot[] = [
     // digit. Fewer, more deliberate trades is a real difference in pace and
     // variance — it is not an edge, and the descriptions do not pretend it is.
     {
+        file: 'g1_over1_gate01.xml',
+        name: 'Over 1 — enter only after 0 or 1',
+        description:
+            'Buys Over 1 (wins on 2-9) only when the last digit was 0 or 1, skipping every other tick. 10 USD, x2.5 on loss, TP 50, SL 200.',
+        tag: 'Premium',
+    },
+    {
+        file: 'g2_over3_gate0123.xml',
+        name: 'Over 3 — enter only after 0-3',
+        description:
+            'Buys Over 3 (wins on 4-9) only when the last digit was 0, 1, 2 or 3. Trades less often than the Over 1 version but pays more per win. 10 USD, x2.5 on loss, TP 50, SL 200.',
+        tag: 'Premium',
+    },
+    {
         file: 's1_gated_over2_lowdigit.xml',
         name: 'Gated Over 2 — after a low digit',
         description:
