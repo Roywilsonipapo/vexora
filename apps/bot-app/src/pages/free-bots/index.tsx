@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { loadStrategyIntoBuilder } from './load-strategy';
@@ -9,7 +10,26 @@ type TBot = {
     name: string;
     description: string;
     tag: string;
+    // Distinct visual treatment for a specific flagship bot. Not a system —
+    // just a hook for the one card that was asked to stand out.
+    theme?: 'gold-robotic';
 };
+
+// Small geometric robot glyph — the icon set has no robot, and this is
+// simple enough (five primitive shapes) that hand-drawing it carries none of
+// the risk complex path data would.
+const RobotGlyph = () => (
+    <svg viewBox='0 0 24 24' width='18' height='18' fill='none' aria-hidden='true'>
+        <rect x='5' y='3' width='2' height='3' fill='currentColor' />
+        <circle cx='6' cy='2.5' r='1.4' fill='currentColor' />
+        <rect x='4' y='7' width='16' height='13' rx='3.5' stroke='currentColor' strokeWidth='1.6' />
+        <circle cx='9.5' cy='13' r='1.6' fill='currentColor' />
+        <circle cx='14.5' cy='13' r='1.6' fill='currentColor' />
+        <rect x='8.5' y='16.5' width='7' height='1.6' rx='0.8' fill='currentColor' />
+        <rect x='0.5' y='11' width='2.2' height='5' rx='1.1' fill='currentColor' />
+        <rect x='21.3' y='11' width='2.2' height='5' rx='1.1' fill='currentColor' />
+    </svg>
+);
 
 // --- Premium: fixed-ladder bots ------------------------------------------
 // One staking rule across all five, to Roy's spec: 10 USD base, x2.5 after a
@@ -73,6 +93,14 @@ const PREMIUM_BOTS: TBot[] = [
         description:
             'Buys Over 3 (wins on 4-9) only when the last digit was 0, 1, 2 or 3. Trades less often than the Over 1 version but pays more per win. 10 USD, x2.5 on loss, TP 50, SL 200.',
         tag: 'Premium',
+    },
+    {
+        file: 'g6_over1_everytick_x5_gold.xml',
+        name: 'Over 1 — every tick, x5',
+        description:
+            'No gate — buys Over 1 on every tick. 10 USD base, x5 on loss (steeper than the x2.5 bots, so the ladder climbs faster: 10, 50, 250 — three losses alone exceeds the 300 stop). Take profit 4.60, stop loss 300.',
+        tag: 'Premium',
+        theme: 'gold-robotic',
     },
     // --- Over 3 / Under 3 pair --------------------------------------------
     // Two separate bots (Deriv can't fire two contracts from one bot on the
@@ -359,7 +387,17 @@ const FreeBots = observer(() => {
             </div>
             <div className='vx-freebots__grid'>
                 {BOTS.filter(FILTERS.find(f => f.id === filter)?.match ?? (() => true)).map(bot => (
-                    <div className='vx-freebots__card' key={bot.file}>
+                    <div
+                        className={classNames('vx-freebots__card', {
+                            'vx-freebots__card--gold': bot.theme === 'gold-robotic',
+                        })}
+                        key={bot.file}
+                    >
+                        {bot.theme === 'gold-robotic' && (
+                            <span className='vx-freebots__badge'>
+                                <RobotGlyph />
+                            </span>
+                        )}
                         <span className='vx-freebots__tag'>{bot.tag}</span>
                         <h3>{bot.name}</h3>
                         <p>{bot.description}</p>
