@@ -74,6 +74,34 @@ const PREMIUM_BOTS: TBot[] = [
             'Buys Over 3 (wins on 4-9) only when the last digit was 0, 1, 2 or 3. Trades less often than the Over 1 version but pays more per win. 10 USD, x2.5 on loss, TP 50, SL 200.',
         tag: 'Premium',
     },
+    // --- Over 3 / Under 3 pair --------------------------------------------
+    // Two separate bots (Deriv can't fire two contracts from one bot on the
+    // same tick — see the note on the Rotator above) sharing the identical
+    // entry gate, so run them in two sessions to have both act on the same
+    // ticks. Different stakes, same trigger.
+    //
+    // This does NOT lock in a win. Under 3 wins on 0-2 and loses on 3-9 — on
+    // digit 3 specifically, BOTH legs lose at once (-3 and -1 together), which
+    // is the case a "the win always covers the loss" read of this pairing
+    // misses. Combining two negative-edge bets on the same draw cannot turn
+    // them into a positive-edge one, whatever the stakes — that holds even at
+    // zero house edge, before Deriv's real edge makes it worse. What this
+    // changes is the shape of outcomes (more frequent small gains, a rarer
+    // larger loss), not the expected result.
+    {
+        file: 'g4_over3_x3_gate0123.xml',
+        name: 'Over 3 — 3 USD, enter after 0-3',
+        description:
+            'Buys Over 3 (wins on 4-9) at 3 USD only when the last digit was 0-3. Pairs with the 1 USD Under 3 bot below on the same gate — run both to have them act on the same ticks. x2.5 on loss, TP 50, SL 200.',
+        tag: 'Premium',
+    },
+    {
+        file: 'g5_under3_x1_gate0123.xml',
+        name: 'Under 3 — 1 USD, enter after 0-3',
+        description:
+            'Buys Under 3 (wins on 0-2) at 1 USD on the same gate as the 3 USD Over 3 bot above. On digit 3 specifically, both lose together — this pairing changes the shape of outcomes, it does not remove the house edge. x2.5 on loss, TP 50, SL 200.',
+        tag: 'Premium',
+    },
     {
         file: 's1_gated_over2_lowdigit.xml',
         name: 'Gated Over 2 — after a low digit',
