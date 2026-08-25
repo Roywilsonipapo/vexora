@@ -11,8 +11,8 @@ type TBot = {
     description: string;
     tag: string;
     // Distinct visual treatment for a specific flagship bot. Not a system —
-    // just a hook for the one card that was asked to stand out.
-    theme?: 'gold-robotic';
+    // just a hook for the handful of cards that were asked to stand out.
+    theme?: 'gold-robotic' | 'vvip-gold';
 };
 
 // Small geometric robot glyph — the icon set has no robot, and this is
@@ -28,6 +28,20 @@ const RobotGlyph = () => (
         <rect x='8.5' y='16.5' width='7' height='1.6' rx='0.8' fill='currentColor' />
         <rect x='0.5' y='11' width='2.2' height='5' rx='1.1' fill='currentColor' />
         <rect x='21.3' y='11' width='2.2' height='5' rx='1.1' fill='currentColor' />
+    </svg>
+);
+
+// Hexagonal chip/crest glyph for the VVIP card — deliberately distinct from
+// the robot above so the two flagship cards don't read as the same badge.
+const ChipGlyph = () => (
+    <svg viewBox='0 0 24 24' width='16' height='16' fill='none' aria-hidden='true'>
+        <path
+            d='M12 2 21 7v10l-9 5-9-5V7z'
+            stroke='currentColor'
+            strokeWidth='1.5'
+            strokeLinejoin='round'
+        />
+        <path d='M12 8 16 10.5v5L12 18l-4-2.5v-5z' fill='currentColor' opacity='0.9' />
     </svg>
 );
 
@@ -101,6 +115,14 @@ const PREMIUM_BOTS: TBot[] = [
             'No gate — buys Over 1 on every tick. 10 USD base, x5 on loss (steeper than the x2.5 bots, so the ladder climbs faster: 10, 50, 250 — three losses alone exceeds the 300 stop). Take profit 4.60, stop loss 300.',
         tag: 'Premium',
         theme: 'gold-robotic',
+    },
+    {
+        file: 'g7_over1_everytick_x7_vvip.xml',
+        name: 'Over 1 — every tick, x7',
+        description:
+            'The x5 bot above, unchanged, plus this separate x7 sibling: 10, 70, 490 on loss — two losses (80 total) stay under the 300 stop, but a third (490) blows straight past it in one trade, steeper than every other ladder here. Take profit 4.60, stop loss 300.',
+        tag: 'Premium',
+        theme: 'vvip-gold',
     },
     // --- Over 3 / Under 3 pair --------------------------------------------
     // Two separate bots (Deriv can't fire two contracts from one bot on the
@@ -390,13 +412,23 @@ const FreeBots = observer(() => {
                     <div
                         className={classNames('vx-freebots__card', {
                             'vx-freebots__card--gold': bot.theme === 'gold-robotic',
+                            'vx-freebots__card--vvip': bot.theme === 'vvip-gold',
                         })}
                         key={bot.file}
                     >
+                        {bot.theme === 'vvip-gold' && <span className='vx-freebots__vvip-sheen' aria-hidden='true' />}
                         {bot.theme === 'gold-robotic' && (
                             <span className='vx-freebots__badge'>
                                 <RobotGlyph />
                             </span>
+                        )}
+                        {bot.theme === 'vvip-gold' && (
+                            <>
+                                <span className='vx-freebots__vvip-pill'>VVIP</span>
+                                <span className='vx-freebots__badge vx-freebots__badge--chip'>
+                                    <ChipGlyph />
+                                </span>
+                            </>
                         )}
                         <span className='vx-freebots__tag'>{bot.tag}</span>
                         <h3>{bot.name}</h3>

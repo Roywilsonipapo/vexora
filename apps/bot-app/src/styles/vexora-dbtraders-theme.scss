@@ -506,6 +506,129 @@
     background: rgba(212, 175, 55, 0.14);
     color: #d4af37;
     border: 1px solid rgba(212, 175, 55, 0.4);
+    z-index: 2;
+}
+
+// VVIP flagship card — one deliberate showpiece, not a reusable rarity tier.
+// Onyx-to-gold radial bloom (the GPU-box-art look that was asked for),
+// tech-card corner brackets, a glowing gradient title, and a slow diagonal
+// light sweep. The sweep is the one place motion earns its keep here — it is
+// the single animated flourish on the whole page, gated behind
+// prefers-reduced-motion below.
+.theme--dark .vx-freebots__card--vvip {
+    position: relative;
+    overflow: hidden;
+    background: radial-gradient(120% 100% at 100% 0%, rgba(255, 215, 130, 0.16), transparent 55%),
+        radial-gradient(90% 90% at 0% 100%, rgba(212, 175, 55, 0.08), transparent 60%),
+        linear-gradient(160deg, #0d0904 0%, #1a1206 45%, var(--vx-panel) 100%) !important;
+    border: 1px solid rgba(255, 215, 130, 0.55) !important;
+    box-shadow: 0 0 0 1px rgba(255, 215, 130, 0.18), 0 0 28px rgba(212, 175, 55, 0.22),
+        inset 0 1px 0 rgba(255, 235, 180, 0.12) !important;
+
+    // Corner brackets — the one place a hard geometric accent reads as
+    // "instrumentation" rather than clutter, echoing the hexagonal chip glyph.
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid rgba(255, 215, 130, 0.7);
+        pointer-events: none;
+        z-index: 2;
+    }
+    &::before {
+        top: 8px;
+        left: 8px;
+        border-right: none;
+        border-bottom: none;
+    }
+    &::after {
+        bottom: 8px;
+        right: 8px;
+        border-left: none;
+        border-top: none;
+    }
+
+    h3 {
+        background: linear-gradient(90deg, #fff3d0, #f5d67a 35%, #d4af37 70%, #b8860b);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent !important;
+        text-shadow: 0 0 18px rgba(212, 175, 55, 0.35);
+    }
+
+    .vx-freebots__tag {
+        background: rgba(255, 215, 130, 0.18) !important;
+        color: #fbe4a0 !important;
+    }
+
+    .vx-freebots__load {
+        border-color: rgba(255, 215, 130, 0.65) !important;
+        color: #fbe4a0 !important;
+        &:hover {
+            background: rgba(255, 215, 130, 0.14) !important;
+        }
+    }
+}
+
+// Absolutely positioned with no explicit z-index, painted after the card's
+// static text content in the stacking order, so it sweeps ABOVE the copy as
+// a translucent highlight rather than under it — the pill and chip badge
+// render after this in the DOM so they stay crisp on top of the sweep.
+.theme--dark .vx-freebots__vvip-sheen {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        115deg,
+        transparent 20%,
+        rgba(255, 235, 180, 0.14) 32%,
+        rgba(255, 235, 180, 0.26) 38%,
+        rgba(255, 235, 180, 0.14) 44%,
+        transparent 56%
+    );
+    background-size: 250% 250%;
+    background-position: -60% -60%;
+    animation: vx-vvip-sheen 4.5s ease-in-out infinite;
+}
+
+@keyframes vx-vvip-sheen {
+    0% {
+        background-position: -60% -60%;
+    }
+    45%,
+    100% {
+        background-position: 130% 130%;
+    }
+}
+
+.theme--dark .vx-freebots__vvip-pill {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.09em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #0d0904;
+    color: #f5d67a;
+    border: 1px solid rgba(255, 215, 130, 0.6);
+    z-index: 2;
+}
+
+.theme--dark .vx-freebots__badge--chip {
+    background: rgba(255, 215, 130, 0.14);
+    color: #f5d67a;
+    border-color: rgba(255, 215, 130, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .theme--dark .vx-freebots__vvip-sheen {
+        animation: none;
+        display: none;
+    }
 }
 
 // The tabs library draws its own active-tab underline via an ::after with no
