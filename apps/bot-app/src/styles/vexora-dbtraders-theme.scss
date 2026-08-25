@@ -624,10 +624,99 @@
     border-color: rgba(255, 215, 130, 0.55);
 }
 
+// Legendary flagship card — the tier above VVIP, so it needs to read as
+// distinctly further rather than a gold reskin. Deep violet-onyx base, a
+// genuine holo-foil ring (conic-gradient masked to a hollow frame via
+// mask-composite: exclude, so it can never obscure the text underneath
+// regardless of paint order — the ring's own interior is transparent), and a
+// slow-shifting rainbow gradient on the title.
+.theme--dark .vx-freebots__card--legendary {
+    position: relative;
+    background: linear-gradient(165deg, #0a0612 0%, #170d28 45%, var(--vx-panel) 100%) !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 0 30px rgba(127, 92, 255, 0.16), 0 0 16px rgba(34, 211, 238, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+
+    h3 {
+        background: linear-gradient(90deg, #f5d67a, #ff6fae 30%, #7f5cff 55%, #22d3ee 80%, #f5d67a);
+        background-size: 220% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent !important;
+        text-shadow: 0 0 16px rgba(127, 92, 255, 0.35);
+        animation: vx-legendary-title-shift 6s linear infinite;
+    }
+
+    .vx-freebots__tag {
+        background: rgba(127, 92, 255, 0.18) !important;
+        color: #d9c9ff !important;
+    }
+
+    .vx-freebots__load {
+        border-color: rgba(127, 92, 255, 0.55) !important;
+        color: #d9c9ff !important;
+        &:hover {
+            background: rgba(127, 92, 255, 0.14) !important;
+        }
+    }
+}
+
+.theme--dark .vx-freebots__legendary-ring {
+    position: absolute;
+    inset: -2px;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: conic-gradient(from 0deg, #f5d67a, #ff6fae, #7f5cff, #22d3ee, #f5d67a);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    animation: vx-legendary-spin 5s linear infinite;
+}
+
+@keyframes vx-legendary-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes vx-legendary-title-shift {
+    to {
+        background-position: -220% 0;
+    }
+}
+
+.theme--dark .vx-freebots__legendary-pill {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: #0a0612;
+    color: #d9c9ff;
+    border: 1px solid rgba(127, 92, 255, 0.55);
+    z-index: 2;
+}
+
+.theme--dark .vx-freebots__badge--crown {
+    background: rgba(127, 92, 255, 0.14);
+    color: #cbb8ff;
+    border-color: rgba(127, 92, 255, 0.5);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .theme--dark .vx-freebots__vvip-sheen {
         animation: none;
         display: none;
+    }
+    .theme--dark .vx-freebots__legendary-ring {
+        animation: none;
+    }
+    .theme--dark .vx-freebots__card--legendary h3 {
+        animation: none;
     }
 }
 

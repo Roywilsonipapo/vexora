@@ -12,7 +12,7 @@ type TBot = {
     tag: string;
     // Distinct visual treatment for a specific flagship bot. Not a system —
     // just a hook for the handful of cards that were asked to stand out.
-    theme?: 'gold-robotic' | 'vvip-gold';
+    theme?: 'gold-robotic' | 'vvip-gold' | 'legendary-holo';
 };
 
 // Small geometric robot glyph — the icon set has no robot, and this is
@@ -42,6 +42,18 @@ const ChipGlyph = () => (
             strokeLinejoin='round'
         />
         <path d='M12 8 16 10.5v5L12 18l-4-2.5v-5z' fill='currentColor' opacity='0.9' />
+    </svg>
+);
+
+// Crown glyph for the legendary card — a tier above the chip, so it needs to
+// read as distinctly "higher" rather than a third variation on the same idea.
+const CrownGlyph = () => (
+    <svg viewBox='0 0 24 24' width='16' height='16' fill='none' aria-hidden='true'>
+        <path
+            d='M4 18h16l1.4-9-5.2 3.5L12 6l-4.2 6.5L2.6 9z'
+            fill='currentColor'
+        />
+        <rect x='4' y='19' width='16' height='2' rx='1' fill='currentColor' />
     </svg>
 );
 
@@ -123,6 +135,14 @@ const PREMIUM_BOTS: TBot[] = [
             'The x5 bot above, unchanged, plus this separate x7 sibling: 10, 70, 490 on loss — two losses (80 total) stay under the 300 stop, but a third (490) blows straight past it in one trade, steeper than every other ladder here. Take profit 4.60, stop loss 300.',
         tag: 'Premium',
         theme: 'vvip-gold',
+    },
+    {
+        file: 'g8_over1_everytick_x7_stake2_legendary.xml',
+        name: 'Over 1 — every tick, x7, 2 USD',
+        description:
+            'Same x7 ladder as the VVIP card, restaked small: 2, 14, 98 on loss — two losses (16 total) stay under the 30 stop, but a third (98) blows far past it in one trade. Take profit is only 2, and stake resets to base after every win, so it typically takes several wins in a row to clear it — a single post-loss win at the escalated stake clears it instantly instead.',
+        tag: 'Premium',
+        theme: 'legendary-holo',
     },
     // --- Over 3 / Under 3 pair --------------------------------------------
     // Two separate bots (Deriv can't fire two contracts from one bot on the
@@ -413,9 +433,11 @@ const FreeBots = observer(() => {
                         className={classNames('vx-freebots__card', {
                             'vx-freebots__card--gold': bot.theme === 'gold-robotic',
                             'vx-freebots__card--vvip': bot.theme === 'vvip-gold',
+                            'vx-freebots__card--legendary': bot.theme === 'legendary-holo',
                         })}
                         key={bot.file}
                     >
+                        {bot.theme === 'legendary-holo' && <span className='vx-freebots__legendary-ring' aria-hidden='true' />}
                         {bot.theme === 'vvip-gold' && <span className='vx-freebots__vvip-sheen' aria-hidden='true' />}
                         {bot.theme === 'gold-robotic' && (
                             <span className='vx-freebots__badge'>
@@ -427,6 +449,14 @@ const FreeBots = observer(() => {
                                 <span className='vx-freebots__vvip-pill'>VVIP</span>
                                 <span className='vx-freebots__badge vx-freebots__badge--chip'>
                                     <ChipGlyph />
+                                </span>
+                            </>
+                        )}
+                        {bot.theme === 'legendary-holo' && (
+                            <>
+                                <span className='vx-freebots__legendary-pill'>LEGENDARY</span>
+                                <span className='vx-freebots__badge vx-freebots__badge--crown'>
+                                    <CrownGlyph />
                                 </span>
                             </>
                         )}
