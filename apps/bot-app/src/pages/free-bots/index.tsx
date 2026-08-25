@@ -12,7 +12,7 @@ type TBot = {
     tag: string;
     // Distinct visual treatment for a specific flagship bot. Not a system —
     // just a hook for the handful of cards that were asked to stand out.
-    theme?: 'gold-robotic' | 'vvip-gold' | 'legendary-holo';
+    theme?: 'gold-robotic' | 'vvip-gold' | 'legendary-holo' | 'mythic-prism';
 };
 
 // Small geometric robot glyph — the icon set has no robot, and this is
@@ -54,6 +54,18 @@ const CrownGlyph = () => (
             fill='currentColor'
         />
         <rect x='4' y='19' width='16' height='2' rx='1' fill='currentColor' />
+    </svg>
+);
+
+// Four-point sparkle for the mythic card — a tier above the crown, kept
+// visually distinct from the other three badges (robot / chip / crown) so
+// four flagship cards don't start to blur into each other.
+const SparkleGlyph = () => (
+    <svg viewBox='0 0 24 24' width='16' height='16' fill='none' aria-hidden='true'>
+        <path
+            d='M12 2 14 10 22 12 14 14 12 22 10 14 2 12 10 10Z'
+            fill='currentColor'
+        />
     </svg>
 );
 
@@ -143,6 +155,13 @@ const PREMIUM_BOTS: TBot[] = [
             'Same x7 ladder as the VVIP card, restaked small: 2, 14, 98 on loss — two losses (16 total) stay under the 30 stop, but a third (98) blows far past it in one trade. Take profit is only 2, and stake resets to base after every win, so it typically takes several wins in a row to clear it — a single post-loss win at the escalated stake clears it instantly instead.',
         tag: 'Premium',
         theme: 'legendary-holo',
+    },
+    {
+        file: 'g9_over2_everytick_x7_stake2_mythic.xml',
+        name: 'Over 2 — Akaikaze',
+        description: 'Its shape is only fully known once loaded.',
+        tag: 'Premium',
+        theme: 'mythic-prism',
     },
     // --- Over 3 / Under 3 pair --------------------------------------------
     // Two separate bots (Deriv can't fire two contracts from one bot on the
@@ -434,9 +453,16 @@ const FreeBots = observer(() => {
                             'vx-freebots__card--gold': bot.theme === 'gold-robotic',
                             'vx-freebots__card--vvip': bot.theme === 'vvip-gold',
                             'vx-freebots__card--legendary': bot.theme === 'legendary-holo',
+                            'vx-freebots__card--mythic': bot.theme === 'mythic-prism',
                         })}
                         key={bot.file}
                     >
+                        {bot.theme === 'mythic-prism' && (
+                            <>
+                                <span className='vx-freebots__mythic-ring vx-freebots__mythic-ring--outer' aria-hidden='true' />
+                                <span className='vx-freebots__mythic-ring vx-freebots__mythic-ring--inner' aria-hidden='true' />
+                            </>
+                        )}
                         {bot.theme === 'legendary-holo' && <span className='vx-freebots__legendary-ring' aria-hidden='true' />}
                         {bot.theme === 'vvip-gold' && <span className='vx-freebots__vvip-sheen' aria-hidden='true' />}
                         {bot.theme === 'gold-robotic' && (
@@ -459,6 +485,11 @@ const FreeBots = observer(() => {
                                     <CrownGlyph />
                                 </span>
                             </>
+                        )}
+                        {bot.theme === 'mythic-prism' && (
+                            <span className='vx-freebots__badge vx-freebots__badge--sparkle'>
+                                <SparkleGlyph />
+                            </span>
                         )}
                         <span className='vx-freebots__tag'>{bot.tag}</span>
                         <h3>{bot.name}</h3>

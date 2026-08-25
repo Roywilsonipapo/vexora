@@ -707,6 +707,88 @@
     border-color: rgba(127, 92, 255, 0.5);
 }
 
+// Mythic — one tier above legendary, reserved for the card that deliberately
+// withholds its own description. The visual has to carry more of the weight
+// than the copy does: two counter-rotating rings for depth instead of one,
+// a slow breathing glow, and a hidden identity (no pill — the point is that
+// the name and the visual are the only things offered).
+.theme--dark .vx-freebots__card--mythic {
+    position: relative;
+    background: radial-gradient(140% 120% at 50% -10%, rgba(168, 85, 247, 0.14), transparent 60%),
+        linear-gradient(175deg, #05030a 0%, #120a20 40%, var(--vx-panel) 100%) !important;
+    border: 1px solid transparent !important;
+    box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    animation: vx-mythic-breathe 3.6s ease-in-out infinite;
+
+    h3 {
+        background: linear-gradient(100deg, #22d3ee, #a855f7 30%, #f5d67a 55%, #ff6fae 75%, #22d3ee);
+        background-size: 260% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent !important;
+        text-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        animation: vx-legendary-title-shift 5s linear infinite;
+    }
+
+    .vx-freebots__tag {
+        background: rgba(168, 85, 247, 0.18) !important;
+        color: #e3d1ff !important;
+    }
+
+    .vx-freebots__load {
+        border-color: rgba(168, 85, 247, 0.6) !important;
+        color: #e3d1ff !important;
+        &:hover {
+            background: rgba(168, 85, 247, 0.14) !important;
+        }
+    }
+}
+
+// Two rings, same masked-frame technique as the legendary card, spinning in
+// opposite directions at different radii so the card reads as layered rather
+// than a bigger copy of the single-ring treatment.
+.theme--dark .vx-freebots__mythic-ring {
+    position: absolute;
+    border-radius: inherit;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+}
+
+.theme--dark .vx-freebots__mythic-ring--outer {
+    inset: -3px;
+    padding: 1.5px;
+    background: conic-gradient(from 0deg, #22d3ee, #a855f7, #f5d67a, #ff6fae, #22d3ee);
+    animation: vx-legendary-spin 7s linear infinite;
+}
+
+.theme--dark .vx-freebots__mythic-ring--inner {
+    inset: 1px;
+    padding: 1px;
+    opacity: 0.6;
+    background: conic-gradient(from 180deg, #ff6fae, #f5d67a, #a855f7, #22d3ee, #ff6fae);
+    animation: vx-legendary-spin 5s linear infinite reverse;
+}
+
+@keyframes vx-mythic-breathe {
+    0%,
+    100% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.14), 0 0 22px rgba(168, 85, 247, 0.14),
+            inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+    50% {
+        box-shadow: 0 0 0 1px rgba(168, 85, 247, 0.3), 0 0 34px rgba(168, 85, 247, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+}
+
+.theme--dark .vx-freebots__badge--sparkle {
+    background: rgba(168, 85, 247, 0.16);
+    color: #e3d1ff;
+    border-color: rgba(168, 85, 247, 0.55);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .theme--dark .vx-freebots__vvip-sheen {
         animation: none;
@@ -716,6 +798,15 @@
         animation: none;
     }
     .theme--dark .vx-freebots__card--legendary h3 {
+        animation: none;
+    }
+    .theme--dark .vx-freebots__card--mythic {
+        animation: none;
+    }
+    .theme--dark .vx-freebots__card--mythic h3 {
+        animation: none;
+    }
+    .theme--dark .vx-freebots__mythic-ring {
         animation: none;
     }
 }

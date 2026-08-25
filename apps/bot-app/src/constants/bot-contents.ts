@@ -20,6 +20,7 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     FREE_BOTS: 5,
     RISK_CALCULATOR: 6,
     ACADEMY: 7,
+    JOURNAL: 8,
 });
 
 export const MAX_STRATEGIES = 10;

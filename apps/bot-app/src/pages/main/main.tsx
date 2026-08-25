@@ -42,6 +42,7 @@ import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
 import VxRunBar from '@/components/vx-run-bar';
 import Academy from '../academy';
+import Journal from '../journal';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import FreeBots from '../free-bots';
@@ -127,7 +128,17 @@ const AppWrapper = observer(() => {
     const { clear } = summary_card;
     const { DASHBOARD, BOT_BUILDER } = DBOT_TABS;
     const init_render = React.useRef(true);
-    const hash = ['dashboard', 'bot_builder', 'chart', 'tutorial', 'market_analysis', 'free_bots', 'risk_calculator', 'academy'];
+    const hash = [
+        'dashboard',
+        'bot_builder',
+        'chart',
+        'tutorial',
+        'market_analysis',
+        'free_bots',
+        'risk_calculator',
+        'academy',
+        'journal',
+    ];
     const { isDesktop } = useDevice();
     const location = useLocation();
     const navigate = useNavigate();
@@ -574,6 +585,23 @@ const AppWrapper = observer(() => {
                             >
                                 <VxTabBoundary label='Academy'>
                                     <Academy />
+                                </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedChartLineCaptionRegularIcon
+                                            height='24px'
+                                            width='24px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Journal' />
+                                    </>
+                                }
+                                id='id-journal'
+                            >
+                                <VxTabBoundary label='Journal'>
+                                    <Journal />
                                 </VxTabBoundary>
                             </div>
                         </Tabs>
