@@ -42,6 +42,7 @@ import { useDevice } from '@deriv-com/ui';
 import RunPanel from '../../components/run-panel';
 import VxRunBar from '@/components/vx-run-bar';
 import Academy from '../academy';
+import AutoRunner from '../auto-runner';
 import Journal from '../journal';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
@@ -138,6 +139,7 @@ const AppWrapper = observer(() => {
         'risk_calculator',
         'academy',
         'journal',
+        'auto_runner',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -602,6 +604,23 @@ const AppWrapper = observer(() => {
                             >
                                 <VxTabBoundary label='Journal'>
                                     <Journal />
+                                </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedObjectsColumnCaptionRegularIcon
+                                            height='24px'
+                                            width='24px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Auto-Runner' />
+                                    </>
+                                }
+                                id='id-auto-runner'
+                            >
+                                <VxTabBoundary label='Auto-Runner'>
+                                    <AutoRunner />
                                 </VxTabBoundary>
                             </div>
                         </Tabs>
