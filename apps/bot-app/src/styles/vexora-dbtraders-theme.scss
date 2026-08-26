@@ -884,17 +884,16 @@
     width: 100%;
     min-width: 0;
     // The embed IS the content, so every pixel of chrome here is stolen from
-    // it. Strip padding to the minimum and let the panel run nearly edge to
-    // edge; the run bar floats, so it only needs ~64px of clearance.
-    padding: 6px 10px 64px !important;
+    // it. Strip padding to the minimum. The run bar is position:fixed and
+    // floats independently of this padding — it does not sit "inside" this
+    // flow, and the iframe scrolls internally on its own when its content
+    // is taller than the space it's given, so this padding was reserving
+    // clearance nothing here actually needed. Kept a small buffer, not a
+    // full run-bar-height reservation.
+    padding: 6px 10px 20px !important;
 
     .vx-analysis__viewtabs {
-        margin-bottom: 6px !important;
-
-        button {
-            padding: 7px 14px !important;
-            font-size: 12px !important;
-        }
+        margin-bottom: 4px !important;
     }
 
     // Wide Circles / Scanner toggle, active side filled orange
@@ -902,7 +901,8 @@
         background: var(--vx-panel) !important;
         border-color: var(--vx-line) !important;
         color: var(--vx-text-dim) !important;
-        padding: 11px 16px !important;
+        padding: 6px 12px !important;
+        font-size: 11px !important;
 
         &.is-active {
             background: var(--vx-orange) !important;
