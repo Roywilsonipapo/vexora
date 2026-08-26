@@ -173,14 +173,15 @@
         background: transparent !important;
         display: flex !important;
         align-items: center;
-        gap: 8px;
-        border-radius: 8px;
-        margin: 6px 2px;
-        padding: 9px 14px;
+        gap: 6px;
+        border-radius: 7px;
+        margin: 4px 2px;
+        padding: 6px 11px;
         border-bottom: none;
         font-family: var(--vx-font-body) !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 600 !important;
+        line-height: 1.2 !important;
         letter-spacing: 0 !important;
         text-transform: none;
         transition:
@@ -192,6 +193,8 @@
         svg {
             fill: var(--vx-orange);
             color: var(--vx-orange);
+            width: 18px !important;
+            height: 18px !important;
         }
 
         &:hover {
@@ -223,35 +226,35 @@
             radial-gradient(circle at 1px 1px, rgba(96, 140, 196, 0.16) 1px, transparent 0) 0 0 / 22px 22px,
             linear-gradient(180deg, var(--vx-hero) 0%, var(--vx-navy) 100%);
         border-bottom: 1px solid var(--vx-line);
-        padding: 46px 24px 40px;
+        padding: 18px 24px 16px;
         text-align: center;
-        margin-bottom: 26px;
+        margin-bottom: 14px;
     }
     .vx-hero__greeting {
-        margin: 0 0 10px !important;
-        font-size: 40px !important;
+        margin: 0 0 4px !important;
+        font-size: 24px !important;
         font-weight: 800 !important;
         color: var(--vx-text) !important;
-        line-height: 1.15;
+        line-height: 1.2;
     }
     .vx-hero__wave {
         display: inline-block;
     }
     .vx-hero__tagline {
         margin: 0;
-        font-size: 15px;
+        font-size: 13px;
         font-style: italic;
         color: var(--vx-text-dim);
     }
 
     .vx-quick-actions-label {
         text-align: center;
-        font-size: 10.5px;
+        font-size: 10px;
         font-weight: 700;
         letter-spacing: 2px;
         text-transform: uppercase;
         color: var(--vx-text-faint);
-        margin-bottom: 14px;
+        margin-bottom: 8px;
     }
 
     // --- Dashboard quick-action cards --------------------------------------
@@ -262,9 +265,9 @@
         flex-wrap: nowrap !important;
         justify-content: center !important;
         align-items: stretch !important;
-        gap: 18px !important;
+        gap: 14px !important;
         overflow-x: auto;
-        padding: 4px 16px 8px;
+        padding: 2px 16px 6px;
     }
 
     .tab__dashboard__table__block {
@@ -274,15 +277,15 @@
         border-top: 2px solid var(--vx-line-strong) !important;
         border-radius: 12px !important;
         overflow: hidden;
-        width: 206px !important;
-        min-width: 206px !important;
-        max-width: 206px !important;
-        min-height: 172px !important;
+        width: 190px !important;
+        min-width: 190px !important;
+        max-width: 190px !important;
+        min-height: 132px !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: flex-start !important;
         text-align: left !important;
-        padding: 18px 16px 14px !important;
+        padding: 14px 14px 12px !important;
         gap: 0;
         cursor: pointer;
         transition:
@@ -296,16 +299,16 @@
 
     // Small rounded-square icon tile, tinted with the card accent
     .tab__dashboard__table__images {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        min-height: 38px !important;
-        max-width: 38px !important;
-        border-radius: 10px !important;
+        width: 30px !important;
+        height: 30px !important;
+        min-width: 30px !important;
+        min-height: 30px !important;
+        max-width: 30px !important;
+        border-radius: 8px !important;
         background: rgba(96, 140, 196, 0.14) !important;
         border: none !important;
         transform: none;
-        margin-bottom: 14px !important;
+        margin-bottom: 8px !important;
         display: flex !important;
         flex: 0 0 auto !important;
         align-items: center;
@@ -315,33 +318,33 @@
     .tab__dashboard__table__images svg,
     .tab__dashboard__table__images img {
         display: block !important;
-        width: 21px !important;
-        height: 21px !important;
-        min-width: 21px !important;
-        flex: 0 0 21px !important;
+        width: 17px !important;
+        height: 17px !important;
+        min-width: 17px !important;
+        flex: 0 0 17px !important;
     }
 
     .vx-card__title {
         margin: 0 !important;
-        font-size: 14px !important;
+        font-size: 13px !important;
         color: var(--vx-text) !important;
         font-weight: 700 !important;
     }
     .vx-card__desc {
-        margin: 6px 0 12px !important;
-        line-height: 1.5 !important;
+        margin: 4px 0 8px !important;
+        line-height: 1.4 !important;
         display: block !important;
         color: var(--vx-text-faint) !important;
-        font-size: 11px !important;
+        font-size: 10.5px !important;
     }
     .vx-card__open {
         margin-top: auto !important;
-        padding-top: 10px;
+        padding-top: 8px;
         width: 100%;
         border-top: 1px solid var(--vx-line);
         letter-spacing: 0;
         text-transform: none;
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
     }
 

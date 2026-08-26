@@ -179,8 +179,13 @@
                 display: unset;
             }
 
+            // Leftover from the pre-Vexora dashboard layout, which centred a
+            // narrower single-column design inside this padding. vx-hero and
+            // the quick-actions row now centre their own content, so this was
+            // just 80px of dead vertical space plus 432px of wasted width on
+            // every load, on top of the header/tabs/hero chrome above it.
             @include desktop-screen {
-                padding: 80px 216px 0;
+                padding: 12px 16px 0;
             }
 
             @include mobile-or-tablet-screen {

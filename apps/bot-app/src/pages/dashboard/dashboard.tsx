@@ -1,6 +1,8 @@
 import React from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
+import VxNamePrompt from '@/components/vx-name-prompt';
+import { useDisplayName } from '@/hooks/useDisplayName';
 import { useStore } from '@/hooks/useStore';
 import { localize } from '@deriv-com/translations';
 import { useDevice } from '@deriv-com/ui';
@@ -28,6 +30,9 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
     const { isDesktop, isTablet } = useDevice();
     // Picked once per mount so the line doesn't churn on every re-render.
     const tagline = React.useMemo(() => localize(TAGLINES[Math.floor(Math.random() * TAGLINES.length)]), []);
+    const { name: display_name, save: saveDisplayName, skip: skipDisplayName, should_prompt } = useDisplayName(
+        client.is_logged_in
+    );
 
     return (
         <React.Fragment>
@@ -44,7 +49,7 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
                         <div className='vx-hero'>
                             <h1 className='vx-hero__greeting'>
                                 {client.loginid
-                                    ? localize('Hello {{loginid}}', { loginid: client.loginid })
+                                    ? localize('Hello {{name}}', { name: display_name || client.loginid })
                                     : localize('Welcome to Vexora')}{' '}
                                 <span className='vx-hero__wave'>👋</span>
                             </h1>
@@ -57,6 +62,7 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
             </div>
             <InfoPanel />
             {active_tab === 0 && <OnboardTourHandler is_mobile={!isDesktop} />}
+            {should_prompt && <VxNamePrompt onSave={saveDisplayName} onSkip={skipDisplayName} />}
         </React.Fragment>
     );
 });

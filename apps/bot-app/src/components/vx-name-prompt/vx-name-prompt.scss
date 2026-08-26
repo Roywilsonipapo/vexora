@@ -1,0 +1,98 @@
+// Self-contained (see journal.scss for why): this modal can mount from the
+// Dashboard tab's own chunk, so it must not depend on classes defined
+// elsewhere.
+.vx-name-prompt {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(4, 8, 16, 0.6);
+    backdrop-filter: blur(2px);
+
+    &__card {
+        width: 100%;
+        max-width: 360px;
+        background: var(--vx-navy-2, #0c1c30);
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        border-radius: 14px;
+        padding: 22px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+        h3 {
+            margin: 0 0 8px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        p {
+            margin: 0 0 16px;
+            font-size: 12.5px;
+            line-height: 1.55;
+            color: var(--vx-text-dim, #9db2cd);
+        }
+
+        input {
+            width: 100%;
+            background: var(--vx-navy, #0a1523);
+            border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+            border-radius: 8px;
+            padding: 11px 12px;
+            font-size: 14px;
+            color: var(--vx-text, #e8f0fb);
+            outline: none;
+
+            &:focus {
+                border-color: var(--vx-orange, #f6512c);
+            }
+
+            &::placeholder {
+                color: var(--vx-text-faint, #647c99);
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 16px;
+    }
+
+    &__skip {
+        background: transparent;
+        border: none;
+        color: var(--vx-text-faint, #647c99);
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 10px 6px;
+
+        &:hover {
+            color: var(--vx-text-dim, #9db2cd);
+        }
+    }
+
+    &__save {
+        background: var(--vx-orange, #f6512c);
+        border: none;
+        color: #fff;
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            background: var(--vx-orange-soft, #ff7a4d);
+        }
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
+}
