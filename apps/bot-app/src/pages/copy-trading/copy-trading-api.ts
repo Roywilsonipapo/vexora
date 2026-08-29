@@ -33,25 +33,44 @@ const send = async <T>(request: Record<string, unknown>): Promise<TApiResponse<T
     return (await api_base.api.send(request)) as unknown as TApiResponse<T>;
 };
 
+/** Surfaces the real error instead of a generic string — some Deriv API
+ *  wrapper calls reject the promise (rather than resolve with an `error`
+ *  field) when the server sends one back, e.g. for a permission/scope
+ *  problem, so the catch block needs to read it too, not just discard it. */
+const describeError = (err: unknown, fallback: string): string => {
+    if (err && typeof err === 'object') {
+        const anyErr = err as { error?: { message?: string; code?: string }; message?: string };
+        if (anyErr.error?.message) return anyErr.error.code ? `${anyErr.error.message} (${anyErr.error.code})` : anyErr.error.message;
+        if (anyErr.message) return anyErr.message;
+    }
+    if (typeof err === 'string' && err) return err;
+    return fallback;
+};
+
+const formatApiError = (error: { message?: string; code?: string } | undefined, fallback: string): string => {
+    if (!error?.message) return fallback;
+    return error.code ? `${error.message} (${error.code})` : error.message;
+};
+
 // ---------- allow_copiers (becoming copyable) ----------
 
 export const getAllowCopiers = async (): Promise<{ allow_copiers: boolean } | { error: string }> => {
     try {
         const res = await send<{ get_settings?: { allow_copiers?: number } }>({ get_settings: 1 });
-        if (res.error) return { error: res.error.message || 'Could not read account settings.' };
+        if (res.error) return { error: formatApiError(res.error, 'Could not read account settings.') };
         return { allow_copiers: !!res.get_settings?.allow_copiers };
-    } catch {
-        return { error: 'Could not reach Deriv to read account settings.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to read account settings.') };
     }
 };
 
 export const setAllowCopiers = async (allow: boolean): Promise<{ ok: true } | { error: string }> => {
     try {
         const res = await send<{ set_settings?: number }>({ set_settings: 1, allow_copiers: allow ? 1 : 0 });
-        if (res.error) return { error: res.error.message || 'Deriv rejected the settings change.' };
+        if (res.error) return { error: formatApiError(res.error, 'Deriv rejected the settings change.') };
         return { ok: true };
-    } catch {
-        return { error: 'Could not reach Deriv to change account settings.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to change account settings.') };
     }
 };
 
@@ -62,10 +81,10 @@ export type TApiToken = { display_name: string; scopes: string[]; last_used?: st
 export const listApiTokens = async (): Promise<{ tokens: TApiToken[] } | { error: string }> => {
     try {
         const res = await send<{ api_token?: { tokens?: TApiToken[] } }>({ api_token: 1 });
-        if (res.error) return { error: res.error.message || 'Could not list API tokens.' };
+        if (res.error) return { error: formatApiError(res.error, 'Could not list API tokens.') };
         return { tokens: res.api_token?.tokens ?? [] };
-    } catch {
-        return { error: 'Could not reach Deriv to list API tokens.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to list API tokens.') };
     }
 };
 
@@ -80,21 +99,21 @@ export const createSharingToken = async (
             new_token: name,
             new_token_scopes: ['read', 'trading_information'],
         });
-        if (res.error) return { error: res.error.message || 'Deriv rejected the token request.' };
+        if (res.error) return { error: formatApiError(res.error, 'Deriv rejected the token request.') };
         if (!res.api_token?.new_token) return { error: 'Deriv did not return a token.' };
         return { token: res.api_token.new_token };
-    } catch {
-        return { error: 'Could not reach Deriv to create a token.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to create a token.') };
     }
 };
 
 export const deleteApiToken = async (display_name: string): Promise<{ ok: true } | { error: string }> => {
     try {
         const res = await send<{ api_token?: unknown }>({ api_token: 1, delete_token: display_name });
-        if (res.error) return { error: res.error.message || 'Deriv rejected the delete request.' };
+        if (res.error) return { error: formatApiError(res.error, 'Deriv rejected the delete request.') };
         return { ok: true };
-    } catch {
-        return { error: 'Could not reach Deriv to delete the token.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to delete the token.') };
     }
 };
 
@@ -117,20 +136,20 @@ export const startCopying = async (
         if (filters.trade_types?.length) request.trade_types = filters.trade_types;
 
         const res = await send<{ copy_start?: number }>(request);
-        if (res.error) return { error: res.error.message || 'Deriv rejected the copy request.' };
+        if (res.error) return { error: formatApiError(res.error, 'Deriv rejected the copy request.') };
         return { ok: true };
-    } catch {
-        return { error: 'Could not reach Deriv to start copying.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to start copying.') };
     }
 };
 
 export const stopCopying = async (trader_token: string): Promise<{ ok: true } | { error: string }> => {
     try {
         const res = await send<{ copy_stop?: number }>({ copy_stop: trader_token });
-        if (res.error) return { error: res.error.message || 'Deriv rejected the stop request.' };
+        if (res.error) return { error: formatApiError(res.error, 'Deriv rejected the stop request.') };
         return { ok: true };
-    } catch {
-        return { error: 'Could not reach Deriv to stop copying.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to stop copying.') };
     }
 };
 
@@ -140,9 +159,9 @@ export const stopCopying = async (trader_token: string): Promise<{ ok: true } | 
 export const getCopyTradingList = async (): Promise<{ raw: unknown } | { error: string }> => {
     try {
         const res = await send<Record<string, unknown>>({ copytrading_list: 1 });
-        if (res.error) return { error: res.error.message || 'Could not list copy relationships.' };
+        if (res.error) return { error: formatApiError(res.error, 'Could not list copy relationships.') };
         return { raw: res.copytrading_list };
-    } catch {
-        return { error: 'Could not reach Deriv to list copy relationships.' };
+    } catch (err) {
+        return { error: describeError(err, 'Could not reach Deriv to list copy relationships.') };
     }
 };

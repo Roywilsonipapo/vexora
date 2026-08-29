@@ -43,6 +43,7 @@ const CopyTrading = observer(() => {
 
     // "Let others copy me"
     const [allowCopiers, setAllowCopiersState] = useState<boolean | null>(null);
+    const [allowCopiersError, setAllowCopiersError] = useState<string | null>(null);
     const [togglingAllow, setTogglingAllow] = useState(false);
     const [tokens, setTokens] = useState<TApiToken[]>([]);
     const [tokensError, setTokensError] = useState<string | null>(null);
@@ -65,8 +66,12 @@ const CopyTrading = observer(() => {
 
     const loadAllowCopiers = useCallback(async () => {
         if (!client.is_logged_in) return;
+        setAllowCopiersError(null);
         const res = await getAllowCopiers();
-        if ('error' in res) return;
+        if ('error' in res) {
+            setAllowCopiersError(res.error);
+            return;
+        }
         setAllowCopiersState(res.allow_copiers);
     }, [client.is_logged_in]);
 
@@ -90,9 +95,14 @@ const CopyTrading = observer(() => {
     const handleToggleAllow = async () => {
         if (allowCopiers === null || togglingAllow) return;
         setTogglingAllow(true);
+        setAllowCopiersError(null);
         const next = !allowCopiers;
         const res = await setAllowCopiers(next);
-        if ('ok' in res) setAllowCopiersState(next);
+        if ('ok' in res) {
+            setAllowCopiersState(next);
+        } else {
+            setAllowCopiersError(res.error);
+        }
         setTogglingAllow(false);
     };
 
@@ -207,6 +217,7 @@ const CopyTrading = observer(() => {
                             <span className='vx-copytrade__switch-knob' />
                         </button>
                     </div>
+                    {allowCopiersError && <p className='vx-copytrade__error'>{allowCopiersError}</p>}
                     <p className='vx-copytrade__hint'>
                         Turn this on, then share a token below. Anyone with it can start copying your Options trades
                         — they trade on their own account and balance, not yours.
