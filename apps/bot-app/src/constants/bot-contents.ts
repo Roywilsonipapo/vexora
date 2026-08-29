@@ -22,6 +22,7 @@ export const DBOT_TABS: TDashboardTabIndex = Object.freeze({
     ACADEMY: 7,
     JOURNAL: 8,
     AUTO_RUNNER: 9,
+    COPY_TRADING: 10,
 });
 
 export const MAX_STRATEGIES = 10;

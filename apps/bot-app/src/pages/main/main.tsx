@@ -43,6 +43,7 @@ import RunPanel from '../../components/run-panel';
 import VxRunBar from '@/components/vx-run-bar';
 import Academy from '../academy';
 import AutoRunner from '../auto-runner';
+import CopyTrading from '../copy-trading';
 import Journal from '../journal';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
@@ -140,6 +141,7 @@ const AppWrapper = observer(() => {
         'academy',
         'journal',
         'auto_runner',
+        'copy_trading',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -621,6 +623,23 @@ const AppWrapper = observer(() => {
                             >
                                 <VxTabBoundary label='Auto-Runner'>
                                     <AutoRunner />
+                                </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedObjectsColumnCaptionRegularIcon
+                                            height='24px'
+                                            width='24px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Copy Trading' />
+                                    </>
+                                }
+                                id='id-copy-trading'
+                            >
+                                <VxTabBoundary label='Copy Trading'>
+                                    <CopyTrading />
                                 </VxTabBoundary>
                             </div>
                         </Tabs>

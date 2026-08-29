@@ -1,0 +1,148 @@
+import { api_base } from '@/external/bot-skeleton';
+
+/**
+ * Deriv's real Copy Trading API — raw WebSocket calls, same pattern as
+ * fetch-profit-table.ts. Nothing here is invented: every call name and field
+ * below is taken from Deriv's own client library docs (deriv-com/deriv-api,
+ * DerivAPI.md) and legacy-docs.deriv.com/docs/copy-trading, since copy
+ * trading isn't in the newer REST schema set (deriv-api-schemas) — it's a
+ * legacy WS-only surface, still live on the same socket api_base already
+ * talks to.
+ *
+ * One thing this file could NOT verify against a real account (no live
+ * Deriv login available while building this): the exact shape of the
+ * copytrading_list response. The docs describe the call but not its return
+ * fields, so getCopyTradingList() below is defensive — it surfaces the raw
+ * response and lets the caller degrade gracefully rather than assume a
+ * shape that might be wrong. Test this against a real account before
+ * relying on it heavily.
+ *
+ * Scope note for the token created in "let others copy me": Deriv's valid
+ * scopes are read, trade, trading_information, payments, admin. The token
+ * shared with copiers only needs read + trading_information — it is used by
+ * Deriv's backend to stream the trader's activity to copiers, not to place
+ * trades on the trader's own account, so it deliberately excludes trade/
+ * payments/admin. A leaked token scoped this way can't move money or place
+ * trades on the sharer's account.
+ */
+
+type TApiResponse<T> = T & { error?: { message?: string; code?: string } };
+
+const send = async <T>(request: Record<string, unknown>): Promise<TApiResponse<T>> => {
+    if (!api_base?.api) throw new Error('Not connected to Deriv yet.');
+    return (await api_base.api.send(request)) as unknown as TApiResponse<T>;
+};
+
+// ---------- allow_copiers (becoming copyable) ----------
+
+export const getAllowCopiers = async (): Promise<{ allow_copiers: boolean } | { error: string }> => {
+    try {
+        const res = await send<{ get_settings?: { allow_copiers?: number } }>({ get_settings: 1 });
+        if (res.error) return { error: res.error.message || 'Could not read account settings.' };
+        return { allow_copiers: !!res.get_settings?.allow_copiers };
+    } catch {
+        return { error: 'Could not reach Deriv to read account settings.' };
+    }
+};
+
+export const setAllowCopiers = async (allow: boolean): Promise<{ ok: true } | { error: string }> => {
+    try {
+        const res = await send<{ set_settings?: number }>({ set_settings: 1, allow_copiers: allow ? 1 : 0 });
+        if (res.error) return { error: res.error.message || 'Deriv rejected the settings change.' };
+        return { ok: true };
+    } catch {
+        return { error: 'Could not reach Deriv to change account settings.' };
+    }
+};
+
+// ---------- API tokens (for sharing with copiers) ----------
+
+export type TApiToken = { display_name: string; scopes: string[]; last_used?: string };
+
+export const listApiTokens = async (): Promise<{ tokens: TApiToken[] } | { error: string }> => {
+    try {
+        const res = await send<{ api_token?: { tokens?: TApiToken[] } }>({ api_token: 1 });
+        if (res.error) return { error: res.error.message || 'Could not list API tokens.' };
+        return { tokens: res.api_token?.tokens ?? [] };
+    } catch {
+        return { error: 'Could not reach Deriv to list API tokens.' };
+    }
+};
+
+/** Deriv only ever returns the raw token value once, at creation — it can't
+ *  be re-displayed later, so the caller must show/copy it immediately. */
+export const createSharingToken = async (
+    name: string
+): Promise<{ token: string } | { error: string }> => {
+    try {
+        const res = await send<{ api_token?: { new_token?: string } }>({
+            api_token: 1,
+            new_token: name,
+            new_token_scopes: ['read', 'trading_information'],
+        });
+        if (res.error) return { error: res.error.message || 'Deriv rejected the token request.' };
+        if (!res.api_token?.new_token) return { error: 'Deriv did not return a token.' };
+        return { token: res.api_token.new_token };
+    } catch {
+        return { error: 'Could not reach Deriv to create a token.' };
+    }
+};
+
+export const deleteApiToken = async (display_name: string): Promise<{ ok: true } | { error: string }> => {
+    try {
+        const res = await send<{ api_token?: unknown }>({ api_token: 1, delete_token: display_name });
+        if (res.error) return { error: res.error.message || 'Deriv rejected the delete request.' };
+        return { ok: true };
+    } catch {
+        return { error: 'Could not reach Deriv to delete the token.' };
+    }
+};
+
+// ---------- copying another trader ----------
+
+export type TCopyFilters = {
+    max_trade_stake?: number;
+    min_trade_stake?: number;
+    trade_types?: string[];
+};
+
+export const startCopying = async (
+    trader_token: string,
+    filters: TCopyFilters = {}
+): Promise<{ ok: true } | { error: string }> => {
+    try {
+        const request: Record<string, unknown> = { copy_start: trader_token };
+        if (filters.max_trade_stake) request.max_trade_stake = filters.max_trade_stake;
+        if (filters.min_trade_stake) request.min_trade_stake = filters.min_trade_stake;
+        if (filters.trade_types?.length) request.trade_types = filters.trade_types;
+
+        const res = await send<{ copy_start?: number }>(request);
+        if (res.error) return { error: res.error.message || 'Deriv rejected the copy request.' };
+        return { ok: true };
+    } catch {
+        return { error: 'Could not reach Deriv to start copying.' };
+    }
+};
+
+export const stopCopying = async (trader_token: string): Promise<{ ok: true } | { error: string }> => {
+    try {
+        const res = await send<{ copy_stop?: number }>({ copy_stop: trader_token });
+        if (res.error) return { error: res.error.message || 'Deriv rejected the stop request.' };
+        return { ok: true };
+    } catch {
+        return { error: 'Could not reach Deriv to stop copying.' };
+    }
+};
+
+/** Shape is unverified against a live account (see file doc comment) — the
+ *  caller should treat this as best-effort and fall back to the locally
+ *  tracked list this app keeps when starting a copy relationship. */
+export const getCopyTradingList = async (): Promise<{ raw: unknown } | { error: string }> => {
+    try {
+        const res = await send<Record<string, unknown>>({ copytrading_list: 1 });
+        if (res.error) return { error: res.error.message || 'Could not list copy relationships.' };
+        return { raw: res.copytrading_list };
+    } catch {
+        return { error: 'Could not reach Deriv to list copy relationships.' };
+    }
+};
