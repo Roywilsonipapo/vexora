@@ -1,13 +1,19 @@
-import { api_base } from '@/external/bot-skeleton';
+import { sendDirect } from './direct-derivws';
 
 /**
- * Deriv's real Copy Trading API — raw WebSocket calls, same pattern as
- * fetch-profit-table.ts. Nothing here is invented: every call name and field
- * below is taken from Deriv's own client library docs (deriv-com/deriv-api,
- * DerivAPI.md) and legacy-docs.deriv.com/docs/copy-trading, since copy
- * trading isn't in the newer REST schema set (deriv-api-schemas) — it's a
- * legacy WS-only surface, still live on the same socket api_base already
- * talks to.
+ * Deriv's real Copy Trading API. Every call name and field below is taken
+ * from Deriv's own client library docs (deriv-com/deriv-api, DerivAPI.md)
+ * and legacy-docs.deriv.com/docs/copy-trading.
+ *
+ * Routed through direct-derivws.ts, NOT api_base — api_base connects to
+ * Deriv's newer "Trading API" product, which returned "Unrecognised
+ * request" for every call in this file on first deploy. That product
+ * doesn't implement account-management-class calls at all; it's scoped to
+ * trade execution. get_settings/api_token/copy_start/copy_stop/
+ * copytrading_list only exist on Deriv's classic API
+ * (wss://ws.derivws.com), which direct-derivws.ts connects to separately
+ * using the same OAuth token this app already holds. See that file's doc
+ * comment for the full story.
  *
  * One thing this file could NOT verify against a real account (no live
  * Deriv login available while building this): the exact shape of the
@@ -29,8 +35,7 @@ import { api_base } from '@/external/bot-skeleton';
 type TApiResponse<T> = T & { error?: { message?: string; code?: string } };
 
 const send = async <T>(request: Record<string, unknown>): Promise<TApiResponse<T>> => {
-    if (!api_base?.api) throw new Error('Not connected to Deriv yet.');
-    return (await api_base.api.send(request)) as unknown as TApiResponse<T>;
+    return (await sendDirect(request)) as unknown as TApiResponse<T>;
 };
 
 /** Surfaces the real error instead of a generic string — some Deriv API
