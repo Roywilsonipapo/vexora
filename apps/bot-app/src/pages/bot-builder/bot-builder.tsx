@@ -11,6 +11,7 @@ import { TBlocklyEvents } from 'Types';
 import LoadModal from '../../components/load-modal';
 import SaveModal from '../dashboard/bot-list/save-modal';
 import BotBuilderTourHandler from '../tutorials/dbot-tours/bot-builder-tour';
+import DemoMirrorPanel from './demo-mirror/demo-mirror-panel';
 import QuickStrategy1 from './quick-strategy';
 import WorkspaceWrapper from './workspace-wrapper';
 
@@ -119,6 +120,7 @@ const BotBuilder = observer(() => {
                     'bot-builder--tour-active': active_tour,
                 })}
             >
+                <DemoMirrorPanel />
                 <div id='scratch_div' ref={el_ref}>
                     <WorkspaceWrapper />
                 </div>

@@ -47,6 +47,16 @@ export default Engine =>
             if (this.is_proposal_subscription_required) {
                 const { id, askPrice } = this.selectProposal(contract_type);
 
+                // Side-channel for the demo-mirror feature (pages/bot-builder/demo-mirror) —
+                // announces the trade about to be bought so it can be replicated on the real
+                // account in near-parallel. Wrapped so a listener problem there can never
+                // affect this purchase.
+                try {
+                    this.observer.emit('bot.purchase_sent', { contract_type, trade_option: this.tradeOptions });
+                } catch {
+                    // no-op
+                }
+
                 const action = () => api_base.api.send({ buy: id, price: askPrice });
 
                 this.isSold = false;
@@ -83,6 +93,14 @@ export default Engine =>
                 ).then(onSuccess);
             }
             const trade_option = tradeOptionToBuy(contract_type, this.tradeOptions);
+
+            // See the comment on the other branch above — same demo-mirror side-channel.
+            try {
+                this.observer.emit('bot.purchase_sent', { contract_type, trade_option: this.tradeOptions });
+            } catch {
+                // no-op
+            }
+
             const action = () => api_base.api.send(trade_option);
 
             this.isSold = false;

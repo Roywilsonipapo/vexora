@@ -2,6 +2,8 @@ import React from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
 import TradeAnimation from '@/components/trade-animation';
+import { useStore } from '@/hooks/useStore';
+import { getDemoMirrorStore } from '@/pages/bot-builder/demo-mirror/demo-mirror-store';
 import { Localize } from '@deriv-com/translations';
 import './vx-run-bar.scss';
 
@@ -28,6 +30,9 @@ const STORAGE_KEY = 'vx_fast_speed';
  * is already trading as fast as the platform allows.
  */
 const VxRunBar = observer(() => {
+    const root_store = useStore();
+    const mirror_store = getDemoMirrorStore(root_store);
+
     const [is_fast, setIsFast] = React.useState(() => {
         try {
             return localStorage.getItem(STORAGE_KEY) !== 'off';
@@ -50,6 +55,12 @@ const VxRunBar = observer(() => {
 
     return (
         <div className={classNames('vx-run-bar', { 'vx-run-bar--fast': is_fast })}>
+            {mirror_store.is_armed && (
+                <span className='vx-run-bar__mirror-badge' title='Demo trades are also firing on your real account'>
+                    <span className='vx-run-bar__mirror-dot' />
+                    MIRRORING TO REAL
+                </span>
+            )}
             <TradeAnimation className='vx-run-bar__animation' />
             <div className='vx-run-bar__divider' />
             <button

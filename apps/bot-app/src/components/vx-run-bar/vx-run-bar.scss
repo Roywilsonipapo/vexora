@@ -29,6 +29,38 @@
         margin: 0;
     }
 
+    // Persistent warning while the demo-mirror feature (pages/bot-builder/
+    // demo-mirror) is armed — deliberately floats ABOVE the pill rather than
+    // inline in it, so it reads as an alert, not just another control, and
+    // stays visible from every tab since this bar is rendered globally.
+    &__mirror-badge {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        margin-bottom: 8px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: var(--vx-red, #ef4444);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        padding: 5px 12px;
+        border-radius: 100px;
+        white-space: nowrap;
+        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4);
+    }
+
+    &__mirror-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fff;
+        animation: vx-run-bar-mirror-pulse 1.2s ease-in-out infinite;
+    }
+
     // Run / Stop button — green pill with the play glyph
     .animation__run-button,
     .animation__stop-button {
@@ -170,9 +202,23 @@
     }
 }
 
+@keyframes vx-run-bar-mirror-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .vx-run-bar__switch,
     .vx-run-bar__knob {
         transition: none;
+    }
+
+    .vx-run-bar__mirror-dot {
+        animation: none;
     }
 }

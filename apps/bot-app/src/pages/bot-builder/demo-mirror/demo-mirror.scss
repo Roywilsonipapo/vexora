@@ -1,0 +1,268 @@
+// Self-contained (see journal.scss for why).
+.vx-mirror {
+    background: var(--vx-navy-2, #0c1c30);
+    border-bottom: 1px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+    padding: 8px 14px;
+    font-size: 12px;
+
+    &--unavailable {
+        color: var(--vx-text-faint, #647c99);
+        font-size: 11.5px;
+    }
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    &__status {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 700;
+        color: var(--vx-text-dim, #9db2cd);
+        font-size: 11.5px;
+    }
+
+    &__status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--vx-text-faint, #647c99);
+    }
+
+    &__status--armed {
+        color: var(--vx-red, #ef4444);
+
+        .vx-mirror__status-dot {
+            background: var(--vx-red, #ef4444);
+            animation: vx-mirror-pulse 1.4s ease-in-out infinite;
+        }
+    }
+
+    &__status--connecting .vx-mirror__status-dot {
+        background: var(--vx-orange, #f6512c);
+        animation: vx-mirror-pulse 0.8s ease-in-out infinite;
+    }
+
+    &__status--error {
+        color: var(--vx-red, #ef4444);
+    }
+
+    &__cap {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
+
+        input {
+            width: 80px;
+            background: var(--vx-navy, #0a1523);
+            border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 12px;
+            color: var(--vx-text, #e8f0fb);
+            outline: none;
+
+            &:focus {
+                border-color: var(--vx-orange, #f6512c);
+            }
+        }
+    }
+
+    &__cap-readout {
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__arm {
+        background: var(--vx-blue, #2f76ed);
+        border: none;
+        color: #fff;
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+    }
+
+    &__disarm {
+        background: transparent;
+        border: 1px solid var(--vx-red, #ef4444);
+        color: var(--vx-red, #ef4444);
+        border-radius: 6px;
+        padding: 6px 14px;
+        font-size: 11.5px;
+        font-weight: 700;
+        cursor: pointer;
+
+        &:hover {
+            background: rgba(239, 68, 68, 0.12);
+        }
+    }
+
+    &__log-toggle {
+        margin-left: auto;
+        background: transparent;
+        border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        color: var(--vx-text-faint, #647c99);
+        border-radius: 6px;
+        padding: 5px 10px;
+        font-size: 10.5px;
+        font-weight: 600;
+        cursor: pointer;
+
+        &:hover {
+            color: var(--vx-text-dim, #9db2cd);
+        }
+    }
+
+    &__log {
+        list-style: none;
+        margin: 8px 0 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        max-height: 140px;
+        overflow-y: auto;
+    }
+
+    &__log-empty {
+        font-size: 11px;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__log-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        border-radius: 6px;
+        background: var(--vx-navy, #0a1523);
+        border-left: 2px solid var(--vx-line, rgba(96, 140, 196, 0.18));
+        font-size: 11px;
+
+        &--fired {
+            border-left-color: var(--vx-green, #16c784);
+        }
+        &--skipped {
+            border-left-color: var(--vx-orange, #f6512c);
+        }
+        &--failed,
+        &--auto-disarmed {
+            border-left-color: var(--vx-red, #ef4444);
+        }
+    }
+
+    &__log-glyph {
+        flex: 0 0 auto;
+        width: 14px;
+        text-align: center;
+        color: var(--vx-text-dim, #9db2cd);
+    }
+
+    &__log-text {
+        flex: 1;
+        color: var(--vx-text, #e8f0fb);
+    }
+
+    &__log-time {
+        flex: 0 0 auto;
+        font-size: 9.5px;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__confirm {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(4, 8, 16, 0.65);
+        backdrop-filter: blur(2px);
+    }
+
+    &__confirm-card {
+        width: 100%;
+        max-width: 380px;
+        background: var(--vx-navy-2, #0c1c30);
+        border: 1px solid var(--vx-red, #ef4444);
+        border-radius: 14px;
+        padding: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+
+        h4 {
+            margin: 0 0 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--vx-text, #e8f0fb);
+        }
+
+        p {
+            margin: 0;
+            font-size: 12px;
+            line-height: 1.55;
+            color: var(--vx-text-dim, #9db2cd);
+
+            strong {
+                color: var(--vx-text, #e8f0fb);
+            }
+        }
+    }
+
+    &__confirm-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 16px;
+
+        button {
+            border-radius: 8px;
+            padding: 9px 16px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        button:first-child {
+            background: transparent;
+            color: var(--vx-text-faint, #647c99);
+            border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
+        }
+    }
+
+    &__confirm-yes {
+        background: var(--vx-red, #ef4444) !important;
+        color: #fff !important;
+    }
+}
+
+@keyframes vx-mirror-pulse {
+    0%,
+    100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.35;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vx-mirror__status-dot {
+        animation: none;
+    }
+}
