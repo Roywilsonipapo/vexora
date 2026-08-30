@@ -42,6 +42,19 @@ export type TMirrorStatus = 'idle' | 'connecting' | 'armed' | 'error';
 export type TMirrorLogKind = 'armed' | 'disarmed' | 'fired' | 'skipped' | 'failed' | 'auto-disarmed';
 export type TMirrorLogEntry = { id: number; time: number; kind: TMirrorLogKind; text: string };
 
+/** sendReal/connectReal can reject with a plain Deriv error response object
+ *  (e.g. { error: { message, code } }), not always a JS Error — surfaces
+ *  the real message either way instead of falling back to a generic string
+ *  that hides what Deriv actually said. */
+const describeError = (err: unknown, fallback: string): string => {
+    if (err instanceof Error) return err.message;
+    if (err && typeof err === 'object') {
+        const anyErr = err as { error?: { message?: string; code?: string } };
+        if (anyErr.error?.message) return anyErr.error.code ? `${anyErr.error.message} (${anyErr.error.code})` : anyErr.error.message;
+    }
+    return fallback;
+};
+
 const AUTO_RUNNER_POLL_MS = 2000;
 const LOG_CAP = 100;
 
@@ -110,7 +123,7 @@ class DemoMirrorStore {
             await connectReal(this.real_account_id as string);
         } catch (err) {
             this.status = 'idle';
-            this.pushLog('failed', err instanceof Error ? err.message : 'Could not connect to your real account.');
+            this.pushLog('failed', describeError(err, 'Could not connect to your real account.'));
             return;
         }
 
@@ -187,7 +200,7 @@ class DemoMirrorStore {
         } catch (err) {
             this.pushLog(
                 'failed',
-                `Real trade failed: ${err instanceof Error ? err.message : 'Could not reach your real account.'}`
+                `Real trade failed: ${describeError(err, 'Could not reach your real account.')}`
             );
         }
     };

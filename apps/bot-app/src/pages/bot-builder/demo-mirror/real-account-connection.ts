@@ -49,9 +49,16 @@ const rejectAllPending = (reason: unknown) => {
 
 export const isRealConnectionOpen = () => !!socket && socket.readyState === WebSocket.OPEN;
 
-/** Opens the real-account connection and authorizes it. Throws with a
- *  real message on any failure — the caller (demo-mirror-store) treats a
- *  failed connect as "do not arm", never as "arm anyway". */
+/** Opens the real-account connection. Throws with a real message on any
+ *  failure — the caller (demo-mirror-store) treats a failed connect as
+ *  "do not arm", never as "arm anyway".
+ *
+ *  Does NOT send a WS `authorize` message — checked api-base.ts (this app's
+ *  own primary connection) and it never sends one either. The OTP-signed
+ *  URL from fetchOTPWebSocketURL authenticates the connection at the
+ *  handshake itself; a follow-up `authorize` isn't part of this Trading API
+ *  surface (same "doesn't implement this" class of rejection Copy Trading
+ *  hit) and was the actual cause of every "Could not connect" error. */
 export const connectReal = async (realAccountId: string): Promise<void> => {
     const authInfo = getAuthInfo();
     if (!authInfo?.access_token) throw new Error('Not logged in.');
@@ -68,13 +75,8 @@ export const connectReal = async (realAccountId: string): Promise<void> => {
         }
         socket = ws;
 
-        const authReqId = ++reqCounter;
         ws.onopen = () => {
-            pending.set(authReqId, {
-                resolve: () => resolve(),
-                reject: err => reject(err),
-            });
-            ws.send(JSON.stringify({ authorize: authInfo.access_token, req_id: authReqId }));
+            resolve();
         };
 
         ws.onmessage = event => {
