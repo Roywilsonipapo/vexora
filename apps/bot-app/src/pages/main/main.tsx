@@ -43,7 +43,6 @@ import RunPanel from '../../components/run-panel';
 import VxRunBar from '@/components/vx-run-bar';
 import Academy from '../academy';
 import AutoRunner from '../auto-runner';
-import CopyTrading from '../copy-trading';
 import Journal from '../journal';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
@@ -141,7 +140,6 @@ const AppWrapper = observer(() => {
         'academy',
         'journal',
         'auto_runner',
-        'copy_trading',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -625,23 +623,14 @@ const AppWrapper = observer(() => {
                                     <AutoRunner />
                                 </VxTabBoundary>
                             </div>
-                            <div
-                                label={
-                                    <>
-                                        <LabelPairedObjectsColumnCaptionRegularIcon
-                                            height='24px'
-                                            width='24px'
-                                            fill='var(--text-general)'
-                                        />
-                                        <Localize i18n_default_text='Copy Trading' />
-                                    </>
-                                }
-                                id='id-copy-trading'
-                            >
-                                <VxTabBoundary label='Copy Trading'>
-                                    <CopyTrading />
-                                </VxTabBoundary>
-                            </div>
+                            {/* Copy Trading tab hidden for now — copy_start/copy_stop/
+                                get_settings/api_token all reject every token this account
+                                has tried (OAuth session, a developers.deriv.com Personal
+                                Access Token) with account/product-tier errors, not bugs in
+                                this app. Pending a response from Deriv support on whether
+                                classic-API access is available for this account. The page
+                                itself (pages/copy-trading) is untouched — re-add this block
+                                to bring the tab back once that's resolved. */}
                         </Tabs>
                         {!isDesktop && right_tab_shadow && <span className='tabs-shadow tabs-shadow--right' />}{' '}
                     </div>
