@@ -17,9 +17,13 @@
     --vx-line: rgba(231, 220, 196, 0.08);
     --vx-line-strong: rgba(231, 220, 196, 0.18);
 
-    // Accents — muted/desaturated on purpose: category colour, not decoration
-    --vx-orange: #a9673f;
-    --vx-orange-soft: #c98a5c;
+    // Accents — muted/desaturated on purpose: category colour, not decoration.
+    // --vx-orange is the one accent used for CTAs/active states, so it's kept
+    // light (cream) to read as "gold", paired with --vx-ink (not white) for
+    // text on top of it.
+    --vx-orange: #e2d2a8;
+    --vx-orange-soft: #ede2c3;
+    --vx-ink: #1c1710;
     --vx-green: #6b8a66;
     --vx-purple: #7c6a96;
     --vx-amber: #b8925a;
@@ -60,19 +64,19 @@
     --text-loss-danger: var(--vx-red);
     --text-hint: var(--vx-text-dim);
 
-    --button-primary-default: var(--vx-blue);
-    --button-primary-hover: #71889d;
+    --button-primary-default: var(--vx-orange);
+    --button-primary-hover: var(--vx-orange-soft);
     --button-secondary-default: var(--vx-panel-2);
-    --button-secondary-hover: #1d3a5e;
+    --button-secondary-hover: #262219;
     --button-tertiary-default: transparent;
 
     --border-normal: var(--vx-line);
     --border-normal-1: var(--vx-line);
     --border-normal-2: var(--vx-line-strong);
     --border-normal-3: var(--vx-line);
-    --border-hover: var(--vx-blue);
-    --border-hover-1: var(--vx-blue);
-    --border-active: var(--vx-blue);
+    --border-hover: var(--vx-orange);
+    --border-hover-1: var(--vx-orange);
+    --border-active: var(--vx-orange);
     --border-divider: var(--vx-line);
 
     --status-success: var(--vx-green);
@@ -80,7 +84,7 @@
     --status-info: var(--vx-blue);
 
     --brand-red-coral: var(--vx-orange);
-    --brand-primary: var(--vx-blue);
+    --brand-primary: var(--vx-orange);
     --brand-secondary: var(--vx-teal);
     --brand-font-primary: var(--vx-font-body);
     --brand-font-secondary: var(--vx-font-body);
@@ -117,7 +121,7 @@
     .app-header__menu {
         color: var(--vx-text-dim);
         font-size: 13px;
-        border-radius: 6px;
+        border-radius: 0;
         padding: 8px 12px;
         &:hover {
             color: var(--vx-text);
@@ -129,7 +133,7 @@
         background: var(--vx-panel) !important;
         color: var(--vx-text) !important;
         border: 1px solid var(--vx-line-strong) !important;
-        border-radius: 10px !important;
+        border-radius: 0 !important;
     }
 
     .account-info,
@@ -141,9 +145,9 @@
 
     .dc-btn--primary,
     button[class*='primary'] {
-        background: var(--vx-blue) !important;
-        color: #fff !important;
-        border-radius: 8px !important;
+        background: var(--vx-orange) !important;
+        color: var(--vx-ink) !important;
+        border-radius: 0 !important;
         font-family: var(--vx-font-body) !important;
         font-weight: 600 !important;
         font-size: 13px !important;
@@ -151,7 +155,7 @@
         text-transform: none;
         letter-spacing: 0;
         &:hover {
-            background: #71889d !important;
+            background: var(--vx-orange-soft) !important;
         }
     }
 
@@ -183,10 +187,10 @@
         display: flex !important;
         align-items: center;
         gap: 6px;
-        border-radius: 7px;
+        border-radius: 0;
         margin: 4px 2px;
         padding: 6px 11px;
-        border-bottom: none;
+        border-bottom: 2px solid transparent;
         font-family: var(--vx-font-body) !important;
         font-size: 12px !important;
         font-weight: 600 !important;
@@ -195,7 +199,8 @@
         text-transform: none;
         transition:
             color 0.15s ease,
-            background 0.15s ease;
+            background 0.15s ease,
+            border-color 0.15s ease;
         white-space: nowrap;
         flex: 0 0 auto;
 
@@ -212,13 +217,16 @@
         }
     }
 
-    // Active tab is a solid blue block, not an underline
+    // Active tab reads as selected via an underline, not a filled block —
+    // a solid light-cream block behind white or ink text either loses
+    // contrast or looks like a highlighter; the underline keeps the accent
+    // legible without needing a second text colour just for this state.
     .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
     .dc-tabs__item--main__tabs.dc-tabs__active {
-        color: #fff !important;
-        background: var(--vx-blue-deep) !important;
-        border-bottom-color: transparent !important;
+        color: var(--vx-text) !important;
+        background: transparent !important;
+        border-bottom-color: var(--vx-orange) !important;
     }
 
     .dc-tabs__active-line {
@@ -267,6 +275,49 @@
         margin-bottom: 8px;
     }
 
+    // --- Session ledger row -------------------------------------------------
+    // Real figures (transactions-store's statistics.total_profit /
+    // max_drawdown, run_panel.is_running) styled as a hairline-divided
+    // ledger: tracked uppercase labels over tabular-figure numbers, the same
+    // treatment institutional statements use for a balance summary.
+    .vx-ledger {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 28px;
+        margin: 16px 16px 0;
+        padding-top: 14px;
+        border-top: 1px solid var(--vx-line);
+    }
+    .vx-ledger__stat {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    .vx-ledger__label {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-transform: uppercase;
+        color: var(--vx-text-faint);
+    }
+    .vx-ledger__value {
+        font-size: 14px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        font-family: 'SFMono-Regular', Consolas, monospace;
+        color: var(--vx-text);
+    }
+    .vx-ledger__value--profit {
+        color: var(--vx-green);
+    }
+    .vx-ledger__value--loss {
+        color: var(--vx-red);
+    }
+    .vx-ledger__stat--status .vx-ledger__value {
+        font-family: var(--vx-font-body);
+    }
+
     // --- Dashboard quick-action cards --------------------------------------
     // One horizontal row, centred. Cards are fixed-width so four of them sit
     // side by side rather than wrapping into a block.
@@ -285,7 +336,7 @@
         background: var(--vx-panel) !important;
         border: 1px solid var(--vx-line) !important;
         border-top: 2px solid var(--vx-line-strong) !important;
-        border-radius: 12px !important;
+        border-radius: 0 !important;
         overflow: hidden;
         width: 190px !important;
         min-width: 190px !important;
@@ -307,14 +358,14 @@
         }
     }
 
-    // Small rounded-square icon tile, tinted with the card accent
+    // Small square icon tile, tinted with the card accent
     .tab__dashboard__table__images {
         width: 30px !important;
         height: 30px !important;
         min-width: 30px !important;
         min-height: 30px !important;
         max-width: 30px !important;
-        border-radius: 8px !important;
+        border-radius: 0 !important;
         background: rgba(231, 220, 196, 0.08) !important;
         border: none !important;
         transform: none;
@@ -414,7 +465,7 @@
     }
 
     button:not(.dc-btn--primary) {
-        border-radius: 8px;
+        border-radius: 0;
         font-family: var(--vx-font-body);
     }
 
@@ -426,19 +477,19 @@
         background: var(--vx-panel) !important;
         color: var(--vx-text) !important;
         border: 1px solid var(--vx-line) !important;
-        border-radius: 10px !important;
+        border-radius: 0 !important;
     }
     // .vx-freebots__load is intentionally excluded — free-bots.scss styles it
     // as an outlined orange button to match the reference card design.
     .vx-quickbot-panel__run,
     .vx-riskcalc button {
-        background: var(--vx-blue) !important;
-        color: #fff !important;
+        background: var(--vx-orange) !important;
+        color: var(--vx-ink) !important;
         font-weight: 600;
-        border-radius: 8px !important;
+        border-radius: 0 !important;
         font-family: var(--vx-font-body) !important;
         &:hover {
-            background: #71889d !important;
+            background: var(--vx-orange-soft) !important;
         }
     }
 
@@ -917,7 +968,7 @@
         &.is-active {
             background: var(--vx-orange) !important;
             border-color: var(--vx-orange) !important;
-            color: #fff !important;
+            color: var(--vx-ink) !important;
         }
     }
 
@@ -938,7 +989,7 @@
         color: var(--vx-text-dim) !important;
         padding: 7px 14px !important;
         font-size: 12px !important;
-        border-radius: 8px;
+        border-radius: 0;
         cursor: pointer;
 
         &:hover {
@@ -985,7 +1036,7 @@
     background: var(--vx-panel-2);
     border: 1px solid var(--vx-line);
     color: var(--vx-text-dim);
-    border-radius: 7px;
+    border-radius: 0;
     padding: 5px 11px;
     font-size: 11.5px;
     font-weight: 700;
@@ -1000,7 +1051,7 @@
     &--active {
         background: var(--vx-orange);
         border-color: var(--vx-orange);
-        color: #fff;
+        color: var(--vx-ink);
     }
 }
 

@@ -96,9 +96,27 @@ export default class TransactionsStore {
                 total_payout: 0,
                 total_stake: 0,
                 won_contracts: 0,
+                max_drawdown: 0,
             }
         );
         statistics.number_of_runs = total_runs;
+
+        // Peak-to-trough drawdown across completed contracts, oldest to
+        // newest — trxs is newest-first (pushTransaction uses unshift), so
+        // walk it in reverse to get a real chronological running balance.
+        let running = 0;
+        let peak = 0;
+        let max_drawdown = 0;
+        [...trxs].reverse().forEach(({ data }) => {
+            const contract = data as TContractInfo;
+            if (!contract.is_completed) return;
+            running += Number(contract.profit) || 0;
+            if (running > peak) peak = running;
+            const drawdown = peak - running;
+            if (drawdown > max_drawdown) max_drawdown = drawdown;
+        });
+        statistics.max_drawdown = max_drawdown;
+
         return statistics;
     }
 

@@ -16,9 +16,9 @@
     align-items: center;
     gap: 0;
 
-    background: var(--vx-panel, #10233c);
-    border: 1px solid var(--vx-line-strong, rgba(96, 140, 196, 0.34));
-    border-radius: 10px;
+    background: var(--vx-panel, #17150f);
+    border: 1px solid var(--vx-line-strong, rgba(231, 220, 196, 0.18));
+    border-radius: 0;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
     padding: 6px 8px;
 
@@ -42,15 +42,15 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: var(--vx-red, #ef4444);
+        background: var(--vx-red, #b8503f);
         color: #fff;
         font-size: 10px;
         font-weight: 800;
         letter-spacing: 0.05em;
         padding: 5px 12px;
-        border-radius: 100px;
+        border-radius: 0;
         white-space: nowrap;
-        box-shadow: 0 6px 18px rgba(239, 68, 68, 0.4);
+        box-shadow: 0 6px 18px rgba(184, 80, 63, 0.4);
     }
 
     &__mirror-dot {
@@ -64,10 +64,10 @@
     // Run / Stop button — green pill with the play glyph
     .animation__run-button,
     .animation__stop-button {
-        background-color: var(--vx-teal, #14b8a6) !important;
+        background-color: var(--vx-teal, #5c7d72) !important;
         color: #fff !important;
         border: none !important;
-        border-radius: 7px !important;
+        border-radius: 0 !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         padding: 7px 16px !important;
@@ -78,15 +78,15 @@
         gap: 6px;
 
         &:hover {
-            background-color: #10a596 !important;
+            background-color: #6f9385 !important;
         }
     }
 
     .animation__stop-button {
-        background-color: var(--vx-red, #ef4444) !important;
+        background-color: var(--vx-red, #b8503f) !important;
 
         &:hover {
-            background-color: #dc2626 !important;
+            background-color: #cc6650 !important;
         }
     }
 

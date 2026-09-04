@@ -1,6 +1,7 @@
 import React from 'react';
 import classNames from 'classnames';
 import { observer } from 'mobx-react-lite';
+import Money from '@/components/shared_ui/money';
 import VxNamePrompt from '@/components/vx-name-prompt';
 import { useDisplayName } from '@/hooks/useDisplayName';
 import { useStore } from '@/hooks/useStore';
@@ -23,7 +24,7 @@ const TAGLINES = [
 ];
 
 const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
-    const { load_modal, dashboard, client } = useStore();
+    const { load_modal, dashboard, client, transactions, run_panel } = useStore();
     const { dashboard_strategies } = load_modal;
     const { active_tab, active_tour } = dashboard;
     const has_dashboard_strategies = !!dashboard_strategies?.length;
@@ -57,6 +58,41 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
                         </div>
                         <div className='vx-quick-actions-label'>{localize('Quick actions')}</div>
                         <Cards has_dashboard_strategies={has_dashboard_strategies} is_mobile={!isDesktop} />
+                        {client.is_logged_in && (
+                            <div className='vx-ledger'>
+                                <div className='vx-ledger__stat'>
+                                    <div className='vx-ledger__label'>{localize('Session P/L')}</div>
+                                    <div
+                                        className={classNames('vx-ledger__value', {
+                                            'vx-ledger__value--profit': transactions.statistics.total_profit >= 0,
+                                            'vx-ledger__value--loss': transactions.statistics.total_profit < 0,
+                                        })}
+                                    >
+                                        <Money
+                                            amount={transactions.statistics.total_profit}
+                                            currency={client.currency}
+                                            has_sign
+                                        />
+                                    </div>
+                                </div>
+                                <div className='vx-ledger__stat'>
+                                    <div className='vx-ledger__label'>{localize('Drawdown')}</div>
+                                    <div className='vx-ledger__value vx-ledger__value--loss'>
+                                        <Money
+                                            amount={-transactions.statistics.max_drawdown}
+                                            currency={client.currency}
+                                            has_sign
+                                        />
+                                    </div>
+                                </div>
+                                <div className='vx-ledger__stat vx-ledger__stat--status'>
+                                    <div className='vx-ledger__label'>{localize('Status')}</div>
+                                    <div className='vx-ledger__value'>
+                                        {run_panel.is_running ? localize('Running') : localize('Idle')}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
