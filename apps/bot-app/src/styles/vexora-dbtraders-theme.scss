@@ -1,38 +1,39 @@
-// DBTraders theme — deep navy trading console.
-// Dark blue surfaces, colour-coded accents (orange / green / purple / amber),
-// plain sans type. Like the Derelict theme before it, this file overrides the
+// Private Bank theme — warm near-black surfaces, one muted bronze accent,
+// a small set of desaturated category hues (never neon), serif display type
+// for the greeting/headings against sans body type for data. Overrides the
 // underlying @deriv-com design tokens directly rather than a handful of
 // component classes, so the re-theme reaches every surface the library renders.
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    // Surfaces — deep navy, each step slightly lighter
-    --vx-navy: #0a1523;
-    --vx-navy-2: #0c1c30;
-    --vx-panel: #10233c;
-    --vx-panel-2: #162c48;
-    --vx-hero: #0e2138;
+    // Surfaces — warm near-black, each step slightly lighter
+    --vx-navy: #0c0b0a;
+    --vx-navy-2: #121110;
+    --vx-panel: #17150f;
+    --vx-panel-2: #1e1b15;
+    --vx-hero: #131210;
 
-    --vx-line: rgba(96, 140, 196, 0.18);
-    --vx-line-strong: rgba(96, 140, 196, 0.34);
+    --vx-line: rgba(231, 220, 196, 0.08);
+    --vx-line-strong: rgba(231, 220, 196, 0.18);
 
-    // Accents
-    --vx-orange: #f6512c;
-    --vx-orange-soft: #ff7a4d;
-    --vx-green: #16c784;
-    --vx-purple: #a855f7;
-    --vx-amber: #f5a623;
-    --vx-blue: #2f76ed;
-    --vx-blue-deep: #1b4fa8;
-    --vx-teal: #14b8a6;
-    --vx-red: #ef4444;
+    // Accents — muted/desaturated on purpose: category colour, not decoration
+    --vx-orange: #a9673f;
+    --vx-orange-soft: #c98a5c;
+    --vx-green: #6b8a66;
+    --vx-purple: #7c6a96;
+    --vx-amber: #b8925a;
+    --vx-blue: #5c7186;
+    --vx-blue-deep: #3f5266;
+    --vx-teal: #5c7d72;
+    --vx-red: #b8503f;
 
     // Type
-    --vx-text: #e8f0fb;
-    --vx-text-dim: #9db2cd;
-    --vx-text-faint: #647c99;
+    --vx-text: #efece4;
+    --vx-text-dim: #a8a297;
+    --vx-text-faint: #726c60;
     --vx-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --vx-font-heading: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
 }
 
 // --- Overriding the @deriv-com design-token layer --------------------------
@@ -60,7 +61,7 @@
     --text-hint: var(--vx-text-dim);
 
     --button-primary-default: var(--vx-blue);
-    --button-primary-hover: #3f86ff;
+    --button-primary-hover: #71889d;
     --button-secondary-default: var(--vx-panel-2);
     --button-secondary-hover: #1d3a5e;
     --button-tertiary-default: transparent;
@@ -89,13 +90,21 @@
     color: var(--vx-text);
     font-family: var(--vx-font-body);
 
+    // Serif for display headings/the greeting, sans stays on everything else
+    // (nav, cards, numbers) — that split is what reads "institutional"
+    // rather than the font choice itself.
     h1,
     h2,
-    h3,
+    h3 {
+        font-family: var(--vx-font-heading) !important;
+        font-weight: 700 !important;
+        letter-spacing: 0;
+    }
+
     .tab__dashboard__header .title,
     .vx-card__title {
         font-family: var(--vx-font-body) !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         letter-spacing: 0;
     }
 
@@ -112,7 +121,7 @@
         padding: 8px 12px;
         &:hover {
             color: var(--vx-text);
-            background: rgba(96, 140, 196, 0.1);
+            background: rgba(231, 220, 196, 0.06);
         }
     }
 
@@ -142,7 +151,7 @@
         text-transform: none;
         letter-spacing: 0;
         &:hover {
-            background: #3f86ff !important;
+            background: #71889d !important;
         }
     }
 
@@ -199,7 +208,7 @@
 
         &:hover {
             color: var(--vx-text) !important;
-            background: rgba(96, 140, 196, 0.1) !important;
+            background: rgba(231, 220, 196, 0.06) !important;
         }
     }
 
@@ -223,7 +232,7 @@
     // --- Dashboard hero band ------------------------------------------------
     .vx-hero {
         background:
-            radial-gradient(circle at 1px 1px, rgba(96, 140, 196, 0.16) 1px, transparent 0) 0 0 / 22px 22px,
+            radial-gradient(circle at 1px 1px, rgba(231, 220, 196, 0.05) 1px, transparent 0) 0 0 / 22px 22px,
             linear-gradient(180deg, var(--vx-hero) 0%, var(--vx-navy) 100%);
         border-bottom: 1px solid var(--vx-line);
         padding: 18px 24px 16px;
@@ -233,7 +242,8 @@
     .vx-hero__greeting {
         margin: 0 0 4px !important;
         font-size: 24px !important;
-        font-weight: 800 !important;
+        font-family: var(--vx-font-heading) !important;
+        font-weight: 700 !important;
         color: var(--vx-text) !important;
         line-height: 1.2;
     }
@@ -305,7 +315,7 @@
         min-height: 30px !important;
         max-width: 30px !important;
         border-radius: 8px !important;
-        background: rgba(96, 140, 196, 0.14) !important;
+        background: rgba(231, 220, 196, 0.08) !important;
         border: none !important;
         transform: none;
         margin-bottom: 8px !important;
@@ -353,7 +363,7 @@
         border-top-color: var(--vx-orange) !important;
     }
     .vx-card--red .tab__dashboard__table__images {
-        background: rgba(246, 81, 44, 0.16) !important;
+        background: rgba(169, 103, 63, 0.18) !important;
     }
     .vx-card--red .vx-card__open,
     .vx-card--red .tab__dashboard__table__images {
@@ -364,7 +374,7 @@
         border-top-color: var(--vx-green) !important;
     }
     .vx-card--green .tab__dashboard__table__images {
-        background: rgba(22, 199, 132, 0.16) !important;
+        background: rgba(107, 138, 102, 0.2) !important;
     }
     .vx-card--green .vx-card__open,
     .vx-card--green .tab__dashboard__table__images {
@@ -375,7 +385,7 @@
         border-top-color: var(--vx-purple) !important;
     }
     .vx-card--purple .tab__dashboard__table__images {
-        background: rgba(168, 85, 247, 0.16) !important;
+        background: rgba(124, 106, 150, 0.2) !important;
     }
     .vx-card--purple .vx-card__open,
     .vx-card--purple .tab__dashboard__table__images {
@@ -386,7 +396,7 @@
         border-top-color: var(--vx-amber) !important;
     }
     .vx-card--amber .tab__dashboard__table__images {
-        background: rgba(245, 166, 35, 0.16) !important;
+        background: rgba(184, 146, 90, 0.2) !important;
     }
     .vx-card--amber .vx-card__open,
     .vx-card--amber .tab__dashboard__table__images {
@@ -397,7 +407,7 @@
         border-top-color: var(--vx-blue) !important;
     }
     .vx-card--blue .tab__dashboard__table__images {
-        background: rgba(47, 118, 237, 0.16) !important;
+        background: rgba(92, 113, 134, 0.2) !important;
     }
     .vx-card--blue .vx-card__open {
         color: var(--vx-blue) !important;
@@ -428,7 +438,7 @@
         border-radius: 8px !important;
         font-family: var(--vx-font-body) !important;
         &:hover {
-            background: #3f86ff !important;
+            background: #71889d !important;
         }
     }
 
