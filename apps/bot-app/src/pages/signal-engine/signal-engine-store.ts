@@ -2,9 +2,10 @@ import { action, makeObservable, observable } from 'mobx';
 import { getAutoRunnerStore } from '@/pages/auto-runner/auto-runner-store';
 import { TContract } from '@/pages/market-analysis/backtest-engine';
 import RootStore from '@/stores/root-store';
+import { handOffToAutoRunner } from './auto-runner-bridge';
 import { CandleFeed } from './candle-feed';
 import { digitBaselineWinProbability, FOREX_BASELINE_WIN_PROBABILITY } from './contract-baselines';
-import { NEEDS_BARRIER, placeContract, TContractType, TSettledContract, watchContractSettlement } from './contract-execution';
+import { NEEDS_BARRIER, TContractType, TSettledContract } from './contract-execution';
 import { computeDigitFeatures, DIGITS_FEATURE_COUNT } from './digit-features';
 import { DigitFeed } from './digit-feed';
 import { DigitStatsEngine, TDigitStats } from './digit-stats';
@@ -47,9 +48,18 @@ import { TickFeed } from './tick-feed';
  * demo-mirror-store.ts — the Tabs component unmounts inactive tab content,
  * and this has to keep running (and learning) regardless of which tab is
  * visible.
+ *
+ * Execution model: this store never places a "real" trade itself. Below
+ * the evidence gate's sample floor, every signal is a paper simulation
+ * (real proposal pricing, real observed settlement, zero cost) purely so
+ * the ensemble has something to learn from — that's the only way it can
+ * ever climb out of calibration. The moment the evidence gate reaches
+ * EDGE_DETECTED for a signal, this hands that one decision off to
+ * Auto-Runner (auto-runner-bridge.ts) and disarms — from that point on,
+ * Auto-Runner's own run/restart/risk machinery is what's actually trading,
+ * not this store.
  */
 
-export type TExecutionMode = 'paper' | 'live';
 export type TSignalStatus = 'idle' | 'connecting' | 'armed' | 'error';
 export type TSignalLogKind = 'armed' | 'disarmed' | 'placed' | 'won' | 'lost' | 'skipped' | 'failed' | 'blocked';
 export type TSignalLogEntry = { id: number; time: number; kind: TSignalLogKind; text: string };
@@ -115,7 +125,6 @@ class SignalEngineStore {
     root_store: RootStore;
     status: TSignalStatus = 'idle';
     market_type: TMarketType = 'forex';
-    execution_mode: TExecutionMode = 'paper';
     stake = 1;
     confidence_threshold = 0.55;
     log: TSignalLogEntry[] = [];
@@ -150,7 +159,6 @@ class SignalEngineStore {
         makeObservable(this, {
             status: observable,
             market_type: observable,
-            execution_mode: observable,
             stake: observable,
             confidence_threshold: observable,
             log: observable,
@@ -166,7 +174,6 @@ class SignalEngineStore {
             arm: action,
             disarm: action,
             setMarketType: action,
-            setExecutionMode: action,
             setStake: action,
             setConfidenceThreshold: action,
             setForexSymbol: action,
@@ -200,9 +207,6 @@ class SignalEngineStore {
 
     setMarketType = (market_type: TMarketType) => {
         if (this.status === 'idle') this.market_type = market_type;
-    };
-    setExecutionMode = (mode: TExecutionMode) => {
-        if (this.status === 'idle') this.execution_mode = mode;
     };
     setStake = (stake: number) => {
         if (this.status === 'idle') this.stake = stake;
@@ -274,11 +278,11 @@ class SignalEngineStore {
         this.status = 'armed';
         this.pushLog(
             'armed',
-            `Armed on ${this.market_type === 'forex' ? this.forex_symbol : this.digits_symbol} — ${this.execution_mode.toUpperCase()} mode, stake ${this.stake}.`
+            `Armed on ${this.market_type === 'forex' ? this.forex_symbol : this.digits_symbol} — stake ${this.stake}. Calibrating until a validated edge is found.`
         );
     };
 
-    disarm = () => {
+    disarm = (reason = 'Disarmed.') => {
         if (this.status !== 'armed' && this.status !== 'connecting') return;
         this.forex_candle_feed?.stop();
         this.forex_candle_feed = null;
@@ -289,7 +293,7 @@ class SignalEngineStore {
         this.pending = null;
         this.status = 'idle';
         this.current_prediction = null;
-        this.pushLog('disarmed', 'Disarmed.');
+        this.pushLog('disarmed', reason);
     };
 
     // --- Per-config model access ----------------------------------------------
@@ -438,12 +442,52 @@ class SignalEngineStore {
             return;
         }
 
-        this.fireTrade(market_type, config_key, signal, features, result, confidence_label, extra.regime_label, ensemble.version);
+        // A validated edge is the one thing that hands control to
+        // Auto-Runner rather than continuing to self-calibrate.
+        if (evidence.status === 'EDGE_DETECTED') {
+            this.handOff(market_type, signal, result, ensemble.version);
+            return;
+        }
+
+        this.fireCalibrationTrade(market_type, config_key, signal, features, result, confidence_label, extra.regime_label, ensemble.version);
     };
 
-    // --- Execution -----------------------------------------------------------
+    // --- Handoff to Auto-Runner ---------------------------------------------
 
-    private fireTrade = async (
+    private handOff = async (
+        market_type: TMarketType,
+        signal: TSignalDirection,
+        ensemble_result: TEnsembleResult,
+        model_version: number
+    ) => {
+        const contract_type: TContractType = market_type === 'forex' ? (signal as 'CALL' | 'PUT') : this.digits_contract;
+        const symbol = market_type === 'forex' ? this.forex_symbol : this.digits_symbol;
+        const duration_unit = market_type === 'forex' ? 'm' : 't';
+        const barrier = market_type === 'digits' && NEEDS_BARRIER.includes(contract_type) ? this.digits_barrier : undefined;
+
+        this.pushLog(
+            'placed',
+            `Validated edge on ${contractLabel(contract_type, barrier)} (${symbol}, ${Math.round(ensemble_result.ensemble_probability * 100)}% probability, v${model_version}) — handing off to Auto-Runner.`
+        );
+
+        try {
+            await handOffToAutoRunner(this.root_store, market_type, {
+                contract_type,
+                symbol,
+                duration: 1,
+                duration_unit,
+                stake: this.stake,
+                barrier,
+            });
+            this.disarm('Handed off to Auto-Runner. Re-arm to look for the next signal once you are done with this run.');
+        } catch (err) {
+            this.pushLog('failed', err instanceof Error ? err.message : 'Could not hand off to Auto-Runner.');
+        }
+    };
+
+    // --- Calibration (paper) trades ------------------------------------------
+
+    private fireCalibrationTrade = async (
         market_type: TMarketType,
         config_key: string,
         signal: TSignalDirection,
@@ -455,7 +499,7 @@ class SignalEngineStore {
     ) => {
         const contract_type: TContractType = market_type === 'forex' ? (signal as 'CALL' | 'PUT') : this.digits_contract;
         const symbol = market_type === 'forex' ? this.forex_symbol : this.digits_symbol;
-        const duration = market_type === 'forex' ? 1 : 1;
+        const duration = 1;
         const duration_unit = market_type === 'forex' ? 'm' : 't';
         const barrier = market_type === 'digits' && NEEDS_BARRIER.includes(contract_type) ? this.digits_barrier : undefined;
 
@@ -478,53 +522,41 @@ class SignalEngineStore {
         const currency = this.root_store.client?.currency ?? 'USD';
 
         try {
-            if (this.execution_mode === 'live') {
-                const { contract_id } = await placeContract({ contract_type, symbol, stake: this.stake, duration, duration_unit, currency, barrier });
-                this.pushLog('placed', `${contractLabel(contract_type, barrier)} on ${symbol} (LIVE) — confidence ${Math.round(ensemble_result.ensemble_probability * 100)}%.`);
-                watchContractSettlement(
-                    contract_id,
-                    settled => this.handleSettlement(settled, false),
-                    message => {
-                        this.pending = null;
-                        this.pushLog('failed', message);
-                    }
-                );
-            } else {
-                const entry_value =
+            const entry_value =
+                market_type === 'forex'
+                    ? this.forex_tick_feed?.prices[this.forex_tick_feed.prices.length - 1] ?? 0
+                    : this.digit_feed?.prices[this.digit_feed.prices.length - 1] ?? 0;
+
+            this.pushLog(
+                'placed',
+                `${contractLabel(contract_type, barrier)} on ${symbol} (calibrating) — confidence ${Math.round(ensemble_result.ensemble_probability * 100)}%.`
+            );
+
+            const settled = await simulatePaperTrade({
+                contract_type,
+                symbol,
+                stake: this.stake,
+                duration,
+                duration_unit,
+                currency,
+                barrier,
+                entry_value,
+                pip_size: this.digit_feed?.pip_size,
+                getElapsedTicks: () =>
+                    market_type === 'forex' ? this.forex_tick_feed?.total_received ?? 0 : this.digit_feed?.total_received ?? 0,
+                getCurrentValue: () =>
                     market_type === 'forex'
-                        ? this.forex_tick_feed?.prices[this.forex_tick_feed.prices.length - 1] ?? 0
-                        : this.digit_feed?.prices[this.digit_feed.prices.length - 1] ?? 0;
-
-                this.pushLog('placed', `${contractLabel(contract_type, barrier)} on ${symbol} (PAPER) — confidence ${Math.round(ensemble_result.ensemble_probability * 100)}%.`);
-
-                const settled = await simulatePaperTrade({
-                    contract_type,
-                    symbol,
-                    stake: this.stake,
-                    duration,
-                    duration_unit,
-                    currency,
-                    barrier,
-                    entry_value,
-                    pip_size: this.digit_feed?.pip_size,
-                    getElapsedTicks: () =>
-                        market_type === 'forex'
-                            ? this.forex_tick_feed?.total_received ?? 0
-                            : this.digit_feed?.total_received ?? 0,
-                    getCurrentValue: () =>
-                        market_type === 'forex'
-                            ? this.forex_tick_feed?.prices[this.forex_tick_feed.prices.length - 1] ?? entry_value
-                            : this.digit_feed?.prices[this.digit_feed.prices.length - 1] ?? entry_value,
-                });
-                this.handleSettlement(settled, true);
-            }
+                        ? this.forex_tick_feed?.prices[this.forex_tick_feed.prices.length - 1] ?? entry_value
+                        : this.digit_feed?.prices[this.digit_feed.prices.length - 1] ?? entry_value,
+            });
+            this.handleSettlement(settled);
         } catch (err) {
             this.pending = null;
-            this.pushLog('failed', err instanceof Error ? err.message : 'Could not place the trade.');
+            this.pushLog('failed', err instanceof Error ? err.message : 'Could not run the calibration trade.');
         }
     };
 
-    private handleSettlement = (settled: TSettledContract, is_paper: boolean) => {
+    private handleSettlement = (settled: TSettledContract) => {
         const meta = this.pending;
         if (!meta) return;
         this.pending = null;
@@ -555,13 +587,13 @@ class SignalEngineStore {
             model_version: meta.model_version,
             won: settled.won,
             profit: settled.profit,
-            is_paper,
+            is_paper: true,
         };
         this.journal.add(entry);
 
         this.pushLog(
             settled.won ? 'won' : 'lost',
-            `${settled.won ? 'Won' : 'Lost'} ${settled.profit.toFixed(2)} (${is_paper ? 'paper' : 'live'}) — ensemble now ${ensemble.sampleSize} samples, ${(ensemble.lifetimeAccuracy * 100).toFixed(1)}% accuracy.`
+            `${settled.won ? 'Won' : 'Lost'} ${settled.profit.toFixed(2)} (calibrating) — ensemble now ${ensemble.sampleSize} samples, ${(ensemble.lifetimeAccuracy * 100).toFixed(1)}% accuracy.`
         );
     };
 

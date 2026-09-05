@@ -4,7 +4,7 @@ import { useStore } from '@/hooks/useStore';
 import { TContract } from '@/pages/market-analysis/backtest-engine';
 import { localize } from '@deriv-com/translations';
 import { TMarketType } from './journal-store';
-import { getSignalEngineStore, TExecutionMode, TSignalDirection } from './signal-engine-store';
+import { getSignalEngineStore, TSignalDirection } from './signal-engine-store';
 import './signal-engine.scss';
 
 const FOREX_SYMBOLS = [{ code: 'frxEURUSD', label: 'EUR/USD' }];
@@ -151,18 +151,6 @@ const SignalEnginePage = observer(() => {
                 )}
 
                 <label>
-                    <span>{localize('Execution')}</span>
-                    <select
-                        value={store.execution_mode}
-                        disabled={store.status !== 'idle'}
-                        onChange={e => store.setExecutionMode(e.target.value as TExecutionMode)}
-                    >
-                        <option value='paper'>{localize('Paper / demo')}</option>
-                        <option value='live'>{localize('Live')}</option>
-                    </select>
-                </label>
-
-                <label>
                     <span>{localize('Stake')}</span>
                     <input
                         type='number'
@@ -193,7 +181,7 @@ const SignalEnginePage = observer(() => {
                         {localize('Arm')}
                     </button>
                 ) : (
-                    <button type='button' className='vx-scalper__disarm' onClick={store.disarm}>
+                    <button type='button' className='vx-scalper__disarm' onClick={() => store.disarm()}>
                         {localize('Disarm')}
                     </button>
                 )}
@@ -440,11 +428,9 @@ const SignalEnginePage = observer(() => {
                     <div className='vx-scalper__confirm-card'>
                         <h4>{localize('Arm the Binary Scalper?')}</h4>
                         <p>
-                            {store.execution_mode === 'live'
-                                ? localize('This will place real trades using real money on your active account.')
-                                : localize(
-                                      'Paper mode: trades are simulated using real market data and real payout quotes — no money moves.'
-                                  )}
+                            {localize(
+                                "Calibration trades are simulated using real market data and real payout quotes — no money moves. Once the model reaches a statistically validated edge, this hands that one decision off to Auto-Runner, which places the real trade on your active account and disarms Binary Scalper."
+                            )}
                         </p>
                         <div className='vx-scalper__confirm-actions'>
                             <button type='button' onClick={() => setShowConfirm(false)}>
