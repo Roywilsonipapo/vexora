@@ -8,7 +8,7 @@ import { NEEDS_BARRIER, placeContract, TContractType, TSettledContract, watchCon
 import { computeDigitFeatures, DIGITS_FEATURE_COUNT } from './digit-features';
 import { DigitFeed } from './digit-feed';
 import { DigitStatsEngine, TDigitStats } from './digit-stats';
-import { evaluateEvidence, TEvidenceResult } from './evidence-gate';
+import { evaluateEvidence, MIN_SAMPLE_SIZE, TEvidenceResult } from './evidence-gate';
 import { JournalStore, TJournalEntry, TMarketType } from './journal-store';
 import { detectRegime, REGIME_LABELS, TMarketRegime } from './market-regime';
 import { ModelEnsemble, TEnsembleResult, TEnsembleSerialized } from './models/ensemble';
@@ -383,11 +383,33 @@ class SignalEngineStore {
                 : digitBaselineWinProbability(this.digits_contract, this.digits_barrier);
         const evidence = evaluateEvidence(ensemble.lifetimeHits, ensemble.sampleSize, baseline);
 
+        // Bootstrap problem: a fresh model has all-zero weights, so it
+        // predicts exactly 0.5 for every feature vector until it has real
+        // outcomes to learn from — and outcomes only come from trades. A
+        // pure confidence-threshold gate would deadlock forever at exactly
+        // 0.5. While evidence is still insufficient (below the evidence
+        // gate's own sample floor), trade anyway purely to collect
+        // (features, outcome) pairs — ties broken randomly rather than
+        // always the same direction, so calibration data isn't biased by a
+        // fixed tie-break rule. This is explicit exploration, not a lowered
+        // confidence bar: the evidence label already tells the user these
+        // trades aren't backed by a validated model.
+        const is_calibrating = ensemble.sampleSize < MIN_SAMPLE_SIZE;
+
         let signal: TSignalDirection;
         if (market_type === 'forex') {
-            if (result.ensemble_probability >= this.confidence_threshold) signal = 'CALL';
-            else if (result.ensemble_probability <= 1 - this.confidence_threshold) signal = 'PUT';
-            else signal = 'NO_TRADE';
+            if (is_calibrating) {
+                const up = result.ensemble_probability > 0.5 || (result.ensemble_probability === 0.5 && Math.random() < 0.5);
+                signal = up ? 'CALL' : 'PUT';
+            } else if (result.ensemble_probability >= this.confidence_threshold) {
+                signal = 'CALL';
+            } else if (result.ensemble_probability <= 1 - this.confidence_threshold) {
+                signal = 'PUT';
+            } else {
+                signal = 'NO_TRADE';
+            }
+        } else if (is_calibrating) {
+            signal = 'CONTRACT';
         } else {
             signal = result.ensemble_probability >= this.confidence_threshold ? 'CONTRACT' : 'NO_TRADE';
         }

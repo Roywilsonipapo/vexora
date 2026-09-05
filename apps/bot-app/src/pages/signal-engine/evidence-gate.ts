@@ -20,7 +20,7 @@ export type TEvidenceResult = {
     p_value: number;
 };
 
-const MIN_SAMPLE_SIZE = 30;
+export const MIN_SAMPLE_SIZE = 30;
 const SIGNIFICANCE_LEVEL = 0.05;
 // A statistically significant edge that's too small to plausibly survive a
 // real payout structure's built-in margin isn't worth calling a discovery.
