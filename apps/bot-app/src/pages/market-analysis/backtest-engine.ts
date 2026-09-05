@@ -71,7 +71,7 @@ export type TBacktestResult = {
     equity: number[];
 };
 
-const isWin = (digit: number, contract: TContract, barrier: number): boolean => {
+export const isWin = (digit: number, contract: TContract, barrier: number): boolean => {
     switch (contract) {
         case 'DIGITOVER':
             return digit > barrier;

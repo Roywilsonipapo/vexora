@@ -44,6 +44,7 @@ import VxRunBar from '@/components/vx-run-bar';
 import Academy from '../academy';
 import AutoRunner from '../auto-runner';
 import Journal from '../journal';
+import BinaryScalper from '../signal-engine';
 import ChartModal from '../chart/chart-modal';
 import Dashboard from '../dashboard';
 import FreeBots from '../free-bots';
@@ -140,6 +141,7 @@ const AppWrapper = observer(() => {
         'academy',
         'journal',
         'auto_runner',
+        'binary_scalper',
     ];
     const { isDesktop } = useDevice();
     const location = useLocation();
@@ -621,6 +623,23 @@ const AppWrapper = observer(() => {
                             >
                                 <VxTabBoundary label='Auto-Runner'>
                                     <AutoRunner />
+                                </VxTabBoundary>
+                            </div>
+                            <div
+                                label={
+                                    <>
+                                        <LabelPairedChartLineCaptionRegularIcon
+                                            height='24px'
+                                            width='24px'
+                                            fill='var(--text-general)'
+                                        />
+                                        <Localize i18n_default_text='Binary Scalper' />
+                                    </>
+                                }
+                                id='id-binary-scalper'
+                            >
+                                <VxTabBoundary label='Binary Scalper'>
+                                    <BinaryScalper />
                                 </VxTabBoundary>
                             </div>
                             {/* Copy Trading tab hidden for now — copy_start/copy_stop/
