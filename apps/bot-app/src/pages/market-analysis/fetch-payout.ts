@@ -38,7 +38,11 @@ export const fetchPayoutRatio = async (
         currency,
         duration: 1,
         duration_unit: 't',
-        symbol,
+        // NOT `symbol` — this connection's real proposal schema rejects that
+        // field (InputValidationFailed: "Properties not allowed: symbol"),
+        // confirmed live. tradeOptionToProposal in bot-skeleton's helpers.js
+        // (the app's own working proposal flow) uses underlying_symbol.
+        underlying_symbol: symbol,
     };
     if (NEEDS_BARRIER.includes(contract)) request.barrier = String(barrier);
 

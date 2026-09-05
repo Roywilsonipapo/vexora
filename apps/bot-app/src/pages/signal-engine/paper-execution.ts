@@ -42,7 +42,13 @@ export const fetchProposal = async (params: {
         currency: params.currency,
         duration: params.duration,
         duration_unit: params.duration_unit,
-        symbol: params.symbol,
+        // NOT `symbol` — confirmed live against this app's actual Trading API
+        // connection (api_base) that it rejects that field with
+        // InputValidationFailed. tradeOptionToProposal in bot-skeleton's own
+        // helpers.js (the app's real, working proposal flow) uses
+        // underlying_symbol, so this matches the connection's real schema
+        // rather than Deriv's classic-API docs.
+        underlying_symbol: params.symbol,
     };
     if (NEEDS_BARRIER.includes(params.contract_type) && params.barrier !== undefined) {
         request.barrier = String(params.barrier);
