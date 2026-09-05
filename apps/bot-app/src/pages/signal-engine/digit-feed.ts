@@ -31,6 +31,11 @@ export class DigitFeed {
     // just the pre-digested digit history.
     prices: number[] = [];
     pip_size = 2;
+    // Monotonically increasing, never capped — unlike digits/prices.length,
+    // which is windowed to MAX_BUFFER and freezes once the buffer fills.
+    // paper-execution.ts's "wait for N real ticks" logic needs a counter
+    // that actually keeps counting past that point.
+    total_received = 0;
 
     private on_digit: TDigitListener;
     private message_subscription: { unsubscribe: () => void } | null = null;
@@ -60,6 +65,7 @@ export class DigitFeed {
             const digit = lastDigit(quote, this.pip_size);
             this.digits = [...this.digits, digit].slice(-MAX_BUFFER);
             this.prices = [...this.prices, quote].slice(-MAX_BUFFER);
+            this.total_received += 1;
             this.last_update_ms = Date.now();
             this.on_digit(digit, quote, epoch);
         });

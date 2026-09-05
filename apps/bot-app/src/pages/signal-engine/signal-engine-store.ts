@@ -508,7 +508,9 @@ class SignalEngineStore {
                     entry_value,
                     pip_size: this.digit_feed?.pip_size,
                     getElapsedTicks: () =>
-                        market_type === 'forex' ? this.forex_tick_feed?.prices.length ?? 0 : this.digit_feed?.prices.length ?? 0,
+                        market_type === 'forex'
+                            ? this.forex_tick_feed?.total_received ?? 0
+                            : this.digit_feed?.total_received ?? 0,
                     getCurrentValue: () =>
                         market_type === 'forex'
                             ? this.forex_tick_feed?.prices[this.forex_tick_feed.prices.length - 1] ?? entry_value

@@ -30,6 +30,10 @@ const describeError = (err: unknown, fallback: string): string => {
 export class TickFeed {
     symbol: string;
     prices: number[] = [];
+    // Monotonically increasing, never capped — unlike prices.length, which
+    // is windowed to MAX_BUFFER and freezes once the buffer fills. Needed
+    // for paper-execution.ts's "wait for N real ticks" logic.
+    total_received = 0;
 
     private on_tick: TTickListener;
     private message_subscription: { unsubscribe: () => void } | null = null;
@@ -51,6 +55,7 @@ export class TickFeed {
             const epoch = Number(tick.epoch);
             if (!Number.isFinite(quote)) return;
             this.prices = [...this.prices, quote].slice(-MAX_BUFFER);
+            this.total_received += 1;
             this.on_tick(quote, epoch);
         });
 
