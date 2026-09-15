@@ -16,10 +16,10 @@
     align-items: center;
     gap: 0;
 
-    background: var(--vx-panel, #17150f);
-    border: 1px solid var(--vx-line-strong, rgba(231, 220, 196, 0.18));
-    border-radius: 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    background: var(--vx-panel, #0d1120);
+    border: 1px solid var(--vx-line-strong, rgba(0, 240, 255, 0.36));
+    border-radius: 100px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 16px rgba(0, 240, 255, 0.2);
     padding: 6px 8px;
 
     .animation__wrapper {
@@ -42,15 +42,15 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: var(--vx-red, #b8503f);
+        background: var(--vx-red, #ff2d55);
         color: #fff;
         font-size: 10px;
         font-weight: 800;
         letter-spacing: 0.05em;
         padding: 5px 12px;
-        border-radius: 0;
+        border-radius: 100px;
         white-space: nowrap;
-        box-shadow: 0 6px 18px rgba(184, 80, 63, 0.4);
+        box-shadow: 0 6px 18px rgba(255, 45, 85, 0.5);
     }
 
     &__mirror-dot {
@@ -64,10 +64,10 @@
     // Run / Stop button — green pill with the play glyph
     .animation__run-button,
     .animation__stop-button {
-        background-color: var(--vx-teal, #5c7d72) !important;
-        color: #fff !important;
+        background-color: var(--vx-teal, #00e0b0) !important;
+        color: #001a14 !important;
         border: none !important;
-        border-radius: 0 !important;
+        border-radius: 100px !important;
         font-weight: 700 !important;
         font-size: 13px !important;
         padding: 7px 16px !important;
@@ -76,17 +76,20 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
+        box-shadow: 0 0 14px rgba(0, 224, 176, 0.45);
 
         &:hover {
-            background-color: #6f9385 !important;
+            background-color: #4dffcf !important;
         }
     }
 
     .animation__stop-button {
-        background-color: var(--vx-red, #b8503f) !important;
+        background-color: var(--vx-red, #ff2d55) !important;
+        color: #fff !important;
+        box-shadow: 0 0 14px rgba(255, 45, 85, 0.5);
 
         &:hover {
-            background-color: #cc6650 !important;
+            background-color: #ff6685 !important;
         }
     }
 
@@ -105,7 +108,7 @@
         width: 1px;
         align-self: stretch;
         margin: 2px 8px;
-        background: var(--vx-line, rgba(96, 140, 196, 0.18));
+        background: var(--vx-line, rgba(0, 240, 255, 0.16));
     }
 
     &__speed {

@@ -104,7 +104,7 @@ const Academy = () => {
         <div className='vx-academy'>
             <div className='vx-academy__head'>
                 <div>
-                    <h2>Vexora Academy</h2>
+                    <h2>HEDGEBFX Academy</h2>
                     <p>
                         {TOTAL_LESSONS} lessons, about {TOTAL_MINUTES} minutes. Everything here is exact maths or
                         measured data — no claimed edges.

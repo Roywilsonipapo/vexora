@@ -1,5 +1,5 @@
 {
-    "brand_name": "Vexora",
+    "brand_name": "HEDGEBFX",
     "brand_domain": "vexora.com",
     "brand_hostname": {
         "staging": "staging.vexora.com/dashboard",
@@ -79,7 +79,7 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "Vexora Bot",
+        "name": "HEDGEBFX",
         "footer": {
             "enable_language_settings": false,
             "enable_theme_toggle": true

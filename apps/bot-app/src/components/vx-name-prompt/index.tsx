@@ -24,7 +24,7 @@ const VxNamePrompt = ({ onSave, onSkip }: TVxNamePrompt) => {
         <div className='vx-name-prompt'>
             <form className='vx-name-prompt__card' onSubmit={submit}>
                 <h3>What should we call you?</h3>
-                <p>Vexora will greet you by this name instead of your account ID. Asked once — you can change it later in Settings.</p>
+                <p>HEDGEBFX will greet you by this name instead of your account ID. Asked once — you can change it later in Settings.</p>
                 <input
                     type='text'
                     autoFocus

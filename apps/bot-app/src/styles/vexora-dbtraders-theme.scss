@@ -1,43 +1,52 @@
-// Private Bank theme — warm near-black surfaces, one muted bronze accent,
-// a small set of desaturated category hues (never neon), serif display type
-// for the greeting/headings against sans body type for data. Overrides the
+// Neon Cyberpunk theme — near-black surfaces lit by two neon accents (cyan
+// for every interactive/functional signal, magenta reserved for brand/decorative
+// glow only, so the two don't fight for attention), scanline + glow-bloom
+// background texture, rounded surfaces with glowing edges instead of plain
+// hairlines, monospace display type for a HUD/terminal feel. Overrides the
 // underlying @deriv-com design tokens directly rather than a handful of
 // component classes, so the re-theme reaches every surface the library renders.
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    // Surfaces — warm near-black, each step slightly lighter
-    --vx-navy: #0c0b0a;
-    --vx-navy-2: #121110;
-    --vx-panel: #17150f;
-    --vx-panel-2: #1e1b15;
-    --vx-hero: #131210;
+    // Surfaces — near-black with a cold blue-black tint, each step slightly lighter
+    --vx-navy: #05060a;
+    --vx-navy-2: #0a0d16;
+    --vx-panel: #0d1120;
+    --vx-panel-2: #131829;
+    --vx-hero: #0a0e1c;
 
-    --vx-line: rgba(231, 220, 196, 0.08);
-    --vx-line-strong: rgba(231, 220, 196, 0.18);
+    --vx-line: rgba(0, 240, 255, 0.16);
+    --vx-line-strong: rgba(0, 240, 255, 0.36);
+    --vx-radius: 10px;
 
-    // Accents — muted/desaturated on purpose: category colour, not decoration.
-    // --vx-orange is the one accent used for CTAs/active states, so it's kept
-    // light (cream) to read as "gold", paired with --vx-ink (not white) for
-    // text on top of it.
-    --vx-orange: #e2d2a8;
-    --vx-orange-soft: #ede2c3;
-    --vx-ink: #1c1710;
-    --vx-green: #6b8a66;
-    --vx-purple: #7c6a96;
-    --vx-amber: #b8925a;
-    --vx-blue: #5c7186;
-    --vx-blue-deep: #3f5266;
-    --vx-teal: #5c7d72;
-    --vx-red: #b8503f;
+    // Accents — --vx-orange is kept as the variable name (15+ files already
+    // reference it) but is now the primary neon-cyan accent: every
+    // interactive/functional highlight (buttons, active tab, borders-on-hover)
+    // uses it, so the UI reads as "one glowing signal colour", not a rainbow.
+    // --vx-magenta is new and deliberately NOT wired into buttons/borders —
+    // it only appears in the background glow and brand/hero touches.
+    --vx-orange: #00f0ff;
+    --vx-orange-soft: #7bf6ff;
+    --vx-magenta: #ff2fd6;
+    --vx-ink: #001417;
+    --vx-green: #39ff88;
+    --vx-purple: #b967ff;
+    --vx-amber: #ffd23f;
+    --vx-blue: #5ac8ff;
+    --vx-blue-deep: #0a3a4d;
+    --vx-teal: #00e0b0;
+    --vx-red: #ff2d55;
+
+    --vx-glow-cyan: 0 0 16px rgba(0, 240, 255, 0.35);
+    --vx-glow-magenta: 0 0 18px rgba(255, 47, 214, 0.3);
 
     // Type
-    --vx-text: #efece4;
-    --vx-text-dim: #a8a297;
-    --vx-text-faint: #726c60;
+    --vx-text: #eafeff;
+    --vx-text-dim: #7fd8e0;
+    --vx-text-faint: #4a7a80;
     --vx-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --vx-font-heading: Georgia, 'Times New Roman', 'Iowan Old Style', serif;
+    --vx-font-heading: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
 }
 
 // --- Overriding the @deriv-com design-token layer --------------------------
@@ -90,19 +99,26 @@
     --brand-font-secondary: var(--vx-font-body);
     --brand-font-monospace: 'SFMono-Regular', Consolas, monospace;
 
-    background: var(--vx-navy) !important;
+    // Base scanline + dual glow-bloom texture — the one background treatment
+    // that makes near-black surfaces read as "cyberpunk" rather than just
+    // "dark theme". Applied once at the app root so it shows through every
+    // panel that doesn't paint its own opaque background over it.
+    background:
+        repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.025) 0px, rgba(0, 240, 255, 0.025) 1px, transparent 1px, transparent 3px),
+        radial-gradient(circle at 12% 0%, rgba(255, 47, 214, 0.1), transparent 40%),
+        radial-gradient(circle at 92% 100%, rgba(0, 240, 255, 0.08), transparent 40%),
+        var(--vx-navy) !important;
     color: var(--vx-text);
     font-family: var(--vx-font-body);
 
-    // Serif for display headings/the greeting, sans stays on everything else
-    // (nav, cards, numbers) — that split is what reads "institutional"
-    // rather than the font choice itself.
+    // Monospace for display headings/the greeting — a HUD/terminal read —
+    // sans stays on everything else (nav, cards, body copy).
     h1,
     h2,
     h3 {
         font-family: var(--vx-font-heading) !important;
         font-weight: 700 !important;
-        letter-spacing: 0;
+        letter-spacing: 0.02em;
     }
 
     .tab__dashboard__header .title,
@@ -116,16 +132,17 @@
     .app-header {
         background: var(--vx-navy-2) !important;
         border-bottom: 1px solid var(--vx-line) !important;
+        box-shadow: 0 1px 0 var(--vx-line), 0 4px 20px rgba(0, 240, 255, 0.06);
         color: var(--vx-text);
     }
     .app-header__menu {
         color: var(--vx-text-dim);
         font-size: 13px;
-        border-radius: 0;
+        border-radius: var(--vx-radius);
         padding: 8px 12px;
         &:hover {
             color: var(--vx-text);
-            background: rgba(231, 220, 196, 0.06);
+            background: rgba(0, 240, 255, 0.08);
         }
     }
 
@@ -133,7 +150,8 @@
         background: var(--vx-panel) !important;
         color: var(--vx-text) !important;
         border: 1px solid var(--vx-line-strong) !important;
-        border-radius: 0 !important;
+        border-radius: var(--vx-radius) !important;
+        box-shadow: var(--vx-glow-cyan);
     }
 
     .account-info,
@@ -147,13 +165,14 @@
     button[class*='primary'] {
         background: var(--vx-orange) !important;
         color: var(--vx-ink) !important;
-        border-radius: 0 !important;
+        border-radius: var(--vx-radius) !important;
         font-family: var(--vx-font-body) !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         font-size: 13px !important;
         border: none !important;
         text-transform: none;
         letter-spacing: 0;
+        box-shadow: var(--vx-glow-cyan);
         &:hover {
             background: var(--vx-orange-soft) !important;
         }
@@ -187,7 +206,7 @@
         display: flex !important;
         align-items: center;
         gap: 6px;
-        border-radius: 0;
+        border-radius: var(--vx-radius) var(--vx-radius) 0 0;
         margin: 4px 2px;
         padding: 6px 11px;
         border-bottom: 2px solid transparent;
@@ -213,20 +232,20 @@
 
         &:hover {
             color: var(--vx-text) !important;
-            background: rgba(231, 220, 196, 0.06) !important;
+            background: rgba(0, 240, 255, 0.08) !important;
         }
     }
 
-    // Active tab reads as selected via an underline, not a filled block —
-    // a solid light-cream block behind white or ink text either loses
-    // contrast or looks like a highlighter; the underline keeps the accent
-    // legible without needing a second text colour just for this state.
+    // Active tab reads as selected via a glowing underline, not a filled
+    // block — the glow does the work a filled background would otherwise
+    // need, without needing a second text colour just for this state.
     .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
     .dc-tabs__item--main__tabs.dc-tabs__active {
         color: var(--vx-text) !important;
-        background: transparent !important;
+        background: rgba(0, 240, 255, 0.06) !important;
         border-bottom-color: var(--vx-orange) !important;
+        box-shadow: inset 0 -2px 8px rgba(0, 240, 255, 0.3);
     }
 
     .dc-tabs__active-line {
@@ -240,7 +259,8 @@
     // --- Dashboard hero band ------------------------------------------------
     .vx-hero {
         background:
-            radial-gradient(circle at 1px 1px, rgba(231, 220, 196, 0.05) 1px, transparent 0) 0 0 / 22px 22px,
+            radial-gradient(circle at 15% 10%, rgba(255, 47, 214, 0.14), transparent 45%),
+            radial-gradient(circle at 85% 90%, rgba(0, 240, 255, 0.12), transparent 45%),
             linear-gradient(180deg, var(--vx-hero) 0%, var(--vx-navy) 100%);
         border-bottom: 1px solid var(--vx-line);
         padding: 18px 24px 16px;
@@ -253,6 +273,7 @@
         font-family: var(--vx-font-heading) !important;
         font-weight: 700 !important;
         color: var(--vx-text) !important;
+        text-shadow: var(--vx-glow-cyan);
         line-height: 1.2;
     }
     .vx-hero__wave {
@@ -336,7 +357,7 @@
         background: var(--vx-panel) !important;
         border: 1px solid var(--vx-line) !important;
         border-top: 2px solid var(--vx-line-strong) !important;
-        border-radius: 0 !important;
+        border-radius: var(--vx-radius) !important;
         overflow: hidden;
         width: 190px !important;
         min-width: 190px !important;
@@ -351,10 +372,12 @@
         cursor: pointer;
         transition:
             border-color 0.15s ease,
+            box-shadow 0.15s ease,
             transform 0.15s ease;
 
         &:hover {
             transform: translateY(-2px);
+            box-shadow: var(--vx-glow-cyan);
         }
     }
 
@@ -365,8 +388,8 @@
         min-width: 30px !important;
         min-height: 30px !important;
         max-width: 30px !important;
-        border-radius: 0 !important;
-        background: rgba(231, 220, 196, 0.08) !important;
+        border-radius: 8px !important;
+        background: rgba(0, 240, 255, 0.1) !important;
         border: none !important;
         transform: none;
         margin-bottom: 8px !important;
@@ -411,21 +434,21 @@
 
     // Per-accent colouring: top border, icon tile tint, "Open ->" link
     .tab__dashboard__table__block.vx-card--red {
-        border-top-color: var(--vx-orange) !important;
+        border-top-color: var(--vx-magenta) !important;
     }
     .vx-card--red .tab__dashboard__table__images {
-        background: rgba(169, 103, 63, 0.18) !important;
+        background: rgba(255, 47, 214, 0.16) !important;
     }
     .vx-card--red .vx-card__open,
     .vx-card--red .tab__dashboard__table__images {
-        color: var(--vx-orange) !important;
+        color: var(--vx-magenta) !important;
     }
 
     .tab__dashboard__table__block.vx-card--green {
         border-top-color: var(--vx-green) !important;
     }
     .vx-card--green .tab__dashboard__table__images {
-        background: rgba(107, 138, 102, 0.2) !important;
+        background: rgba(57, 255, 136, 0.16) !important;
     }
     .vx-card--green .vx-card__open,
     .vx-card--green .tab__dashboard__table__images {
@@ -436,7 +459,7 @@
         border-top-color: var(--vx-purple) !important;
     }
     .vx-card--purple .tab__dashboard__table__images {
-        background: rgba(124, 106, 150, 0.2) !important;
+        background: rgba(185, 103, 255, 0.18) !important;
     }
     .vx-card--purple .vx-card__open,
     .vx-card--purple .tab__dashboard__table__images {
@@ -447,7 +470,7 @@
         border-top-color: var(--vx-amber) !important;
     }
     .vx-card--amber .tab__dashboard__table__images {
-        background: rgba(184, 146, 90, 0.2) !important;
+        background: rgba(255, 210, 63, 0.16) !important;
     }
     .vx-card--amber .vx-card__open,
     .vx-card--amber .tab__dashboard__table__images {
@@ -458,18 +481,18 @@
         border-top-color: var(--vx-blue) !important;
     }
     .vx-card--blue .tab__dashboard__table__images {
-        background: rgba(92, 113, 134, 0.2) !important;
+        background: rgba(90, 200, 255, 0.18) !important;
     }
     .vx-card--blue .vx-card__open {
         color: var(--vx-blue) !important;
     }
 
     button:not(.dc-btn--primary) {
-        border-radius: 0;
+        border-radius: var(--vx-radius);
         font-family: var(--vx-font-body);
     }
 
-    // --- Vexora-built pages ------------------------------------------------
+    // --- HEDGEBFX-built pages ------------------------------------------------
     .vx-card,
     .vx-freebots__card,
     .vx-riskcalc__panel,
@@ -477,7 +500,7 @@
         background: var(--vx-panel) !important;
         color: var(--vx-text) !important;
         border: 1px solid var(--vx-line) !important;
-        border-radius: 0 !important;
+        border-radius: var(--vx-radius) !important;
     }
     // .vx-freebots__load is intentionally excluded — free-bots.scss styles it
     // as an outlined orange button to match the reference card design.
@@ -485,9 +508,10 @@
     .vx-riskcalc button {
         background: var(--vx-orange) !important;
         color: var(--vx-ink) !important;
-        font-weight: 600;
-        border-radius: 0 !important;
+        font-weight: 700;
+        border-radius: var(--vx-radius) !important;
         font-family: var(--vx-font-body) !important;
+        box-shadow: var(--vx-glow-cyan);
         &:hover {
             background: var(--vx-orange-soft) !important;
         }
@@ -969,6 +993,7 @@
             background: var(--vx-orange) !important;
             border-color: var(--vx-orange) !important;
             color: var(--vx-ink) !important;
+            box-shadow: var(--vx-glow-cyan);
         }
     }
 
@@ -989,12 +1014,13 @@
         color: var(--vx-text-dim) !important;
         padding: 7px 14px !important;
         font-size: 12px !important;
-        border-radius: 0;
+        border-radius: var(--vx-radius);
         cursor: pointer;
 
         &:hover {
             color: var(--vx-text) !important;
             border-color: var(--vx-orange) !important;
+            box-shadow: var(--vx-glow-cyan);
         }
     }
 }
@@ -1036,12 +1062,12 @@
     background: var(--vx-panel-2);
     border: 1px solid var(--vx-line);
     color: var(--vx-text-dim);
-    border-radius: 0;
+    border-radius: 100px;
     padding: 5px 11px;
     font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
-    transition: color 0.15s ease, border-color 0.15s ease;
+    transition: color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 
     &:hover {
         color: var(--vx-text);
@@ -1052,6 +1078,7 @@
         background: var(--vx-orange);
         border-color: var(--vx-orange);
         color: var(--vx-ink);
+        box-shadow: var(--vx-glow-cyan);
     }
 }
 
