@@ -47,6 +47,28 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
                         <Announcements is_mobile={!isDesktop} is_tablet={isTablet} handleTabChange={handleTabChange} />
                     )}
                     <div className='quick-panel'>
+                        <div className='vx-promo'>
+                            <svg className='vx-promo__art' viewBox='0 0 120 120' fill='none' aria-hidden='true'>
+                                <defs>
+                                    <linearGradient id='vxPromoGradient' x1='0' y1='0' x2='1' y2='1'>
+                                        <stop offset='0' stopColor='#00ff85' />
+                                        <stop offset='.5' stopColor='#36e9ff' />
+                                        <stop offset='1' stopColor='#ff5fd8' />
+                                    </linearGradient>
+                                </defs>
+                                <circle cx='60' cy='60' r='46' stroke='url(#vxPromoGradient)' strokeWidth='2' opacity='0.5' />
+                                <circle cx='60' cy='60' r='33' stroke='url(#vxPromoGradient)' strokeWidth='1.4' opacity='0.7' className='vx-promo__ring' />
+                                <polygon points='60,32 82,60 60,88 38,60' fill='url(#vxPromoGradient)' opacity='0.18' />
+                                <circle cx='60' cy='60' r='10' fill='url(#vxPromoGradient)' />
+                            </svg>
+                            <div className='vx-promo__text'>
+                                <p className='vx-promo__eyebrow'>{localize('Season 2030 · New Look')}</p>
+                                <p className='vx-promo__title'>{localize('Apexindices, Reskinned')}</p>
+                                <p className='vx-promo__sub'>
+                                    {localize('A holographic interface across every tab — same tools underneath, sharper to read.')}
+                                </p>
+                            </div>
+                        </div>
                         <div className='vx-hero'>
                             <h1 className='vx-hero__greeting'>
                                 {client.loginid

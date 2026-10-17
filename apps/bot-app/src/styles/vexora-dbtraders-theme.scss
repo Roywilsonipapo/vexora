@@ -274,6 +274,78 @@
         display: none !important;
     }
 
+    // --- Dashboard promo banner ---------------------------------------------
+    // The one place genuinely decorative art earns its keep: an orbiting ring
+    // over a gradient core, same sweep-light cue as the hero below. Copy is
+    // deliberately about the interface itself, not a performance or edge
+    // claim — this is marketing for the redesign, not for a trading result.
+    .vx-promo {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        border-radius: 16px;
+        border: 1px solid var(--vx-line);
+        background: linear-gradient(135deg, #0a1410, #0a0d1a 60%, #150a16);
+        padding: 16px 18px;
+        margin-bottom: 14px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -10%;
+            width: 40%;
+            height: 220%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.06) 50%, transparent);
+            transform: rotate(10deg);
+            animation: vx-sweep-light 7s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        &__art {
+            flex: none;
+            width: 64px;
+            height: 64px;
+        }
+
+        &__ring {
+            transform-origin: 60px 60px;
+            animation: vx-promo-spin 9s linear infinite;
+        }
+
+        &__text {
+            position: relative;
+            z-index: 1;
+            min-width: 0;
+        }
+
+        &__eyebrow {
+            margin: 0 0 2px;
+            font-size: 10px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--vx-amber);
+        }
+
+        &__title {
+            margin: 0 0 2px;
+            font-family: var(--vx-font-heading);
+            font-style: italic;
+            font-weight: 800;
+            font-size: 16px;
+            color: var(--vx-text);
+        }
+
+        &__sub {
+            margin: 0;
+            font-size: 11.5px;
+            color: var(--vx-text-faint);
+            max-width: 48ch;
+        }
+    }
+
     // --- Dashboard hero band ------------------------------------------------
     // The one place an ambient light-sweep earns its keep: a single slow
     // diagonal pass, same "stadium screen booting up" cue as the Season
@@ -594,6 +666,12 @@
     }
     .blocklyFlyoutBackground {
         fill: var(--vx-panel-2) !important;
+    }
+}
+
+@keyframes vx-promo-spin {
+    to {
+        transform: rotate(360deg);
     }
 }
 
@@ -977,6 +1055,12 @@
     .theme--dark .vx-hero::after {
         display: none;
     }
+    .theme--dark .vx-promo::after {
+        display: none;
+    }
+    .theme--dark .vx-promo__ring {
+        animation: none;
+    }
 }
 
 // The tabs library draws its own active-tab underline via an ::after with no
@@ -1202,5 +1286,17 @@
 @media (prefers-reduced-motion: reduce) {
     .theme--dark * {
         transition: none !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .theme--dark .vx-promo {
+        flex-wrap: wrap;
+        text-align: center;
+        justify-content: center;
+
+        &__art {
+            margin: 0 auto;
+        }
     }
 }

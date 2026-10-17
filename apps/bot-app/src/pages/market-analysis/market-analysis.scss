@@ -291,13 +291,13 @@
             border-color 0.15s ease;
 
         &:hover {
-            border-color: var(--brand-primary, #ff6b00);
+            border-color: var(--brand-primary, #00ff85);
         }
 
         &.is-active {
-            background: var(--brand-primary, #ff6b00);
-            border-color: var(--brand-primary, #ff6b00);
-            color: #2a1900;
+            background: var(--brand-primary, #00ff85);
+            border-color: var(--brand-primary, #00ff85);
+            color: var(--vx-ink, #04140c);
         }
     }
 }
@@ -472,12 +472,13 @@
     align-items: center;
     margin-top: 10px;
     padding: 10px 18px;
-    border-radius: 10px;
-    background: #ff6b00;
-    color: #fff;
+    border-radius: 100px;
+    background: var(--vx-orange, #00ff85);
+    color: var(--vx-ink, #04140c);
     font-weight: 700;
     font-size: 0.85rem;
     text-decoration: none;
+    box-shadow: var(--vx-glow-cyan, 0 0 16px rgba(0, 255, 133, 0.35));
 }
 
 .vx-scan-table {
