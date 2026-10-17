@@ -17,9 +17,9 @@
     gap: 0;
 
     background: var(--vx-panel, #0d1120);
-    border: 1px solid var(--vx-line-strong, rgba(0, 240, 255, 0.36));
+    border: 1px solid var(--vx-line-strong, rgba(0, 255, 133, 0.36));
     border-radius: 100px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 16px rgba(0, 240, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 16px rgba(0, 255, 133, 0.2);
     padding: 6px 8px;
 
     .animation__wrapper {
@@ -61,11 +61,13 @@
         animation: vx-run-bar-mirror-pulse 1.2s ease-in-out infinite;
     }
 
-    // Run / Stop button — green pill with the play glyph
+    // Run / Stop button — signature green pill with the play glyph, pulsing
+    // like the Season 2030 reference's primary CTA so it reads as the one
+    // thing on screen worth pressing.
     .animation__run-button,
     .animation__stop-button {
-        background-color: var(--vx-teal, #00e0b0) !important;
-        color: #001a14 !important;
+        background-color: var(--vx-teal, #00ff85) !important;
+        color: var(--vx-ink, #04140c) !important;
         border: none !important;
         border-radius: 100px !important;
         font-weight: 700 !important;
@@ -76,20 +78,21 @@
         align-items: center;
         justify-content: center;
         gap: 6px;
-        box-shadow: 0 0 14px rgba(0, 224, 176, 0.45);
+        animation: vx-run-bar-pulse 2.6s ease-in-out infinite;
 
         &:hover {
-            background-color: #4dffcf !important;
+            background-color: #6dffb8 !important;
         }
     }
 
     .animation__stop-button {
-        background-color: var(--vx-red, #ff2d55) !important;
+        background-color: var(--vx-red, #ff4d6d) !important;
         color: #fff !important;
-        box-shadow: 0 0 14px rgba(255, 45, 85, 0.5);
+        animation: none;
+        box-shadow: 0 0 14px rgba(255, 77, 109, 0.5);
 
         &:hover {
-            background-color: #ff6685 !important;
+            background-color: #ff8099 !important;
         }
     }
 
@@ -108,7 +111,7 @@
         width: 1px;
         align-self: stretch;
         margin: 2px 8px;
-        background: var(--vx-line, rgba(0, 240, 255, 0.16));
+        background: var(--vx-line, rgba(0, 255, 133, 0.16));
     }
 
     &__speed {
@@ -215,6 +218,16 @@
     }
 }
 
+@keyframes vx-run-bar-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 14px rgba(0, 255, 133, 0.35);
+    }
+    50% {
+        box-shadow: 0 0 22px rgba(0, 255, 133, 0.65);
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .vx-run-bar__switch,
     .vx-run-bar__knob {
@@ -223,5 +236,10 @@
 
     .vx-run-bar__mirror-dot {
         animation: none;
+    }
+
+    .vx-run-bar .animation__run-button {
+        animation: none;
+        box-shadow: 0 0 14px rgba(0, 255, 133, 0.45);
     }
 }

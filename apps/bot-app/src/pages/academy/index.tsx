@@ -5,7 +5,7 @@ import { ACADEMY, TOTAL_LESSONS, TOTAL_MINUTES } from './academy-content';
 import './academy.scss';
 
 /**
- * Vexora Academy.
+ * Apexindices Academy.
  *
  * Course content plus a live edge table. The table is the part that does not
  * exist anywhere else: it puts Deriv's real current payout next to the exact
@@ -104,7 +104,7 @@ const Academy = () => {
         <div className='vx-academy'>
             <div className='vx-academy__head'>
                 <div>
-                    <h2>HEDGEBFX Academy</h2>
+                    <h2>Apexindices Academy</h2>
                     <p>
                         {TOTAL_LESSONS} lessons, about {TOTAL_MINUTES} minutes. Everything here is exact maths or
                         measured data — no claimed edges.

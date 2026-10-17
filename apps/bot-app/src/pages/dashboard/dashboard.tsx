@@ -51,7 +51,7 @@ const DashboardComponent = observer(({ handleTabChange }: TMobileIconGuide) => {
                             <h1 className='vx-hero__greeting'>
                                 {client.loginid
                                     ? localize('Hello {{name}}', { name: display_name || client.loginid })
-                                    : localize('Welcome to HEDGEBFX')}{' '}
+                                    : localize('Welcome to Apexindices')}{' '}
                                 <span className='vx-hero__wave'>👋</span>
                             </h1>
                             <p className='vx-hero__tagline'>{tagline}</p>

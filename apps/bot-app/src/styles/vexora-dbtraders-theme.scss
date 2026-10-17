@@ -1,52 +1,59 @@
-// Neon Cyberpunk theme — near-black surfaces lit by two neon accents (cyan
-// for every interactive/functional signal, magenta reserved for brand/decorative
-// glow only, so the two don't fight for attention), scanline + glow-bloom
-// background texture, rounded surfaces with glowing edges instead of plain
-// hairlines, monospace display type for a HUD/terminal feel. Overrides the
-// underlying @deriv-com design tokens directly rather than a handful of
-// component classes, so the re-theme reaches every surface the library renders.
+// Season 2030 theme — a near-future sports-game menu aesthetic (the EA FC /
+// PS5 Ultimate Team UI language) applied to the trading dashboard. Deep-space
+// surfaces, a signature green signal colour for every interactive/functional
+// highlight, cyan + magenta reserved as a secondary "holo" accent pair for
+// decorative glow and rarity treatments only, pill-shaped buttons/tabs, and
+// an italic condensed display face for headings instead of a terminal
+// monospace. Overrides the underlying @deriv-com design tokens directly
+// rather than a handful of component classes, so the re-theme reaches every
+// surface the library renders.
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-    // Surfaces — near-black with a cold blue-black tint, each step slightly lighter
-    --vx-navy: #05060a;
-    --vx-navy-2: #0a0d16;
-    --vx-panel: #0d1120;
-    --vx-panel-2: #131829;
-    --vx-hero: #0a0e1c;
+    // Surfaces — deep-space near-black, each step slightly lighter
+    --vx-navy: #03040a;
+    --vx-navy-2: #070a12;
+    --vx-panel: #0c1016;
+    --vx-panel-2: #121720;
+    --vx-hero: #080b14;
 
-    --vx-line: rgba(0, 240, 255, 0.16);
-    --vx-line-strong: rgba(0, 240, 255, 0.36);
+    --vx-line: rgba(0, 255, 133, 0.16);
+    --vx-line-strong: rgba(0, 255, 133, 0.36);
     --vx-radius: 10px;
+    --vx-radius-pill: 100px;
 
     // Accents — --vx-orange is kept as the variable name (15+ files already
-    // reference it) but is now the primary neon-cyan accent: every
+    // reference it) but is now the primary signal-green accent: every
     // interactive/functional highlight (buttons, active tab, borders-on-hover)
     // uses it, so the UI reads as "one glowing signal colour", not a rainbow.
-    // --vx-magenta is new and deliberately NOT wired into buttons/borders —
-    // it only appears in the background glow and brand/hero touches.
-    --vx-orange: #00f0ff;
-    --vx-orange-soft: #7bf6ff;
-    --vx-magenta: #ff2fd6;
-    --vx-ink: #001417;
+    // --vx-cyan/--vx-magenta are the secondary "holo" pair — deliberately NOT
+    // wired into buttons/borders, only background glow, rarity accents and
+    // brand-mark touches, so they read as atmosphere rather than function.
+    --vx-orange: #00ff85;
+    --vx-orange-soft: #6dffb8;
+    --vx-cyan: #36e9ff;
+    --vx-magenta: #ff5fd8;
+    --vx-ink: #04140c;
     --vx-green: #39ff88;
     --vx-purple: #b967ff;
     --vx-amber: #ffd23f;
     --vx-blue: #5ac8ff;
     --vx-blue-deep: #0a3a4d;
-    --vx-teal: #00e0b0;
-    --vx-red: #ff2d55;
+    --vx-teal: #00ff85;
+    --vx-red: #ff4d6d;
 
-    --vx-glow-cyan: 0 0 16px rgba(0, 240, 255, 0.35);
-    --vx-glow-magenta: 0 0 18px rgba(255, 47, 214, 0.3);
+    --vx-glow-cyan: 0 0 16px rgba(0, 255, 133, 0.35);
+    --vx-glow-magenta: 0 0 18px rgba(255, 95, 216, 0.3);
 
-    // Type
-    --vx-text: #eafeff;
-    --vx-text-dim: #7fd8e0;
-    --vx-text-faint: #4a7a80;
+    // Type — italic condensed display for headings, the "sports-menu"
+    // typographic signature; sans stays plain everywhere else.
+    --vx-text: #f3fff8;
+    --vx-text-dim: #86e6b4;
+    --vx-text-faint: #44705a;
     --vx-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --vx-font-heading: 'SFMono-Regular', 'JetBrains Mono', Consolas, monospace;
+    --vx-font-heading: 'Arial Narrow', Arial, 'Helvetica Neue', sans-serif;
+    --vx-font-mono: 'SFMono-Regular', Consolas, monospace;
 }
 
 // --- Overriding the @deriv-com design-token layer --------------------------
@@ -99,26 +106,31 @@
     --brand-font-secondary: var(--vx-font-body);
     --brand-font-monospace: 'SFMono-Regular', Consolas, monospace;
 
-    // Base scanline + dual glow-bloom texture — the one background treatment
-    // that makes near-black surfaces read as "cyberpunk" rather than just
-    // "dark theme". Applied once at the app root so it shows through every
-    // panel that doesn't paint its own opaque background over it.
+    // Tri-glow stadium-lights texture — the background treatment that makes
+    // near-black surfaces read as "Season 2030 menu" rather than just "dark
+    // theme". Applied once at the app root so it shows through every panel
+    // that doesn't paint its own opaque background over it.
     background:
-        repeating-linear-gradient(0deg, rgba(0, 240, 255, 0.025) 0px, rgba(0, 240, 255, 0.025) 1px, transparent 1px, transparent 3px),
-        radial-gradient(circle at 12% 0%, rgba(255, 47, 214, 0.1), transparent 40%),
-        radial-gradient(circle at 92% 100%, rgba(0, 240, 255, 0.08), transparent 40%),
+        repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.02) 0px, rgba(255, 255, 255, 0.02) 2px, transparent 2px, transparent 68px),
+        radial-gradient(circle at 12% 0%, rgba(0, 255, 133, 0.12), transparent 45%),
+        radial-gradient(circle at 92% 8%, rgba(255, 95, 216, 0.08), transparent 45%),
+        radial-gradient(circle at 50% 100%, rgba(54, 233, 255, 0.07), transparent 50%),
         var(--vx-navy) !important;
     color: var(--vx-text);
     font-family: var(--vx-font-body);
 
-    // Monospace for display headings/the greeting — a HUD/terminal read —
-    // sans stays on everything else (nav, cards, body copy).
+    // Italic condensed display for headings — the sports-menu read — plain
+    // sans stays on everything else (nav, cards, body copy). Uppercase is
+    // deliberately NOT part of this global rule: it reads fine on the short
+    // hero greeting (styled separately below) but breaks longer sentence-case
+    // headings elsewhere in the app (dialogs, Academy module titles).
     h1,
     h2,
     h3 {
         font-family: var(--vx-font-heading) !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.02em;
+        font-style: italic;
+        font-weight: 800 !important;
+        letter-spacing: 0.01em;
     }
 
     .tab__dashboard__header .title,
@@ -132,7 +144,7 @@
     .app-header {
         background: var(--vx-navy-2) !important;
         border-bottom: 1px solid var(--vx-line) !important;
-        box-shadow: 0 1px 0 var(--vx-line), 0 4px 20px rgba(0, 240, 255, 0.06);
+        box-shadow: 0 1px 0 var(--vx-line), 0 4px 20px rgba(0, 255, 133, 0.06);
         color: var(--vx-text);
     }
     .app-header__menu {
@@ -142,7 +154,7 @@
         padding: 8px 12px;
         &:hover {
             color: var(--vx-text);
-            background: rgba(0, 240, 255, 0.08);
+            background: rgba(0, 255, 133, 0.08);
         }
     }
 
@@ -165,7 +177,7 @@
     button[class*='primary'] {
         background: var(--vx-orange) !important;
         color: var(--vx-ink) !important;
-        border-radius: var(--vx-radius) !important;
+        border-radius: var(--vx-radius-pill) !important;
         font-family: var(--vx-font-body) !important;
         font-weight: 700 !important;
         font-size: 13px !important;
@@ -206,16 +218,17 @@
         display: flex !important;
         align-items: center;
         gap: 6px;
-        border-radius: var(--vx-radius) var(--vx-radius) 0 0;
+        border-radius: var(--vx-radius-pill);
         margin: 4px 2px;
         padding: 6px 11px;
         border-bottom: 2px solid transparent;
-        font-family: var(--vx-font-body) !important;
+        font-family: var(--vx-font-heading) !important;
+        font-style: italic;
         font-size: 12px !important;
-        font-weight: 600 !important;
+        font-weight: 700 !important;
         line-height: 1.2 !important;
-        letter-spacing: 0 !important;
-        text-transform: none;
+        letter-spacing: 0.02em !important;
+        text-transform: uppercase;
         transition:
             color 0.15s ease,
             background 0.15s ease,
@@ -232,20 +245,25 @@
 
         &:hover {
             color: var(--vx-text) !important;
-            background: rgba(0, 240, 255, 0.08) !important;
+            background: rgba(0, 255, 133, 0.08) !important;
         }
     }
 
-    // Active tab reads as selected via a glowing underline, not a filled
-    // block — the glow does the work a filled background would otherwise
-    // need, without needing a second text colour just for this state.
+    // Active tab reads as selected via a filled green pill — the sliding-pill
+    // indicator language the rest of the Season 2030 nav uses — rather than
+    // the library's own underline.
     .dc-tabs__active--main__tabs.dc-tabs__active--main__tabs,
     .dc-tabs__item--top.dc-tabs__item--main__tabs.dc-tabs__active,
     .dc-tabs__item--main__tabs.dc-tabs__active {
-        color: var(--vx-text) !important;
-        background: rgba(0, 240, 255, 0.06) !important;
-        border-bottom-color: var(--vx-orange) !important;
-        box-shadow: inset 0 -2px 8px rgba(0, 240, 255, 0.3);
+        color: var(--vx-ink) !important;
+        background: linear-gradient(135deg, var(--vx-orange), var(--vx-cyan)) !important;
+        border-bottom-color: transparent !important;
+        box-shadow: var(--vx-glow-cyan);
+
+        svg {
+            fill: var(--vx-ink) !important;
+            color: var(--vx-ink) !important;
+        }
     }
 
     .dc-tabs__active-line {
@@ -257,21 +275,42 @@
     }
 
     // --- Dashboard hero band ------------------------------------------------
+    // The one place an ambient light-sweep earns its keep: a single slow
+    // diagonal pass, same "stadium screen booting up" cue as the Season
+    // 2030 mockup, gated behind prefers-reduced-motion below.
     .vx-hero {
+        position: relative;
+        overflow: hidden;
         background:
-            radial-gradient(circle at 15% 10%, rgba(255, 47, 214, 0.14), transparent 45%),
-            radial-gradient(circle at 85% 90%, rgba(0, 240, 255, 0.12), transparent 45%),
+            radial-gradient(circle at 15% 10%, rgba(255, 95, 216, 0.14), transparent 45%),
+            radial-gradient(circle at 85% 90%, rgba(0, 255, 133, 0.12), transparent 45%),
             linear-gradient(180deg, var(--vx-hero) 0%, var(--vx-navy) 100%);
         border-bottom: 1px solid var(--vx-line);
         padding: 18px 24px 16px;
         text-align: center;
         margin-bottom: 14px;
+
+        &::after {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: -45%;
+            width: 40%;
+            height: 220%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.05) 50%, transparent);
+            transform: rotate(10deg);
+            animation: vx-sweep-light 9s ease-in-out infinite;
+            pointer-events: none;
+        }
     }
     .vx-hero__greeting {
+        position: relative;
         margin: 0 0 4px !important;
         font-size: 24px !important;
         font-family: var(--vx-font-heading) !important;
-        font-weight: 700 !important;
+        font-style: italic;
+        font-weight: 800 !important;
+        text-transform: uppercase;
         color: var(--vx-text) !important;
         text-shadow: var(--vx-glow-cyan);
         line-height: 1.2;
@@ -352,6 +391,9 @@
         padding: 2px 16px 6px;
     }
 
+    // Player-card foil shine: a diagonal highlight parked off the left edge,
+    // sliding across on hover — the one motion cue borrowed directly from the
+    // Season 2030 reference, reused here instead of a new one-off effect.
     .tab__dashboard__table__block {
         position: relative;
         background: var(--vx-panel) !important;
@@ -375,9 +417,26 @@
             box-shadow 0.15s ease,
             transform 0.15s ease;
 
+        &::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -75%;
+            width: 50%;
+            height: 220%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.12) 45%, transparent 60%);
+            transform: rotate(12deg);
+            transition: left 0.55s ease;
+            pointer-events: none;
+        }
+
         &:hover {
             transform: translateY(-2px);
             box-shadow: var(--vx-glow-cyan);
+
+            &::after {
+                left: 125%;
+            }
         }
     }
 
@@ -389,7 +448,7 @@
         min-height: 30px !important;
         max-width: 30px !important;
         border-radius: 8px !important;
-        background: rgba(0, 240, 255, 0.1) !important;
+        background: rgba(0, 255, 133, 0.1) !important;
         border: none !important;
         transform: none;
         margin-bottom: 8px !important;
@@ -492,7 +551,7 @@
         font-family: var(--vx-font-body);
     }
 
-    // --- HEDGEBFX-built pages ------------------------------------------------
+    // --- Apexindices-built pages ---------------------------------------------
     .vx-card,
     .vx-freebots__card,
     .vx-riskcalc__panel,
@@ -535,6 +594,24 @@
     }
     .blocklyFlyoutBackground {
         fill: var(--vx-panel-2) !important;
+    }
+}
+
+@keyframes vx-sweep-light {
+    0%,
+    100% {
+        left: -45%;
+        opacity: 0;
+    }
+    15% {
+        opacity: 0.9;
+    }
+    55% {
+        opacity: 0.9;
+    }
+    75% {
+        left: 115%;
+        opacity: 0;
     }
 }
 
@@ -896,6 +973,9 @@
     }
     .theme--dark .vx-freebots__mythic-ring {
         animation: none;
+    }
+    .theme--dark .vx-hero::after {
+        display: none;
     }
 }
 

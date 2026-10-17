@@ -1,5 +1,5 @@
 {
-    "brand_name": "HEDGEBFX",
+    "brand_name": "Apexindices",
     "brand_domain": "vexora.com",
     "brand_hostname": {
         "staging": "staging.vexora.com/dashboard",
@@ -7,7 +7,7 @@
     },
     "domain_name": "Vexora.com",
     "colors": {
-        "primary": "#FF6B00",
+        "primary": "#00FF85",
         "secondary": "#64748b",
         "tertiary": "#FF3B3B",
         "success": "#10b981",
@@ -79,7 +79,7 @@
         "css_variable_prefix": "--brand"
     },
     "platform": {
-        "name": "HEDGEBFX",
+        "name": "Apexindices",
         "footer": {
             "enable_language_settings": false,
             "enable_theme_toggle": true

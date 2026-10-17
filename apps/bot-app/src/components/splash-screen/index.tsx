@@ -19,9 +19,9 @@ const SplashScreen = () => {
     if (!visible) return null;
 
     return (
-        <div className={`vexora-splash${fading ? ' vexora-splash--fade' : ''}`} role='status' aria-label='Loading HEDGEBFX'>
-            <div className='vexora-splash__mark'>H</div>
-            <div className='vexora-splash__name'>HEDGEBFX</div>
+        <div className={`vexora-splash${fading ? ' vexora-splash--fade' : ''}`} role='status' aria-label='Loading Apexindices'>
+            <div className='vexora-splash__mark'>A</div>
+            <div className='vexora-splash__name'>APEXINDICES</div>
             <div className='vexora-splash__bar'>
                 <div className='vexora-splash__bar-fill' />
             </div>
