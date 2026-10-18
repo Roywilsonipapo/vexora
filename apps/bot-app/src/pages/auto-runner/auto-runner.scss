@@ -87,9 +87,11 @@
     // The console — the centerpiece. A spinning masked conic-gradient ring
     // (identical technique to .vx-freebots__legendary-ring) framing a dark
     // glass panel, so this reads as the same tier of showpiece as the
-    // flagship bot cards rather than a plain settings form.
+    // flagship bot cards rather than a plain settings form. overflow:hidden
+    // keeps the ring's own corners from ever rendering past the panel edge.
     &__console {
         position: relative;
+        overflow: hidden;
         border-radius: 18px;
         padding: 2px;
     }
@@ -105,10 +107,23 @@
         mask-composite: exclude;
         pointer-events: none;
         animation: vx-autorun-spin 7s linear infinite;
+        z-index: 2;
+    }
+
+    // Slow-drifting particle canvas, sitting behind the console's own content
+    // but above its gradient background — the "flight deck" ambience.
+    &__stars {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0.6;
+        pointer-events: none;
     }
 
     &__console-inner {
         position: relative;
+        z-index: 1;
         border-radius: 16px;
         padding: 22px 18px;
         background: radial-gradient(130% 100% at 50% -10%, rgba(212, 175, 55, 0.1), transparent 60%),
@@ -119,85 +134,116 @@
         gap: 18px;
     }
 
-    &__gauge {
+    // --- Dial — a 180° HUD gauge replacing the old linear bar, loss limit on
+    // the left, target on the right, the live total as a comet-head marker
+    // riding the arc between them.
+    &__dial {
+        position: relative;
         display: flex;
         flex-direction: column;
-        gap: 6px;
+        align-items: center;
     }
 
-    &__gauge-track {
-        position: relative;
-        height: 10px;
-        border-radius: 100px;
-        background: linear-gradient(90deg, rgba(239, 68, 68, 0.35), rgba(100, 124, 153, 0.22) 50%, rgba(212, 175, 55, 0.4));
+    &__dial-svg {
+        width: 100%;
+        max-width: 320px;
         overflow: visible;
     }
 
-    &__gauge-marker {
+    &__dial-track {
+        fill: none;
+        stroke: rgba(232, 240, 251, 0.12);
+        stroke-width: 10;
+        stroke-linecap: round;
+    }
+
+    &__dial-fill {
+        fill: none;
+        stroke: url(#vx-autorun-dial-gradient);
+        stroke-width: 10;
+        stroke-linecap: round;
+        filter: drop-shadow(0 0 8px rgba(245, 214, 122, 0.45));
+        transition: d 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &.is-neg &__dial-fill {
+        filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.45));
+    }
+
+    &__dial-zero {
+        stroke: rgba(232, 240, 251, 0.4);
+        stroke-width: 2;
+    }
+
+    &__dial-marker {
+        fill: #f5d67a;
+        stroke: rgba(10, 6, 18, 0.6);
+        stroke-width: 3;
+        filter: drop-shadow(0 0 10px rgba(245, 214, 122, 0.8));
+        transition: cx 0.6s cubic-bezier(0.22, 1, 0.36, 1), cy 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &.is-neg &__dial-marker {
+        fill: #ef4444;
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.75));
+    }
+
+    &__dial-readout {
         position: absolute;
-        top: 50%;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
+        top: 58%;
+        left: 50%;
         transform: translate(-50%, -50%);
-        background: radial-gradient(circle at 35% 30%, #fff3d0, #f5d67a 55%, #b8860b);
-        box-shadow: 0 0 10px rgba(245, 214, 122, 0.8), 0 0 0 3px rgba(10, 6, 18, 0.6);
-        transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-
-    &__gauge-zero {
-        position: absolute;
-        top: -3px;
-        width: 2px;
-        height: 16px;
-        background: rgba(232, 240, 251, 0.35);
-        transform: translateX(-50%);
-    }
-
-    &__gauge-labels {
         display: flex;
-        justify-content: space-between;
-        font-size: 10px;
-        font-variant-numeric: tabular-nums;
+        flex-direction: column;
+        align-items: center;
+        gap: 1px;
+    }
+
+    &__dial-label {
+        font-size: 9.5px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
         color: var(--vx-text-faint, #647c99);
     }
 
-    &__total {
-        text-align: center;
+    &__dial-value {
+        font-family: var(--vx-font-heading);
+        font-style: italic;
+        font-size: 32px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        background: linear-gradient(90deg, #fff3d0, #f5d67a 35%, #d4af37 70%, #b8860b);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 22px rgba(212, 175, 55, 0.3);
+    }
+
+    &.is-neg &__dial-value {
+        background: linear-gradient(90deg, #ffb3b3, #ef4444 60%, #b91c1c);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        text-shadow: 0 0 22px rgba(239, 68, 68, 0.28);
+    }
+
+    &__dial-currency {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        color: var(--vx-text-faint, #647c99);
+    }
+
+    &__dial-labels {
         display: flex;
-        flex-direction: column;
-        gap: 2px;
-
-        &-label {
-            font-size: 10.5px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            color: var(--vx-text-faint, #647c99);
-        }
-
-        &-value {
-            font-size: 34px;
-            font-weight: 800;
-            font-variant-numeric: tabular-nums;
-            background: linear-gradient(90deg, #fff3d0, #f5d67a 35%, #d4af37 70%, #b8860b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 22px rgba(212, 175, 55, 0.3);
-        }
-
-        &.is-neg &-value {
-            background: linear-gradient(90deg, #ffb3b3, #ef4444 60%, #b91c1c);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 22px rgba(239, 68, 68, 0.28);
-        }
-
-        &-sub {
-            font-size: 11px;
-            color: var(--vx-text-faint, #647c99);
-        }
+        justify-content: space-between;
+        width: 100%;
+        max-width: 320px;
+        margin-top: -6px;
+        font-size: 10px;
+        font-variant-numeric: tabular-nums;
+        color: var(--vx-text-faint, #647c99);
     }
 
     &__inputs {
@@ -270,7 +316,7 @@
         gap: 8px;
         background: transparent;
         border: 1px solid rgba(255, 215, 130, 0.25);
-        border-radius: 100px;
+        border-radius: 100px !important;
         padding: 6px 12px 6px 6px;
         font-size: 11.5px;
         font-weight: 600;
@@ -312,21 +358,49 @@
         }
     }
 
-    &__cta {
+    // Launch control — deliberately circular and labelled differently from
+    // the floating global Run pill (vx-run-bar), so the two never read as a
+    // duplicate control even when the page is scrolled so they sit close
+    // together on screen.
+    &__launch-row {
+        display: flex;
+        justify-content: center;
+        padding: 4px 0 2px;
+    }
+
+    &__launch {
         position: relative;
+        width: 108px;
+        height: 108px;
+        border-radius: 50% !important;
         border: none;
-        border-radius: 12px;
-        padding: 14px;
-        font-size: 14px;
-        font-weight: 800;
-        letter-spacing: 0.02em;
         cursor: pointer;
-        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &-label {
+            position: relative;
+            z-index: 1;
+            font-family: var(--vx-font-heading);
+            font-style: italic;
+            font-size: 15px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        &-ring {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+            pointer-events: none;
+        }
 
         &--start {
-            background: linear-gradient(90deg, #f5d67a, #d4af37 55%, #b8860b);
+            background: radial-gradient(circle at 35% 30%, #fff3d0, #f5d67a 45%, #b8860b 100%);
             color: #1a1206;
-            box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+            box-shadow: 0 0 0 1px rgba(255, 215, 130, 0.4), 0 10px 28px rgba(212, 175, 55, 0.35);
 
             &:hover {
                 filter: brightness(1.06);
@@ -334,18 +408,18 @@
         }
 
         &--stop {
-            background: linear-gradient(90deg, #2a1414, #3a1414);
+            background: radial-gradient(circle at 35% 30%, #3a1414, #2a1010 70%);
             color: #ffb3b3;
             border: 1px solid rgba(239, 68, 68, 0.5);
-        }
 
-        &-pulse {
-            position: absolute;
-            inset: -1px;
-            border-radius: inherit;
-            border: 1px solid rgba(239, 68, 68, 0.6);
-            animation: vx-autorun-cta-pulse 1.6s ease-out infinite;
-            pointer-events: none;
+            .vx-autorun__launch-ring {
+                border: 1px solid rgba(239, 68, 68, 0.55);
+                animation: vx-autorun-launch-pulse 1.8s ease-out infinite;
+            }
+
+            .vx-autorun__launch-ring--2 {
+                animation-delay: 0.6s;
+            }
         }
     }
 
@@ -468,19 +542,21 @@
     }
 }
 
-@keyframes vx-autorun-cta-pulse {
+@keyframes vx-autorun-launch-pulse {
     0% {
-        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45);
+        transform: scale(1);
+        opacity: 0.75;
     }
     100% {
-        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+        transform: scale(1.6);
+        opacity: 0;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .vx-autorun__console-ring,
     .vx-autorun__status-dot,
-    .vx-autorun__cta-pulse {
+    .vx-autorun__launch-ring {
         animation: none;
     }
 }
@@ -493,8 +569,13 @@
             padding: 18px 14px;
         }
 
-        &__total-value {
-            font-size: 28px;
+        &__dial-value {
+            font-size: 26px;
+        }
+
+        &__launch {
+            width: 92px;
+            height: 92px;
         }
 
         &__inputs {

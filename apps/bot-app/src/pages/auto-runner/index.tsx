@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { RefObject, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { getAutoRunnerStore, TLogKind } from './auto-runner-store';
@@ -38,10 +38,86 @@ const LOG_GLYPH: Record<TLogKind, string> = {
     stop: '■',
 };
 
+// Dial geometry — a 180° arc read left-to-right (loss limit → target), same
+// semicircle-gauge trick throughout: angle 180° is the left end, 0° the
+// right end, sweeping clockwise over the top.
+const DIAL_CX = 100;
+const DIAL_CY = 100;
+const DIAL_R = 86;
+const polarPoint = (pct: number) => {
+    const angleDeg = 180 - (Math.max(0, Math.min(100, pct)) / 100) * 180;
+    const angleRad = (angleDeg * Math.PI) / 180;
+    return { x: DIAL_CX + DIAL_R * Math.cos(angleRad), y: DIAL_CY - DIAL_R * Math.sin(angleRad) };
+};
+const dialArc = (fromPct: number, toPct: number) => {
+    const start = polarPoint(fromPct);
+    const end = polarPoint(toPct);
+    return `M ${start.x} ${start.y} A ${DIAL_R} ${DIAL_R} 0 0 1 ${end.x} ${end.y}`;
+};
+
+// Slow-drifting particle field behind the console — purely decorative, reads
+// as "flight deck" ambience. Respects prefers-reduced-motion (renders one
+// static frame instead of animating) and tears its own loop down on unmount,
+// since this whole page unmounts whenever you leave the tab.
+const useStarfield = (canvasRef: RefObject<HTMLCanvasElement>) => {
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (!canvas) return undefined;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return undefined;
+
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let width = 0;
+        let height = 0;
+        let stars: { x: number; y: number; r: number; speed: number; phase: number }[] = [];
+
+        const resize = () => {
+            const rect = canvas.getBoundingClientRect();
+            width = canvas.width = rect.width;
+            height = canvas.height = rect.height;
+            const count = Math.round((width * height) / 9000);
+            stars = Array.from({ length: count }, () => ({
+                x: Math.random() * width,
+                y: Math.random() * height,
+                r: Math.random() * 1.2 + 0.3,
+                speed: Math.random() * 0.15 + 0.03,
+                phase: Math.random() * Math.PI * 2,
+            }));
+        };
+        resize();
+        window.addEventListener('resize', resize);
+
+        let raf = 0;
+        let t = 0;
+        const draw = () => {
+            ctx.clearRect(0, 0, width, height);
+            t += 0.02;
+            stars.forEach(s => {
+                s.y -= s.speed;
+                if (s.y < 0) s.y = height;
+                const twinkle = 0.35 + 0.5 * Math.abs(Math.sin(t + s.phase));
+                ctx.fillStyle = `rgba(245, 214, 122, ${twinkle})`;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            if (!reduce) raf = requestAnimationFrame(draw);
+        };
+        draw();
+
+        return () => {
+            window.removeEventListener('resize', resize);
+            if (raf) cancelAnimationFrame(raf);
+        };
+    }, [canvasRef]);
+};
+
 const AutoRunner = observer(() => {
     const root_store = useStore();
     const store = getAutoRunnerStore(root_store);
     const { client } = root_store;
+    const starfieldRef = useRef<HTMLCanvasElement>(null);
+    useStarfield(starfieldRef);
 
     const [profitInput, setProfitInput] = useState<string>(store.daily_profit_target ? String(store.daily_profit_target) : '');
     const [lossInput, setLossInput] = useState<string>(store.daily_loss_limit ? String(store.daily_loss_limit) : '');
@@ -53,6 +129,7 @@ const AutoRunner = observer(() => {
     const limit = store.daily_loss_limit;
     const span = target + limit;
     const gauge_pct = span > 0 ? Math.min(100, Math.max(0, ((cumulative_profit + limit) / span) * 100)) : 50;
+    const zero_pct = span > 0 ? (limit / span) * 100 : 50;
 
     const handleStart = () => {
         const target_val = Math.max(0, parseFloat(profitInput) || 0);
@@ -80,27 +157,50 @@ const AutoRunner = observer(() => {
             </div>
 
             <div className='vx-autorun__console'>
+                <canvas className='vx-autorun__stars' ref={starfieldRef} aria-hidden='true' />
                 <span className='vx-autorun__console-ring' aria-hidden='true' />
                 <div className='vx-autorun__console-inner'>
-                    <div className='vx-autorun__gauge'>
-                        <div className='vx-autorun__gauge-track'>
-                            <div className='vx-autorun__gauge-marker' style={{ left: `${gauge_pct}%` }} />
-                            <div className='vx-autorun__gauge-zero' style={{ left: `${span > 0 ? (limit / span) * 100 : 50}%` }} />
+                    <div className={`vx-autorun__dial ${cumulative_profit >= 0 ? 'is-pos' : 'is-neg'}`}>
+                        <svg viewBox='0 0 200 112' className='vx-autorun__dial-svg' aria-hidden='true'>
+                            <defs>
+                                <linearGradient id='vx-autorun-dial-gradient' x1='0' y1='0' x2='1' y2='0'>
+                                    <stop offset='0%' stopColor='#ef4444' />
+                                    <stop offset={`${zero_pct}%`} stopColor='#8a8990' />
+                                    <stop offset='100%' stopColor='#f5d67a' />
+                                </linearGradient>
+                            </defs>
+                            <path className='vx-autorun__dial-track' d={dialArc(0, 100)} />
+                            <path
+                                className='vx-autorun__dial-fill'
+                                d={dialArc(Math.min(zero_pct, gauge_pct), Math.max(zero_pct, gauge_pct))}
+                            />
+                            <line
+                                className='vx-autorun__dial-zero'
+                                x1={polarPoint(zero_pct).x}
+                                y1={polarPoint(zero_pct).y - 7}
+                                x2={polarPoint(zero_pct).x}
+                                y2={polarPoint(zero_pct).y + 7}
+                            />
+                            <circle
+                                className='vx-autorun__dial-marker'
+                                cx={polarPoint(gauge_pct).x}
+                                cy={polarPoint(gauge_pct).y}
+                                r='5.5'
+                            />
+                        </svg>
+                        <div className='vx-autorun__dial-readout'>
+                            <span className='vx-autorun__dial-label'>Today&rsquo;s total</span>
+                            <span className='vx-autorun__dial-value'>
+                                {cumulative_profit >= 0 ? '+' : ''}
+                                {cumulative_profit.toFixed(2)}
+                            </span>
+                            <span className='vx-autorun__dial-currency'>{currency}</span>
                         </div>
-                        <div className='vx-autorun__gauge-labels'>
+                        <div className='vx-autorun__dial-labels'>
                             <span>&minus;{limit ? limit.toFixed(2) : '—'}</span>
-                            <span>0</span>
+                            <span>{cycles_completed} cycle{cycles_completed === 1 ? '' : 's'} today</span>
                             <span>+{target ? target.toFixed(2) : '—'}</span>
                         </div>
-                    </div>
-
-                    <div className={`vx-autorun__total ${cumulative_profit >= 0 ? 'is-pos' : 'is-neg'}`}>
-                        <span className='vx-autorun__total-label'>Today&rsquo;s total</span>
-                        <span className='vx-autorun__total-value'>
-                            {cumulative_profit >= 0 ? '+' : ''}
-                            {cumulative_profit.toFixed(2)} {currency}
-                        </span>
-                        <span className='vx-autorun__total-sub'>{cycles_completed} cycle{cycles_completed === 1 ? '' : 's'} today</span>
                     </div>
 
                     <div className='vx-autorun__inputs'>
@@ -155,16 +255,19 @@ const AutoRunner = observer(() => {
                         </button>
                     </div>
 
-                    {store.is_active ? (
-                        <button type='button' className='vx-autorun__cta vx-autorun__cta--stop' onClick={store.stop}>
-                            <span className='vx-autorun__cta-pulse' />
-                            Stop Auto-Runner
-                        </button>
-                    ) : (
-                        <button type='button' className='vx-autorun__cta vx-autorun__cta--start' onClick={handleStart}>
-                            Start Auto-Runner
-                        </button>
-                    )}
+                    <div className='vx-autorun__launch-row'>
+                        {store.is_active ? (
+                            <button type='button' className='vx-autorun__launch vx-autorun__launch--stop' onClick={store.stop}>
+                                <span className='vx-autorun__launch-ring' />
+                                <span className='vx-autorun__launch-ring vx-autorun__launch-ring--2' />
+                                <span className='vx-autorun__launch-label'>Stop</span>
+                            </button>
+                        ) : (
+                            <button type='button' className='vx-autorun__launch vx-autorun__launch--start' onClick={handleStart}>
+                                <span className='vx-autorun__launch-label'>Launch</span>
+                            </button>
+                        )}
+                    </div>
 
                     {!store.is_active && (
                         <p className='vx-autorun__hint'>
