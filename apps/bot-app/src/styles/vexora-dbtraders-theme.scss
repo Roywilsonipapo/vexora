@@ -8,7 +8,7 @@
 // rather than a handful of component classes, so the re-theme reaches every
 // surface the library renders.
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Saira+Condensed:ital,wght@0,600;0,700;0,800;1,700;1,800;1,900&display=swap');
 
 :root {
     // Surfaces — deep-space near-black, each step slightly lighter
@@ -52,7 +52,7 @@
     --vx-text-dim: #86e6b4;
     --vx-text-faint: #44705a;
     --vx-font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --vx-font-heading: 'Arial Narrow', Arial, 'Helvetica Neue', sans-serif;
+    --vx-font-heading: 'Saira Condensed', 'Arial Narrow', Arial, 'Helvetica Neue', sans-serif;
     --vx-font-mono: 'SFMono-Regular', Consolas, monospace;
 }
 
@@ -133,11 +133,19 @@
         letter-spacing: 0.01em;
     }
 
-    .tab__dashboard__header .title,
-    .vx-card__title {
+    .tab__dashboard__header .title {
         font-family: var(--vx-font-body) !important;
         font-weight: 600 !important;
         letter-spacing: 0;
+    }
+
+    // Quick-action card titles get the same condensed italic tile-label type
+    // as the menu system they're styled after.
+    .vx-card__title {
+        font-family: var(--vx-font-heading) !important;
+        font-style: italic;
+        font-weight: 800 !important;
+        letter-spacing: 0.01em;
     }
 
     // --- Header ---
@@ -381,7 +389,7 @@
         font-size: 24px !important;
         font-family: var(--vx-font-heading) !important;
         font-style: italic;
-        font-weight: 800 !important;
+        font-weight: 900 !important;
         text-transform: uppercase;
         color: var(--vx-text) !important;
         text-shadow: var(--vx-glow-cyan);
@@ -434,10 +442,11 @@
         color: var(--vx-text-faint);
     }
     .vx-ledger__value {
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 15px;
+        font-style: italic;
+        font-weight: 800;
         font-variant-numeric: tabular-nums;
-        font-family: 'SFMono-Regular', Consolas, monospace;
+        font-family: var(--vx-font-heading);
         color: var(--vx-text);
     }
     .vx-ledger__value--profit {
@@ -666,6 +675,37 @@
     }
     .blocklyFlyoutBackground {
         fill: var(--vx-panel-2) !important;
+    }
+}
+
+// --- Screen-to-screen motion ------------------------------------------------
+// Every tab's root unmounts when you leave it (the library tears down
+// inactive tabs — see auto-runner-store.ts), so this animation replays fresh
+// each time one of these mounts: a quick fade + rise, the same read as the
+// Season 2030 reference's screen transitions, applied once centrally instead
+// of per-page.
+.theme--dark {
+    .tab__dashboard,
+    #bot-builder,
+    .vx-scalper,
+    .vx-autorun,
+    .vx-analysis,
+    .vx-freebots,
+    .vx-riskcalc,
+    .vx-academy,
+    .vx-journal {
+        animation: vx-screen-enter 0.38s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    }
+}
+
+@keyframes vx-screen-enter {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
@@ -1059,6 +1099,17 @@
         display: none;
     }
     .theme--dark .vx-promo__ring {
+        animation: none;
+    }
+    .theme--dark .tab__dashboard,
+    .theme--dark #bot-builder,
+    .theme--dark .vx-scalper,
+    .theme--dark .vx-autorun,
+    .theme--dark .vx-analysis,
+    .theme--dark .vx-freebots,
+    .theme--dark .vx-riskcalc,
+    .theme--dark .vx-academy,
+    .theme--dark .vx-journal {
         animation: none;
     }
 }

@@ -70,7 +70,11 @@
         color: var(--vx-ink, #04140c) !important;
         border: none !important;
         border-radius: 100px !important;
-        font-weight: 700 !important;
+        font-family: var(--vx-font-heading, 'Saira Condensed', sans-serif) !important;
+        font-style: italic;
+        font-weight: 800 !important;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
         font-size: 13px !important;
         padding: 7px 16px !important;
         min-width: 84px;
