@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStore } from '@/hooks/useStore';
 import { getAutoRunnerStore, TLogKind } from './auto-runner-store';
@@ -38,98 +38,141 @@ const LOG_GLYPH: Record<TLogKind, string> = {
     stop: '■',
 };
 
-// Dial geometry — a 180° arc read left-to-right (loss limit → target), same
-// semicircle-gauge trick throughout: angle 180° is the left end, 0° the
-// right end, sweeping clockwise over the top.
-const DIAL_CX = 100;
-const DIAL_CY = 100;
-const DIAL_R = 86;
-const polarPoint = (pct: number) => {
-    const angleDeg = 180 - (Math.max(0, Math.min(100, pct)) / 100) * 180;
-    const angleRad = (angleDeg * Math.PI) / 180;
-    return { x: DIAL_CX + DIAL_R * Math.cos(angleRad), y: DIAL_CY - DIAL_R * Math.sin(angleRad) };
-};
-const dialArc = (fromPct: number, toPct: number) => {
-    const start = polarPoint(fromPct);
-    const end = polarPoint(toPct);
-    return `M ${start.x} ${start.y} A ${DIAL_R} ${DIAL_R} 0 0 1 ${end.x} ${end.y}`;
-};
+// Rotating background art — purely decorative, crossfades on a timer. Add or
+// remove images by editing this list; nothing else needs to change.
+const ART_IMAGES = [
+    '/auto-runner/01-growth.png',
+    '/auto-runner/02-river.png',
+    '/auto-runner/03-terrain.png',
+    '/auto-runner/04-fabric.png',
+    '/auto-runner/05-sound.png',
+];
+const ART_ROTATE_MS = 5000;
 
-// Slow-drifting particle field behind the console — purely decorative, reads
-// as "flight deck" ambience. Respects prefers-reduced-motion (renders one
-// static frame instead of animating) and tears its own loop down on unmount,
-// since this whole page unmounts whenever you leave the tab.
-const useStarfield = (canvasRef: RefObject<HTMLCanvasElement>) => {
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas) return undefined;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return undefined;
+const HISTORY_CAP = 40;
+const SPARK_POINTS = 16;
+const SPARK_W = 110;
+const SPARK_H = 26;
+const SPARK_PAD = 3;
 
-        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-        let width = 0;
-        let height = 0;
-        let stars: { x: number; y: number; r: number; speed: number; phase: number }[] = [];
-
-        const resize = () => {
-            const rect = canvas.getBoundingClientRect();
-            width = canvas.width = rect.width;
-            height = canvas.height = rect.height;
-            const count = Math.round((width * height) / 9000);
-            stars = Array.from({ length: count }, () => ({
-                x: Math.random() * width,
-                y: Math.random() * height,
-                r: Math.random() * 1.2 + 0.3,
-                speed: Math.random() * 0.15 + 0.03,
-                phase: Math.random() * Math.PI * 2,
-            }));
-        };
-        resize();
-        window.addEventListener('resize', resize);
-
-        let raf = 0;
-        let t = 0;
-        const draw = () => {
-            ctx.clearRect(0, 0, width, height);
-            t += 0.02;
-            stars.forEach(s => {
-                s.y -= s.speed;
-                if (s.y < 0) s.y = height;
-                const twinkle = 0.35 + 0.5 * Math.abs(Math.sin(t + s.phase));
-                ctx.fillStyle = `rgba(245, 214, 122, ${twinkle})`;
-                ctx.beginPath();
-                ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-                ctx.fill();
-            });
-            if (!reduce) raf = requestAnimationFrame(draw);
-        };
-        draw();
-
-        return () => {
-            window.removeEventListener('resize', resize);
-            if (raf) cancelAnimationFrame(raf);
-        };
-    }, [canvasRef]);
+const buildSparkline = (values: number[]) => {
+    const pts = values.slice(-SPARK_POINTS);
+    if (pts.length === 0) return { line: '', dot: { x: SPARK_PAD, y: SPARK_H / 2 } };
+    const min = Math.min(...pts);
+    const max = Math.max(...pts);
+    const span = Math.max(1, max - min);
+    const coords = pts.map((v, i) => {
+        const x = SPARK_PAD + (i / Math.max(1, pts.length - 1)) * (SPARK_W - SPARK_PAD * 2);
+        const y = SPARK_H - SPARK_PAD - ((v - min) / span) * (SPARK_H - SPARK_PAD * 2);
+        return `${x},${y}`;
+    });
+    const last = coords[coords.length - 1].split(',').map(Number);
+    return { line: coords.join(' '), dot: { x: last[0], y: last[1] } };
 };
 
 const AutoRunner = observer(() => {
     const root_store = useStore();
     const store = getAutoRunnerStore(root_store);
     const { client } = root_store;
-    const starfieldRef = useRef<HTMLCanvasElement>(null);
-    useStarfield(starfieldRef);
 
     const [profitInput, setProfitInput] = useState<string>(store.daily_profit_target ? String(store.daily_profit_target) : '');
     const [lossInput, setLossInput] = useState<string>(store.daily_loss_limit ? String(store.daily_loss_limit) : '');
 
     const currency = client.currency || '';
     const { cumulative_profit, cycles_completed } = store.daily_state;
-
     const target = store.daily_profit_target;
     const limit = store.daily_loss_limit;
-    const span = target + limit;
-    const gauge_pct = span > 0 ? Math.min(100, Math.max(0, ((cumulative_profit + limit) / span) * 100)) : 50;
-    const zero_pct = span > 0 ? (limit / span) * 100 : 50;
+
+    // --- count-up animation for the running total -------------------------
+    const [displayedTotal, setDisplayedTotal] = useState(cumulative_profit);
+    const prevTotalRef = useRef(cumulative_profit);
+    const countRafRef = useRef<number>();
+
+    useEffect(() => {
+        const to = cumulative_profit;
+        const from = prevTotalRef.current;
+        prevTotalRef.current = to;
+        if (from === to) return undefined;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) {
+            setDisplayedTotal(to);
+            return undefined;
+        }
+
+        const start = performance.now();
+        const duration = 650;
+        if (countRafRef.current) cancelAnimationFrame(countRafRef.current);
+
+        const frame = (now: number) => {
+            const progress = Math.min(1, (now - start) / duration);
+            const eased = 1 - (1 - progress) ** 3;
+            setDisplayedTotal(from + (to - from) * eased);
+            if (progress < 1) countRafRef.current = requestAnimationFrame(frame);
+        };
+        countRafRef.current = requestAnimationFrame(frame);
+        return () => {
+            if (countRafRef.current) cancelAnimationFrame(countRafRef.current);
+        };
+    }, [cumulative_profit]);
+
+    // --- sparkline history --------------------------------------------------
+    const [history, setHistory] = useState<number[]>([cumulative_profit]);
+    useEffect(() => {
+        setHistory(prev => {
+            if (prev.length && prev[prev.length - 1] === cumulative_profit) return prev;
+            const next = [...prev, cumulative_profit];
+            return next.length > HISTORY_CAP ? next.slice(-HISTORY_CAP) : next;
+        });
+    }, [cumulative_profit]);
+    const spark = buildSparkline(history);
+
+    // --- toast on real status transitions -----------------------------------
+    const [toast, setToast] = useState<{ text: string; kind: 'pos' | 'neg' | '' } | null>(null);
+    const toastTimerRef = useRef<ReturnType<typeof setTimeout>>();
+    const showToast = useCallback((text: string, kind: 'pos' | 'neg' | '' = '') => {
+        setToast({ text, kind });
+        clearTimeout(toastTimerRef.current);
+        toastTimerRef.current = setTimeout(() => setToast(null), 2600);
+    }, []);
+    useEffect(() => () => clearTimeout(toastTimerRef.current), []);
+
+    const prevStatusRef = useRef(store.status);
+    useEffect(() => {
+        const prev = prevStatusRef.current;
+        prevStatusRef.current = store.status;
+        if (prev === store.status) return;
+        if (store.status === 'running') showToast('Auto-Runner started');
+        else if (store.status === 'stopped_target') showToast('Target reached — session stopped', 'pos');
+        else if (store.status === 'stopped_loss') showToast('Loss limit reached — session stopped', 'neg');
+        else if (store.status === 'stopped_manual' && prev === 'running') showToast('Stopped manually');
+        else if (store.status === 'error') showToast('Auto-Runner needs attention', 'neg');
+    }, [store.status, showToast]);
+
+    // --- rotating background art, crossfades between two always-mounted layers
+    const [slotImages, setSlotImages] = useState<[string, string]>([ART_IMAGES[0], ART_IMAGES[0]]);
+    const [activeSlot, setActiveSlot] = useState<0 | 1>(0);
+    const activeSlotRef = useRef<0 | 1>(0);
+
+    useEffect(() => {
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) return undefined;
+        let index = 0;
+        const id = setInterval(() => {
+            index = (index + 1) % ART_IMAGES.length;
+            const nextSlot = activeSlotRef.current === 0 ? 1 : 0;
+            setSlotImages(prev => {
+                const next: [string, string] = [...prev] as [string, string];
+                next[nextSlot] = ART_IMAGES[index];
+                return next;
+            });
+            requestAnimationFrame(() => {
+                activeSlotRef.current = nextSlot;
+                setActiveSlot(nextSlot);
+            });
+        }, ART_ROTATE_MS);
+        return () => clearInterval(id);
+    }, []);
 
     const handleStart = () => {
         const target_val = Math.max(0, parseFloat(profitInput) || 0);
@@ -156,127 +199,125 @@ const AutoRunner = observer(() => {
                 </p>
             </div>
 
-            <div className='vx-autorun__console'>
-                <canvas className='vx-autorun__stars' ref={starfieldRef} aria-hidden='true' />
-                <span className='vx-autorun__console-ring' aria-hidden='true' />
-                <div className='vx-autorun__console-inner'>
-                    <div className={`vx-autorun__dial ${cumulative_profit >= 0 ? 'is-pos' : 'is-neg'}`}>
-                        <svg viewBox='0 0 200 112' className='vx-autorun__dial-svg' aria-hidden='true'>
-                            <defs>
-                                <linearGradient id='vx-autorun-dial-gradient' x1='0' y1='0' x2='1' y2='0'>
-                                    <stop offset='0%' stopColor='#ef4444' />
-                                    <stop offset={`${zero_pct}%`} stopColor='#8a8990' />
-                                    <stop offset='100%' stopColor='#f5d67a' />
-                                </linearGradient>
-                            </defs>
-                            <path className='vx-autorun__dial-track' d={dialArc(0, 100)} />
-                            <path
-                                className='vx-autorun__dial-fill'
-                                d={dialArc(Math.min(zero_pct, gauge_pct), Math.max(zero_pct, gauge_pct))}
-                            />
-                            <line
-                                className='vx-autorun__dial-zero'
-                                x1={polarPoint(zero_pct).x}
-                                y1={polarPoint(zero_pct).y - 7}
-                                x2={polarPoint(zero_pct).x}
-                                y2={polarPoint(zero_pct).y + 7}
-                            />
-                            <circle
-                                className='vx-autorun__dial-marker'
-                                cx={polarPoint(gauge_pct).x}
-                                cy={polarPoint(gauge_pct).y}
-                                r='5.5'
-                            />
-                        </svg>
-                        <div className='vx-autorun__dial-readout'>
-                            <span className='vx-autorun__dial-label'>Today&rsquo;s total</span>
-                            <span className='vx-autorun__dial-value'>
-                                {cumulative_profit >= 0 ? '+' : ''}
-                                {cumulative_profit.toFixed(2)}
-                            </span>
-                            <span className='vx-autorun__dial-currency'>{currency}</span>
-                        </div>
-                        <div className='vx-autorun__dial-labels'>
-                            <span>&minus;{limit ? limit.toFixed(2) : '—'}</span>
-                            <span>{cycles_completed} cycle{cycles_completed === 1 ? '' : 's'} today</span>
-                            <span>+{target ? target.toFixed(2) : '—'}</span>
-                        </div>
-                    </div>
+            <div className='vx-autorun__photopanel'>
+                <div
+                    className={`vx-autorun__art-layer${activeSlot === 0 ? ' is-active' : ''}`}
+                    style={{ backgroundImage: `url(${slotImages[0]})` }}
+                    aria-hidden='true'
+                />
+                <div
+                    className={`vx-autorun__art-layer${activeSlot === 1 ? ' is-active' : ''}`}
+                    style={{ backgroundImage: `url(${slotImages[1]})` }}
+                    aria-hidden='true'
+                />
 
-                    <div className='vx-autorun__inputs'>
-                        <label>
-                            <span>Daily profit target</span>
-                            <div className='vx-autorun__input-wrap'>
-                                <input
-                                    type='number'
-                                    min='0'
-                                    step='0.01'
-                                    placeholder='0 = off'
-                                    value={profitInput}
-                                    disabled={store.is_active}
-                                    onChange={e => setProfitInput(e.target.value)}
-                                />
-                                <span>{currency}</span>
-                            </div>
-                        </label>
-                        <label>
-                            <span>Daily loss limit</span>
-                            <div className='vx-autorun__input-wrap'>
-                                <input
-                                    type='number'
-                                    min='0'
-                                    step='0.01'
-                                    placeholder='0 = off'
-                                    value={lossInput}
-                                    disabled={store.is_active}
-                                    onChange={e => setLossInput(e.target.value)}
-                                />
-                                <span>{currency}</span>
-                            </div>
-                        </label>
-                    </div>
+                <div className='vx-autorun__chip vx-autorun__chip--brand'>
+                    <span className='vx-autorun__chip-nm'>Auto-Runner</span>
+                </div>
+                <div className={`vx-autorun__chip vx-autorun__chip--status${store.status !== 'running' ? ' is-stopped' : ''}`}>
+                    <span className={`vx-autorun__chip-dot${store.status === 'running' ? ' pulse' : ''}`} />
+                    <span>{STATUS_LABEL[store.status]}</span>
+                </div>
 
-                    <div className='vx-autorun__toggles'>
-                        <button
-                            type='button'
-                            className={`vx-autorun__toggle ${store.sound_on ? 'is-on' : ''}`}
-                            onClick={() => store.setSoundOn(!store.sound_on)}
-                        >
-                            <span className='vx-autorun__toggle-track' />
-                            Chime
+                <div className='vx-autorun__chip vx-autorun__stat vx-autorun__stat--target'>
+                    <span className='vx-autorun__stat-lbl'>Target</span>
+                    <span className='vx-autorun__stat-val is-pos'>+{target ? target.toFixed(2) : '—'}</span>
+                </div>
+
+                <div className='vx-autorun__chip vx-autorun__stat vx-autorun__stat--current'>
+                    <span className='vx-autorun__stat-lbl'>Today&rsquo;s total</span>
+                    <span className={`vx-autorun__stat-val vx-autorun__stat-val--lg ${displayedTotal >= 0 ? 'is-pos' : 'is-neg'}`}>
+                        {displayedTotal >= 0 ? '+' : ''}
+                        {displayedTotal.toFixed(2)} {currency}
+                    </span>
+                    <svg className='vx-autorun__spark' width={SPARK_W} height={SPARK_H} viewBox={`0 0 ${SPARK_W} ${SPARK_H}`} aria-hidden='true'>
+                        <polyline
+                            points={spark.line}
+                            className={history[history.length - 1] >= 0 ? 'is-pos' : 'is-neg'}
+                        />
+                        <circle
+                            cx={spark.dot.x}
+                            cy={spark.dot.y}
+                            r={2.2}
+                            className={history[history.length - 1] >= 0 ? 'is-pos' : 'is-neg'}
+                        />
+                    </svg>
+                </div>
+
+                <div className='vx-autorun__chip vx-autorun__stat vx-autorun__stat--loss'>
+                    <span className='vx-autorun__stat-lbl'>Loss limit</span>
+                    <span className='vx-autorun__stat-val is-neg'>&minus;{limit ? limit.toFixed(2) : '—'}</span>
+                </div>
+
+                {toast && <div className={`vx-autorun__toast is-visible ${toast.kind}`}>{toast.text}</div>}
+
+                <div className='vx-autorun__bar'>
+                    <span className='vx-autorun__bar-cycles'>
+                        <b>{cycles_completed}</b> cycle{cycles_completed === 1 ? '' : 's'} today
+                    </span>
+
+                    <label className='vx-autorun__field'>
+                        <span>Target</span>
+                        <input
+                            type='number'
+                            min='0'
+                            step='0.01'
+                            placeholder='0 = off'
+                            value={profitInput}
+                            disabled={store.is_active}
+                            onChange={e => setProfitInput(e.target.value)}
+                        />
+                    </label>
+                    <label className='vx-autorun__field'>
+                        <span>Loss limit</span>
+                        <input
+                            type='number'
+                            min='0'
+                            step='0.01'
+                            placeholder='0 = off'
+                            value={lossInput}
+                            disabled={store.is_active}
+                            onChange={e => setLossInput(e.target.value)}
+                        />
+                    </label>
+
+                    <button
+                        type='button'
+                        className={`vx-autorun__toggle ${store.sound_on ? 'is-on' : ''}`}
+                        onClick={() => store.setSoundOn(!store.sound_on)}
+                    >
+                        <span className='vx-autorun__toggle-dot' />
+                        Chime
+                    </button>
+                    <button
+                        type='button'
+                        className={`vx-autorun__toggle ${store.voice_on ? 'is-on' : ''}`}
+                        onClick={() => store.setVoiceOn(!store.voice_on)}
+                    >
+                        <span className='vx-autorun__toggle-dot' />
+                        Voice
+                    </button>
+
+                    <span className='vx-autorun__bar-spacer' />
+
+                    {store.is_active ? (
+                        <button type='button' className='vx-autorun__btn vx-autorun__btn--stop' onClick={store.stop}>
+                            Stop
                         </button>
-                        <button
-                            type='button'
-                            className={`vx-autorun__toggle ${store.voice_on ? 'is-on' : ''}`}
-                            onClick={() => store.setVoiceOn(!store.voice_on)}
-                        >
-                            <span className='vx-autorun__toggle-track' />
-                            Voice
+                    ) : (
+                        <button type='button' className='vx-autorun__btn vx-autorun__btn--run' onClick={handleStart}>
+                            Run
                         </button>
-                    </div>
-
-                    <div className='vx-autorun__launch-row'>
-                        {store.is_active ? (
-                            <button type='button' className='vx-autorun__launch vx-autorun__launch--stop' onClick={store.stop}>
-                                <span className='vx-autorun__launch-ring' />
-                                <span className='vx-autorun__launch-ring vx-autorun__launch-ring--2' />
-                                <span className='vx-autorun__launch-label'>Stop</span>
-                            </button>
-                        ) : (
-                            <button type='button' className='vx-autorun__launch vx-autorun__launch--start' onClick={handleStart}>
-                                <span className='vx-autorun__launch-label'>Launch</span>
-                            </button>
-                        )}
-                    </div>
-
-                    {!store.is_active && (
-                        <p className='vx-autorun__hint'>
-                            Load your strategy in Bot Builder first. Auto-Runner presses the same Run button — it
-                            can&rsquo;t start without a strategy loaded there.
-                        </p>
                     )}
                 </div>
             </div>
+
+            {!store.is_active && (
+                <p className='vx-autorun__hint'>
+                    Load your strategy in Bot Builder first. Auto-Runner presses the same Run button — it can&rsquo;t
+                    start without a strategy loaded there.
+                </p>
+            )}
 
             <div className='vx-card vx-autorun__log'>
                 <h3>Live log</h3>
@@ -301,7 +342,7 @@ const AutoRunner = observer(() => {
                 Auto-Runner automates pressing Run and Reset around your own strategy — it does not add its own
                 take-profit or stop-loss. Those still come from your strategy&rsquo;s blocks or Quick Strategy
                 settings. If you stop the bot manually from the run panel while Auto-Runner is active, it will treat
-                that as the end of a cycle and restart — use &ldquo;Stop Auto-Runner&rdquo; above for a clean stop.
+                that as the end of a cycle and restart — use &ldquo;Stop&rdquo; above for a clean stop.
             </p>
         </div>
     );
